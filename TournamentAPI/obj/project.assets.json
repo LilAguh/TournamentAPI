@@ -98,6 +98,43 @@
         "runtime": {
           "bin/placeholder/Config.dll": {}
         }
+      },
+      "DataAccess/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "dependencies": {
+          "Models": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/DataAccess.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/DataAccess.dll": {}
+        }
+      },
+      "Models/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "compile": {
+          "bin/placeholder/Models.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Models.dll": {}
+        }
+      },
+      "Services/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "dependencies": {
+          "DataAccess": "1.0.0",
+          "Models": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/Services.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Services.dll": {}
+        }
       }
     }
   },
@@ -454,11 +491,29 @@
       "type": "project",
       "path": "../Config/Config.csproj",
       "msbuildProject": "../Config/Config.csproj"
+    },
+    "DataAccess/1.0.0": {
+      "type": "project",
+      "path": "../DataAccess/DataAccess.csproj",
+      "msbuildProject": "../DataAccess/DataAccess.csproj"
+    },
+    "Models/1.0.0": {
+      "type": "project",
+      "path": "../Models/Models.csproj",
+      "msbuildProject": "../Models/Models.csproj"
+    },
+    "Services/1.0.0": {
+      "type": "project",
+      "path": "../Services/Services.csproj",
+      "msbuildProject": "../Services/Services.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net8.0": [
       "Config >= 1.0.0",
+      "DataAccess >= 1.0.0",
+      "Models >= 1.0.0",
+      "Services >= 1.0.0",
       "Swashbuckle.AspNetCore >= 6.6.2"
     ]
   },
@@ -496,6 +551,15 @@
           "projectReferences": {
             "C:\\Users\\aguez\\OneDrive\\Documentos\\Dev\\BootcampExtrados\\C#\\TournamentAPI\\Config\\Config.csproj": {
               "projectPath": "C:\\Users\\aguez\\OneDrive\\Documentos\\Dev\\BootcampExtrados\\C#\\TournamentAPI\\Config\\Config.csproj"
+            },
+            "C:\\Users\\aguez\\OneDrive\\Documentos\\Dev\\BootcampExtrados\\C#\\TournamentAPI\\DataAccess\\DataAccess.csproj": {
+              "projectPath": "C:\\Users\\aguez\\OneDrive\\Documentos\\Dev\\BootcampExtrados\\C#\\TournamentAPI\\DataAccess\\DataAccess.csproj"
+            },
+            "C:\\Users\\aguez\\OneDrive\\Documentos\\Dev\\BootcampExtrados\\C#\\TournamentAPI\\Models\\Models.csproj": {
+              "projectPath": "C:\\Users\\aguez\\OneDrive\\Documentos\\Dev\\BootcampExtrados\\C#\\TournamentAPI\\Models\\Models.csproj"
+            },
+            "C:\\Users\\aguez\\OneDrive\\Documentos\\Dev\\BootcampExtrados\\C#\\TournamentAPI\\Services\\Services.csproj": {
+              "projectPath": "C:\\Users\\aguez\\OneDrive\\Documentos\\Dev\\BootcampExtrados\\C#\\TournamentAPI\\Services\\Services.csproj"
             }
           }
         }
