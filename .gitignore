@@ -9,6 +9,8 @@
 # Build results
 bin/
 obj/
+**/bin/
+**/obj/
 
 # NuGet
 *.nupkg
@@ -17,6 +19,7 @@ project.lock.json
 project.fragment.lock.json
 artifacts/
 *.nuget.cache
+*.cache
 
 # VS Code
 .vscode/
