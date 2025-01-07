@@ -33,9 +33,9 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\aguez\\OneDrive\\Documentos\\Dev\\BootcampExtrados\\C#\\TournamentAPI\\DataAccess\\DataAccess.csproj",
+      "projectUniqueName": "C:\\Users\\aguez\\OneDrive\\Documentos\\Dev\\BootcampExtrados\\C#\\TournamentApi\\DataAccess\\DataAccess.csproj",
       "projectName": "DataAccess",
-      "projectPath": "C:\\Users\\aguez\\OneDrive\\Documentos\\Dev\\BootcampExtrados\\C#\\TournamentAPI\\DataAccess\\DataAccess.csproj",
+      "projectPath": "C:\\Users\\aguez\\OneDrive\\Documentos\\Dev\\BootcampExtrados\\C#\\TournamentApi\\DataAccess\\DataAccess.csproj",
       "packagesPath": "C:\\Users\\aguez\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\aguez\\OneDrive\\Documentos\\Dev\\BootcampExtrados\\C#\\TournamentAPI\\DataAccess\\obj\\",
       "projectStyle": "PackageReference",
@@ -58,8 +58,8 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "C:\\Users\\aguez\\OneDrive\\Documentos\\Dev\\BootcampExtrados\\C#\\TournamentAPI\\Models\\Models.csproj": {
-              "projectPath": "C:\\Users\\aguez\\OneDrive\\Documentos\\Dev\\BootcampExtrados\\C#\\TournamentAPI\\Models\\Models.csproj"
+            "C:\\Users\\aguez\\OneDrive\\Documentos\\Dev\\BootcampExtrados\\C#\\TournamentApi\\Models\\Models.csproj": {
+              "projectPath": "C:\\Users\\aguez\\OneDrive\\Documentos\\Dev\\BootcampExtrados\\C#\\TournamentApi\\Models\\Models.csproj"
             }
           }
         }

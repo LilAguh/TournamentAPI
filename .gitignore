@@ -1,4 +1,30 @@
-.vs
-**/bin/
-**/obj/
-*.csproj
+# Visual Studio
+.vscode/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build results
+bin/
+obj/
+
+# NuGet
+*.nupkg
+*.snupkg
+project.lock.json
+project.fragment.lock.json
+artifacts/
+*.nuget.cache
+
+# VS Code
+.vscode/
+
+# Rider
+.idea/
+
+# JetBrains Rider
+.idea/
+*.iml
+*.sln.iml

@@ -1,15 +1,15 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\aguez\\OneDrive\\Documentos\\Dev\\BootcampExtrados\\C#\\TournamentAPI\\Config\\Config.csproj": {}
+    "C:\\Users\\aguez\\OneDrive\\Documentos\\Dev\\BootcampExtrados\\C#\\TournamentApi\\Config\\Config.csproj": {}
   },
   "projects": {
-    "C:\\Users\\aguez\\OneDrive\\Documentos\\Dev\\BootcampExtrados\\C#\\TournamentAPI\\Config\\Config.csproj": {
+    "C:\\Users\\aguez\\OneDrive\\Documentos\\Dev\\BootcampExtrados\\C#\\TournamentApi\\Config\\Config.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\aguez\\OneDrive\\Documentos\\Dev\\BootcampExtrados\\C#\\TournamentAPI\\Config\\Config.csproj",
+        "projectUniqueName": "C:\\Users\\aguez\\OneDrive\\Documentos\\Dev\\BootcampExtrados\\C#\\TournamentApi\\Config\\Config.csproj",
         "projectName": "Config",
-        "projectPath": "C:\\Users\\aguez\\OneDrive\\Documentos\\Dev\\BootcampExtrados\\C#\\TournamentAPI\\Config\\Config.csproj",
+        "projectPath": "C:\\Users\\aguez\\OneDrive\\Documentos\\Dev\\BootcampExtrados\\C#\\TournamentApi\\Config\\Config.csproj",
         "packagesPath": "C:\\Users\\aguez\\.nuget\\packages\\",
         "outputPath": "C:\\Users\\aguez\\OneDrive\\Documentos\\Dev\\BootcampExtrados\\C#\\TournamentAPI\\Config\\obj\\",
         "projectStyle": "PackageReference",

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "QbE5Hu66Ps8=",
+  "dgSpecHash": "wVibrP05tcM=",
   "success": true,
-  "projectFilePath": "C:\\Users\\aguez\\OneDrive\\Documentos\\Dev\\BootcampExtrados\\C#\\TournamentAPI\\TournamentAPI\\TournamentAPI.csproj",
+  "projectFilePath": "C:\\Users\\aguez\\OneDrive\\Documentos\\Dev\\BootcampExtrados\\C#\\TournamentApi\\TournamentAPI\\TournamentAPI.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\aguez\\.nuget\\packages\\microsoft.extensions.apidescription.server\\6.0.5\\microsoft.extensions.apidescription.server.6.0.5.nupkg.sha512",
     "C:\\Users\\aguez\\.nuget\\packages\\microsoft.openapi\\1.6.14\\microsoft.openapi.1.6.14.nupkg.sha512",
