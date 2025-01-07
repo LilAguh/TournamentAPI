@@ -31,10 +31,18 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddCors(options =>
 {
-    var corsSetting = builder.Configuration.GetSection("CorsSettings:Origins").Get<string[]>();
+    var corsOrigins = builder.Configuration.GetSection("CorsSettings:Origins").Get<string[]>();
+
+    if (corsOrigins == null || corsOrigins.Length == 0)
+    {
+        throw new ArgumentNullException("CorsSettings:Origins", "CORS origins are not configured properly in appsettings.json.");
+    }
+
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins(corsSetting).AllowAnyHeader().AllowAnyMethod();
+        policy.WithOrigins(corsOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod();
     });
 });
 
@@ -45,7 +53,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    //app.UseSwaggerUI(); // dejamos de lado la ui de swagger
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
