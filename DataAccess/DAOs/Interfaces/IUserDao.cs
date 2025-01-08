@@ -9,6 +9,6 @@ namespace DataAccess.DAOs.Interfaces
 {
     public interface IUserDao
     {
-        Task<User> GetById(int id);
+        Task<User> GetUserById(int id);
     }
 }
