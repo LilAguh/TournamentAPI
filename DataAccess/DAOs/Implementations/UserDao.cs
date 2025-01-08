@@ -1,5 +1,7 @@
-﻿using DataAccess.DAOs.Interfaces;
+﻿using Dapper;
+using DataAccess.DAOs.Interfaces;
 using DataAccess.Database;
+using Models.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +17,15 @@ namespace DataAccess.DAOs.Implementations
         public UserDao (IDatabaseConnection databaseConnection)
         {
             _databaseConnection = databaseConnection;
+        }
+
+        public async Task<User> GetUserById (int id)
+        {
+            using (var connection = await _databaseConnection.GetConnectionAsync())
+            {
+                var query = "SELECT * FROM Users WHERE Id = @Id";
+                return await connection.QueryFirstOrDefaultAsync<User>(query, new { Id = id});
+            }
         }
     }
 }
