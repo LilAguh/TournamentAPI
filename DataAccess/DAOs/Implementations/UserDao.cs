@@ -27,5 +27,14 @@ namespace DataAccess.DAOs.Implementations
                 return await connection.QueryFirstOrDefaultAsync<User>(query, new { Id = id});
             }
         }
+
+        public async Task<User> GetUserByEmail(string email)
+        {
+            using (var connection = await _databaseConnection.GetConnectionAsync())
+            {
+                var query = "SELECT * FROM Users WHERE Email = @Email";
+                return await connection.QueryFirstOrDefaultAsync<User>(query, new { Email = email });
+            }
+        }
     }
 }
