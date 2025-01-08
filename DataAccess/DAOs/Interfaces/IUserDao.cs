@@ -10,5 +10,6 @@ namespace DataAccess.DAOs.Interfaces
     public interface IUserDao
     {
         Task<User> GetUserById(int id);
+        Task<User> GetUserByEmail(string email);
     }
 }
