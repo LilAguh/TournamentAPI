@@ -1,3 +1,6 @@
+using DataAccess.DAOs.Implementations;
+using DataAccess.DAOs.Interfaces;
+using DataAccess.Database;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -12,6 +15,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
+builder.Services.AddSingleton<IDatabaseConnection>(new MySqlConnectionFactory(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -47,6 +51,7 @@ builder.Services.AddCors(options =>
 });
 
 // Aca van los scopes
+builder.Services.AddScoped<IUserDao, UserDao>();
 
 var app = builder.Build();
 
