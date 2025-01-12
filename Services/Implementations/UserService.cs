@@ -15,11 +15,13 @@ namespace Services.Implementations
     {
         private readonly IUserDao _userDao;
         private readonly PasswordHasher _passwordHasher;
-        private readonly JwtHeader _jwtHelper;
+        private readonly JwtHelper _jwtHelper;
 
         public UserService(IUserDao userDao, PasswordHasher passwordHasher, JwtHelper jwtHelper)
         {
-
+            _userDao = userDao;
+            _passwordHasher = passwordHasher;
+            _jwtHelper = jwtHelper;
         }
     }
 }
