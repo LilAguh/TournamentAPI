@@ -20,12 +20,12 @@ namespace DataAccess.DAOs.Implementations
             _databaseConnection = databaseConnection;
         }
 
-        public async Task<User> GetUserById (int id)
+        public async Task<User> GetUserById(int id)
         {
             using (var connection = await _databaseConnection.GetConnectionAsync())
             {
                 var query = "SELECT * FROM Users WHERE Id = @Id";
-                return await connection.QueryFirstOrDefaultAsync<User>(query, new { Id = id});
+                return await connection.QueryFirstOrDefaultAsync<User>(query, new { Id = id });
             }
         }
 
@@ -38,46 +38,46 @@ namespace DataAccess.DAOs.Implementations
             }
         }
 
-        public async Task AddUser(UserDto userRegisterDto)
+        public async Task AddUser(UserDto userDto)
         {
             using (var connection = await _databaseConnection.GetConnectionAsync())
             {
                 var query = @"
-                INSERT INTO Users (Name, LastName, Alias, Email, Password, Country, Role, AvatarUrl, Active)
-                VALUES (@Name, @LastName, @Alias, @Email, @Password, @Country, @Role, @AvatarUrl, @Active)";
-                await connection.ExecuteAsync(query, userRegisterDto);
+            INSERT INTO Users (Name, LastName, Alias, Email, Password, Country, Role, AvatarUrl, Active)
+            VALUES (@Name, @LastName, @Alias, @Email, @Password, @Country, @Role, @AvatarUrl, @Active)";
+                await connection.ExecuteAsync(query, userDto);
             }
         }
 
-        public async Task UpdateUser (int id, UserDto userUpdateDto)
+        public async Task UpdateUser(int id, UserDto userDto)
         {
             using (var connection = await _databaseConnection.GetConnectionAsync())
             {
                 var query = @"
-                UPDATE Users
-                SET Name = @Name, LastName = @LastName, Alias = @Alias, Email = @Email,
-                    Password = @Password, Country = @Country, Role = @Role,
-                    AvatarUrl = @AvatarUrl
-                WHERE Id = @Id";
+            UPDATE Users
+            SET Name = @Name, LastName = @LastName, Alias = @Alias, Email = @Email,
+                Password = @Password, Country = @Country, Role = @Role,
+                AvatarUrl = @AvatarUrl
+            WHERE Id = @Id";
 
                 var parameters = new
                 {
                     Id = id,
-                    userUpdateDto.Name,
-                    userUpdateDto.LastName,
-                    userUpdateDto.Alias,
-                    userUpdateDto.Email,
-                    userUpdateDto.Password,
-                    userUpdateDto.Country,
-                    userUpdateDto.Role,
-                    userUpdateDto.AvatarUrl
+                    userDto.Name,
+                    userDto.LastName,
+                    userDto.Alias,
+                    userDto.Email,
+                    userDto.Password,
+                    userDto.Country,
+                    userDto.Role,
+                    userDto.AvatarUrl
                 };
 
                 await connection.ExecuteAsync(query, parameters);
             }
         }
 
-        public async Task DesactivateUser (int id)
+        public async Task DesactivateUser(int id)
         {
             using (var connection = await _databaseConnection.GetConnectionAsync())
             {
