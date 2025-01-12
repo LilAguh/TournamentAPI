@@ -8,6 +8,7 @@ namespace Models.DTOs
 {
     public class UserDto
     {
+        public string ID { get; set; }
         public string Name { get; set; }
         public string LastName { get; set; }
         public string Alias { get; set; }
@@ -16,5 +17,6 @@ namespace Models.DTOs
         public string Country { get; set; }
         public string Role { get; set; }
         public string AvatarUrl { get; set; }
+        public bool Active { get; set; } = true;
     }
 }
