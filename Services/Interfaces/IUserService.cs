@@ -13,5 +13,6 @@ namespace Services.Interfaces
         Task<string> Login(UserDto userDto);
         Task<UserResponseDto> GetUserById(int id);
         Task UpdateUser(int id, UserDto userDto);
+        Task DesactivateUser(int id);
     }
 }
