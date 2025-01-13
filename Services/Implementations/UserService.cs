@@ -11,6 +11,7 @@ using Services.Helpers;
 using Models.DTOs;
 using System.Linq.Expressions;
 using Models.Exceptions;
+using System.Net.WebSockets;
 
 namespace Services.Implementations
 {
@@ -104,6 +105,33 @@ namespace Services.Implementations
                 Role = user.Role,
                 AvatarUrl = user.AvatarUrl
             };
+        }
+
+        public async Task UpdateUser(int id, UserDto userDto)
+        {
+            var user = await _userDao.GetUserById(id);
+
+            if (user == null)
+            {
+                throw new NotFoundException("User not found");
+            }
+
+            var passwordHash = _passwordHasher.HashPassword(userDto.Password);
+
+            var updatedUser = new UserDto
+            {
+                Id = id, // Asegúrate de incluir el Id
+                Name = userDto.Name ?? user.Name,
+                LastName = userDto.LastName ?? user.LastName,
+                Alias = userDto.Alias ?? user.Alias,
+                Email = userDto.Email ?? user.Email,
+                Password = passwordHash,
+                Country = userDto.Country ?? user.Country,
+                Role = userDto.Role ?? user.Role,
+                AvatarUrl = userDto.AvatarUrl ?? user.AvatarUrl
+            };
+
+            await _userDao.UpdateUser(id, updatedUser);
         }
     }
 }
