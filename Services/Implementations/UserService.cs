@@ -133,5 +133,17 @@ namespace Services.Implementations
 
             await _userDao.UpdateUser(id, updatedUser);
         }
+
+        public async Task DesactivateUser(int id)
+        {
+            var user = await _userDao.GetUserById(id);
+
+            if (user == null)
+            {
+                throw new NotFoundException("User not found");
+            }
+
+            await _userDao.DesactivateUser(id);
+        }
     }
 }
