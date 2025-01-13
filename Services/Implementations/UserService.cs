@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Services.Helpers;
 using Models.DTOs;
 using System.Linq.Expressions;
+using Models.Exceptions;
 
 namespace Services.Implementations
 {
@@ -63,6 +64,24 @@ namespace Services.Implementations
                 Role = user.Role,
                 AvatarUrl = user.AvatarUrl
             };
+        }
+
+        public async Task<string> Login(UserDto userDto)
+        {
+            var user = await _userDao.GetUserByEmail(userDto.Email);
+            
+            if (user == null)
+            {
+                throw new UnauthorizedException("Invalid email or password");
+            }
+
+            if (!_passwordHasher.VerifyPassword(userDto.Password, user.Password))
+            {
+                throw new UnauthorizedException("Invalid email or password");
+            }
+
+            var token = _jwtHelper.GenerateToken(userDto);
+            return token;
         }
     }
 }
