@@ -10,5 +10,6 @@ namespace Services.Interfaces
     public interface IUserService
     {
         Task<UserResponseDto> Register(UserDto userDto);
+        Task<string> Login(UserDto userDto);
     }
 }
