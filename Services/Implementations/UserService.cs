@@ -83,5 +83,27 @@ namespace Services.Implementations
             var token = _jwtHelper.GenerateToken(userDto);
             return token;
         }
+
+        public async Task<UserResponseDto> GetUserById(int id)
+        {
+            var user = await _userDao.GetUserById(id);
+
+            if (user == null)
+            {
+                throw new NotFoundException("User not found");
+            }
+
+            return new UserResponseDto
+            {
+                Id = user.Id,
+                Name = user.Name,
+                LastName = user.LastName,
+                Alias = user.Alias,
+                Email = user.Email,
+                Country = user.Country,
+                Role = user.Role,
+                AvatarUrl = user.AvatarUrl
+            };
+        }
     }
 }
