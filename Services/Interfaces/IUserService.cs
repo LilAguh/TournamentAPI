@@ -11,5 +11,6 @@ namespace Services.Interfaces
     {
         Task<UserResponseDto> Register(UserDto userDto);
         Task<string> Login(UserDto userDto);
+        Task<UserResponseDto> GetUserById(int id);
     }
 }
