@@ -14,6 +14,6 @@ namespace DataAccess.DAOs.Interfaces
         Task<User> GetUserByEmail(string email);
         Task AddUser(UserDto userRegisterDto);
         Task UpdateUser(int id, UserDto userUpdateDto);
-        Task DesactivateUser(int id);
+        Task DeactivateUser(int id);
     }
 }
