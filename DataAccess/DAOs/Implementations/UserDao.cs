@@ -77,7 +77,7 @@ namespace DataAccess.DAOs.Implementations
             }
         }
 
-        public async Task DesactivateUser(int id)
+        public async Task DeactivateUser(int id)
         {
             using (var connection = await _databaseConnection.GetConnectionAsync())
             {
