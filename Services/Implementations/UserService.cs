@@ -134,7 +134,7 @@ namespace Services.Implementations
             await _userDao.UpdateUser(id, updatedUser);
         }
 
-        public async Task DesactivateUser(int id)
+        public async Task DeactivateUser(int id)
         {
             var user = await _userDao.GetUserById(id);
 
@@ -143,7 +143,7 @@ namespace Services.Implementations
                 throw new NotFoundException("User not found");
             }
 
-            await _userDao.DesactivateUser(id);
+            await _userDao.DeactivateUser(id);
         }
     }
 }
