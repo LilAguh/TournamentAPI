@@ -1,17 +1,8 @@
 ﻿using DataAccess.DAOs.Interfaces;
-using Microsoft.AspNetCore.Identity;
 using Services.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Services.Helpers;
 using Models.DTOs;
-using System.Linq.Expressions;
 using Models.Exceptions;
-using System.Net.WebSockets;
 
 namespace Services.Implementations
 {
@@ -30,56 +21,78 @@ namespace Services.Implementations
 
         public async Task<UserResponseDto> Register(UserDto userDto)
         {
-            var existingUser = await _userDao.GetUserByEmail(userDto.Email);
-            if (existingUser != null)
+            if (userDto == null)
+                throw new ArgumentNullException(nameof(userDto), "UserDto object cannot be null.");
+
+            try
             {
-                throw new Exception("Email already registered");
+                var existingUser = await _userDao.GetUserByEmail(userDto.Email);
+                if (existingUser != null)
+                {
+                    throw new Exception("The email is already registered.");
+                }
+
+                var passwordHash = _passwordHasher.HashPassword(userDto.Password);
+
+                var newUser = new UserDto
+                {
+                    Name = userDto.Name,
+                    LastName = userDto.LastName,
+                    Alias = userDto.Alias,
+                    Email = userDto.Email,
+                    Password = passwordHash,
+                    Country = userDto.Country,
+                    Role = userDto.Role,
+                    Avatar = userDto.Avatar,
+                    Active = true,
+                    CreatedBy = userDto.CreatedBy // Use the value provided in userDto
+                };
+
+                await _userDao.AddUser(newUser);
+
+                var user = await _userDao.GetUserByEmail(userDto.Email);
+                return new UserResponseDto
+                {
+                    ID = user.ID,
+                    Name = user.Name,
+                    LastName = user.LastName,
+                    Alias = user.Alias,
+                    Email = user.Email,
+                    Country = user.Country,
+                    Role = user.Role,
+                    Avatar = user.Avatar
+                };
             }
-
-            var passwordHash = _passwordHasher.HashPassword(userDto.Password);
-
-            var newUser = new UserDto
+            catch (Exception ex)
             {
-                Name = userDto.Name,
-                LastName = userDto.LastName,
-                Alias = userDto.Alias,
-                Email = userDto.Email,
-                Password = passwordHash,
-                Country = userDto.Country,
-                Role = userDto.Role,
-                AvatarUrl = userDto.AvatarUrl,
-                Active = true
-            };
-
-            await _userDao.AddUser(newUser);
-
-            var user = await _userDao.GetUserByEmail(userDto.Email);
-            return new UserResponseDto
-            {
-                Id = user.Id,
-                Name = user.Name,
-                LastName = user.LastName,
-                Alias = user.Alias,
-                Email = user.Email,
-                Country = user.Country,
-                Role = user.Role,
-                AvatarUrl = user.AvatarUrl
-            };
+                // Catch specific exceptions (e.g., duplicate alias)
+                if (ex.Message.Contains("Duplicate entry") && ex.Message.Contains("Alias"))
+                {
+                    throw new Exception("The alias is already in use.");
+                }
+                throw; // Rethrow other exceptions
+            }
         }
 
-        public async Task<string> Login(UserDto userDto)
+        public async Task<string> Login(UserLoginDto userLoginDto)
         {
-            var user = await _userDao.GetUserByEmail(userDto.Email);
-            
+            var user = await _userDao.GetUserByEmail(userLoginDto.Email);
+
             if (user == null)
             {
                 throw new UnauthorizedException("Invalid email or password");
             }
 
-            if (!_passwordHasher.VerifyPassword(userDto.Password, user.Password))
+            if (!_passwordHasher.VerifyPassword(userLoginDto.Password, user.Password))
             {
                 throw new UnauthorizedException("Invalid email or password");
             }
+
+            var userDto = new UserDto
+            {
+                Email = user.Email,
+                Role = user.Role
+            };
 
             var token = _jwtHelper.GenerateToken(userDto);
             return token;
@@ -96,14 +109,14 @@ namespace Services.Implementations
 
             return new UserResponseDto
             {
-                Id = user.Id,
+                ID = user.ID,
                 Name = user.Name,
                 LastName = user.LastName,
                 Alias = user.Alias,
                 Email = user.Email,
                 Country = user.Country,
                 Role = user.Role,
-                AvatarUrl = user.AvatarUrl
+                Avatar = user.Avatar
             };
         }
 
@@ -120,7 +133,7 @@ namespace Services.Implementations
 
             var updatedUser = new UserDto
             {
-                Id = id, // Asegúrate de incluir el Id
+                ID = id, // Asegúrate de incluir el Id
                 Name = userDto.Name ?? user.Name,
                 LastName = userDto.LastName ?? user.LastName,
                 Alias = userDto.Alias ?? user.Alias,
@@ -128,7 +141,7 @@ namespace Services.Implementations
                 Password = passwordHash,
                 Country = userDto.Country ?? user.Country,
                 Role = userDto.Role ?? user.Role,
-                AvatarUrl = userDto.AvatarUrl ?? user.AvatarUrl
+                Avatar = userDto.Avatar ?? user.Avatar
             };
 
             await _userDao.UpdateUser(id, updatedUser);

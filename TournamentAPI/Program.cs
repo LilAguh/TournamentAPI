@@ -1,60 +1,74 @@
+using Config;
+using DataAccess.Database;
 using DataAccess.DAOs.Implementations;
 using DataAccess.DAOs.Interfaces;
-using DataAccess.Database;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Services.Helpers;
+using Services.Implementations;
+using Services.Interfaces;
 using System.Text;
+using TournamentAPI.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configuración de CORS
+var corsSettings = builder.Configuration.GetSection("CorsSettings:Origins").Get<string[]>();
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins(corsSettings ?? Array.Empty<string>())
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
-builder.Services.AddControllers();
-
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
-builder.Services.AddSingleton<IDatabaseConnection>(new MySqlConnectionFactory(builder.Configuration.GetConnectionString("DefaultConnection")));
-
+// Configuración de JWT
+var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtConfig>();
+builder.Services.Configure<JwtConfig>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        var jwtSettings = builder.Configuration.GetSection("JwtSettings");
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtSettings["Issuer"],
-            ValidAudience = jwtSettings["Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]))
+            ValidIssuer = jwtSettings.Issuer,
+            ValidAudience = jwtSettings.Audience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey))
         };
     });
 
-builder.Services.AddCors(options =>
+builder.Services.AddAuthorization();
+
+// Configuración de servicios y dependencias
+builder.Services.AddSingleton<IDatabaseConnection>(provider =>
 {
-    var corsOrigins = builder.Configuration.GetSection("CorsSettings:Origins").Get<string[]>();
-
-    if (corsOrigins == null || corsOrigins.Length == 0)
-    {
-        throw new ArgumentNullException("CorsSettings:Origins", "CORS origins are not configured properly in appsettings.json.");
-    }
-
-    options.AddDefaultPolicy(policy =>
-    {
-        policy.WithOrigins(corsOrigins)
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    return new MySqlConnectionFactory(connectionString);
 });
-
-// Aca van los scopes
 builder.Services.AddScoped<IUserDao, UserDao>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddSingleton<PasswordHasher>();
+builder.Services.AddSingleton<JwtHelper>();
+
+// Configuración de controladores
+builder.Services.AddControllers();
+
+// Configuración de Swagger
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+// Middleware de manejo de excepciones personalizado
+app.UseMiddleware<ExceptionMiddleware>();
+
+// Configuración del pipeline de la aplicación
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

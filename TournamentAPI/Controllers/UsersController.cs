@@ -1,13 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.DTOs;
+using Models.Exceptions;
 using Services.Interfaces;
 
 namespace TournamentAPI.Controllers
 {
 
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -20,15 +21,32 @@ namespace TournamentAPI.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(UserDto userDto)
         {
-            var userResponse = await _userService.Register(userDto);
-            return Ok(userResponse);
+            try
+            {
+                var userResponse = await _userService.Register(userDto);
+                return Ok(userResponse);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
-
         [HttpPost("login")]
-        public async Task<IActionResult> Login(UserDto userDto)
+        public async Task<IActionResult> Login(UserLoginDto userLoginDto)
         {
-            var token = await _userService.Login(userDto);
-            return Ok(new { Token = token });
+            try
+            {
+                var token = await _userService.Login(userLoginDto);
+                return Ok(new { Token = token });
+            }
+            catch (UnauthorizedException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [Authorize]

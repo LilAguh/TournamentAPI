@@ -3,11 +3,6 @@ using DataAccess.DAOs.Interfaces;
 using DataAccess.Database;
 using Models.DTOs;
 using Models.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DataAccess.DAOs.Implementations
 {
@@ -40,12 +35,20 @@ namespace DataAccess.DAOs.Implementations
 
         public async Task AddUser(UserDto userDto)
         {
-            using (var connection = await _databaseConnection.GetConnectionAsync())
+            try
             {
-                var query = @"
-            INSERT INTO Users (Name, LastName, Alias, Email, Password, Country, Role, AvatarUrl, Active)
-            VALUES (@Name, @LastName, @Alias, @Email, @Password, @Country, @Role, @AvatarUrl, @Active)";
-                await connection.ExecuteAsync(query, userDto);
+                using (var connection = await _databaseConnection.GetConnectionAsync())
+                {
+                    var query = @"
+                INSERT INTO Users (Role, Name, LastName, Alias, Email, Password, Country, Avatar, Active, CreatedBy)
+                VALUES (@Role, @Name, @LastName, @Alias, @Email, @Password, @Country, @Avatar, @Active, @CreatedBy)";
+                    await connection.ExecuteAsync(query, userDto);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error inserting user into database:");
+                Console.WriteLine(ex.Message);
             }
         }
 
@@ -70,7 +73,7 @@ namespace DataAccess.DAOs.Implementations
                     userDto.Password,
                     userDto.Country,
                     userDto.Role,
-                    userDto.AvatarUrl
+                    userDto.Avatar
                 };
 
                 await connection.ExecuteAsync(query, parameters);
