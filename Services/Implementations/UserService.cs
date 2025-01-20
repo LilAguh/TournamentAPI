@@ -3,6 +3,7 @@ using Services.Interfaces;
 using Services.Helpers;
 using Models.DTOs;
 using Models.Exceptions;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Services.Implementations
 {
@@ -32,23 +33,13 @@ namespace Services.Implementations
                     throw new Exception("The email is already registered.");
                 }
 
-                var passwordHash = _passwordHasher.HashPassword(userDto.Password);
+                userDto.Password = _passwordHasher.HashPassword(userDto.Password); // Hashear contraseña
+                userDto.Role = "player"; // Asignar rol predeterminado
+                userDto.Active = true;
 
-                var newUser = new UserDto
-                {
-                    Name = userDto.Name,
-                    LastName = userDto.LastName,
-                    Alias = userDto.Alias,
-                    Email = userDto.Email,
-                    Password = passwordHash,
-                    Country = userDto.Country,
-                    Role = userDto.Role,
-                    Avatar = userDto.Avatar,
-                    Active = true,
-                    CreatedBy = userDto.CreatedBy // Use the value provided in userDto
-                };
 
-                await _userDao.AddUser(newUser);
+                await _userDao.AddUser(userDto);
+                Console.Write(userDto);
 
                 var user = await _userDao.GetUserByEmail(userDto.Email);
                 return new UserResponseDto
@@ -60,7 +51,8 @@ namespace Services.Implementations
                     Email = user.Email,
                     Country = user.Country,
                     Role = user.Role,
-                    Avatar = user.Avatar
+                    Avatar = user.Avatar,
+                    CreatedBy = user.CreatedBy
                 };
             }
             catch (Exception ex)
