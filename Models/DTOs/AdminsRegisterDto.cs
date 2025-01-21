@@ -1,4 +1,6 @@
-﻿
+﻿using Models.Enums;
+
+
 namespace Models.DTOs
 {
     public class AdminsRegisterDto
@@ -10,7 +12,7 @@ namespace Models.DTOs
         public string Email { get; set; }
         public string Password { get; set; }
         public string Country { get; set; }
-        public string Role { get; set; }
+        public RoleEnum Role { get; set; }
         public string Avatar { get; set; }
     }
 }
