@@ -130,6 +130,70 @@ namespace Services.Implementations
             }
         }
 
+        public async Task<UserResponseDto> RegisterAdmin(AdminsRegisterDto adminsRegisterDto, int createdBy)
+        {
+            if (adminsRegisterDto == null)
+                throw new ArgumentNullException(nameof(adminsRegisterDto), "adminsRegisterDto object cannot be null.");
+
+            try
+            {
+                if (string.IsNullOrWhiteSpace(adminsRegisterDto.Email))
+                    throw new ArgumentException("Email is required.");
+                if (string.IsNullOrWhiteSpace(adminsRegisterDto.Password))
+                    throw new ArgumentException("Password is required.");
+                if (string.IsNullOrWhiteSpace(adminsRegisterDto.Name))
+                    throw new ArgumentException("Name is required.");
+                if (string.IsNullOrWhiteSpace(adminsRegisterDto.Alias))
+                    throw new ArgumentException("Alias is required.");
+
+                var existingEmail = await _userDao.GetUserByEmail(adminsRegisterDto.Email);
+                if (existingEmail != null)
+                    throw new Exception("The email is already registered.");
+
+                var existingUser = await _userDao.GetUserByAlias(adminsRegisterDto.Alias);
+                if (existingUser != null)
+                    throw new Exception("The alias is already registered.");
+
+                var passwordHash = _passwordHasher.HashPassword(adminsRegisterDto.Password);
+
+
+                var newUser = new UserDto
+                {
+                    Name = adminsRegisterDto.Name,
+                    LastName = adminsRegisterDto.LastName,
+                    Alias = adminsRegisterDto.Alias,
+                    Email = adminsRegisterDto.Email,
+                    Password = passwordHash,
+                    Country = adminsRegisterDto.Country,
+                    Avatar = adminsRegisterDto.Avatar ?? "missingAvatar.png",
+                    Role = adminsRegisterDto.Role.ToString(),
+                    Active = true,
+                    CreatedBy = createdBy
+                };
+
+
+                await _userDao.AddUser(newUser);
+
+
+                return new UserResponseDto
+                {
+                    ID = newUser.ID,
+                    Name = newUser.Name,
+                    LastName = newUser.LastName,
+                    Alias = newUser.Alias,
+                    Email = newUser.Email,
+                    Country = newUser.Country,
+                    Role = newUser.Role
+                };
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("Duplicate Entry") && ex.Message.Contains("Alias"))
+                    throw new Exception("The alias is already in use.");
+                throw;
+            }
+        }
+
         public async Task<string> Login(UserLoginDto userLoginDto)
         {
             var user = await _userDao.GetUserByEmail(userLoginDto.Email);
