@@ -33,6 +33,15 @@ namespace DataAccess.DAOs.Implementations
             }
         }
 
+        public async Task<User> GetUserByAlias(string alias)
+        {
+            using (var connection = await _databaseConnection.GetConnectionAsync())
+            {
+                var query = "SELECT * FROM Users WHERE Alias = @Alias";
+                return await connection.QueryFirstOrDefaultAsync<User>(query, new { Alias = alias });
+            }
+        }
+
         public async Task AddUser(UserDto userDto)
         {
             try
