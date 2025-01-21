@@ -66,6 +66,56 @@ namespace Services.Implementations
             }
         }
 
+        public async Task<UserResponseDto> RegisterPlayer(PlayerRegisterDto playerDto)
+        {
+            if (playerDto == null)
+                throw new ArgumentNullException(nameof(playerDto), "PlayerRegisterDto object cannot be null.");
+
+            if (string.IsNullOrWhiteSpace(playerDto.Email))
+                throw new ArgumentException("Email is required.");
+            if (string.IsNullOrWhiteSpace(playerDto.Password))
+                throw new ArgumentException("Password is required.");
+            if (string.IsNullOrWhiteSpace(playerDto.Name))
+                throw new ArgumentException("Name is required.");
+            if (string.IsNullOrWhiteSpace(playerDto.Alias))
+                throw new ArgumentException("Alias is required.");
+
+            var existingUser = await _userDao.GetUserByEmail(playerDto.Email);
+            if (existingUser != null)
+                throw new Exception("The email is already registered.");
+
+            var passwordHash = _passwordHasher.HashPassword(playerDto.Password);
+
+            
+            var newUser = new UserDto
+            {
+                Name = playerDto.Name,
+                LastName = playerDto.LastName,
+                Alias = playerDto.Alias,
+                Email = playerDto.Email,
+                Password = passwordHash,
+                Country = playerDto.Country,
+                Avatar = playerDto.Avatar ?? "missingAvatar.png",
+                Role = "player",
+                Active = true,
+                CreatedBy = 0 
+            };
+
+            
+            await _userDao.AddUser(newUser);
+
+            
+            return new UserResponseDto
+            {
+                Name = newUser.Name,
+                LastName = newUser.LastName,
+                Alias = newUser.Alias,
+                Email = newUser.Email,
+                Country = newUser.Country,
+                Avatar = newUser.Avatar
+            };
+        }
+
         public async Task<string> Login(UserLoginDto userLoginDto)
         {
             var user = await _userDao.GetUserByEmail(userLoginDto.Email);
