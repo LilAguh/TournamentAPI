@@ -4,6 +4,7 @@ using Services.Helpers;
 using Models.DTOs;
 using Models.Exceptions;
 using Microsoft.AspNetCore.Http.HttpResults;
+using System.Linq.Expressions;
 
 namespace Services.Implementations
 {
@@ -66,54 +67,67 @@ namespace Services.Implementations
             }
         }
 
-        public async Task<UserResponseDto> RegisterPlayer(PlayerRegisterDto playerDto)
+        public async Task<UserResponseDto> RegisterPlayer(PlayerRegisterDto playerRegisterDto)
         {
-            if (playerDto == null)
-                throw new ArgumentNullException(nameof(playerDto), "PlayerRegisterDto object cannot be null.");
+            if (playerRegisterDto == null)
+                throw new ArgumentNullException(nameof(playerRegisterDto), "PlayerRegisterDto object cannot be null.");
 
-            if (string.IsNullOrWhiteSpace(playerDto.Email))
-                throw new ArgumentException("Email is required.");
-            if (string.IsNullOrWhiteSpace(playerDto.Password))
-                throw new ArgumentException("Password is required.");
-            if (string.IsNullOrWhiteSpace(playerDto.Name))
-                throw new ArgumentException("Name is required.");
-            if (string.IsNullOrWhiteSpace(playerDto.Alias))
-                throw new ArgumentException("Alias is required.");
-
-            var existingUser = await _userDao.GetUserByEmail(playerDto.Email);
-            if (existingUser != null)
-                throw new Exception("The email is already registered.");
-
-            var passwordHash = _passwordHasher.HashPassword(playerDto.Password);
-
-            
-            var newUser = new UserDto
+            try
             {
-                Name = playerDto.Name,
-                LastName = playerDto.LastName,
-                Alias = playerDto.Alias,
-                Email = playerDto.Email,
-                Password = passwordHash,
-                Country = playerDto.Country,
-                Avatar = playerDto.Avatar ?? "missingAvatar.png",
-                Role = "player",
-                Active = true,
-                CreatedBy = 0 
-            };
+                if (string.IsNullOrWhiteSpace(playerRegisterDto.Email))
+                    throw new ArgumentException("Email is required.");
+                if (string.IsNullOrWhiteSpace(playerRegisterDto.Password))
+                    throw new ArgumentException("Password is required.");
+                if (string.IsNullOrWhiteSpace(playerRegisterDto.Name))
+                    throw new ArgumentException("Name is required.");
+                if (string.IsNullOrWhiteSpace(playerRegisterDto.Alias))
+                    throw new ArgumentException("Alias is required.");
 
-            
-            await _userDao.AddUser(newUser);
+                var existingEmail = await _userDao.GetUserByEmail(playerRegisterDto.Email);
+                if (existingEmail != null)
+                    throw new Exception("The email is already registered.");
 
-            
-            return new UserResponseDto
+                var existingUser = await _userDao.GetUserByAlias(playerRegisterDto.Alias);
+                if (existingUser != null)
+                    throw new Exception("The alias is already registered.");
+
+                var passwordHash = _passwordHasher.HashPassword(playerRegisterDto.Password);
+
+
+                var newUser = new UserDto
+                {
+                    Name = playerRegisterDto.Name,
+                    LastName = playerRegisterDto.LastName,
+                    Alias = playerRegisterDto.Alias,
+                    Email = playerRegisterDto.Email,
+                    Password = passwordHash,
+                    Country = playerRegisterDto.Country,
+                    Avatar = playerRegisterDto.Avatar ?? "missingAvatar.png",
+                    Role = "player",
+                    Active = true,
+                    CreatedBy = 0
+                };
+
+
+                await _userDao.AddUser(newUser);
+
+
+                return new UserResponseDto
+                {
+                    Name = newUser.Name,
+                    LastName = newUser.LastName,
+                    Alias = newUser.Alias,
+                    Email = newUser.Email,
+                    Country = newUser.Country,
+                    Avatar = newUser.Avatar
+                };
+            }
+            catch (Exception ex)
             {
-                Name = newUser.Name,
-                LastName = newUser.LastName,
-                Alias = newUser.Alias,
-                Email = newUser.Email,
-                Country = newUser.Country,
-                Avatar = newUser.Avatar
-            };
+                if (ex.Message.Contains("Duplicate Entry") && ex.Message.Contains("Alias"))
+                    throw new Exception("The alias is already in use.");
+                throw;
+            }
         }
 
         public async Task<string> Login(UserLoginDto userLoginDto)
