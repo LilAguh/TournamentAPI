@@ -40,8 +40,8 @@ namespace DataAccess.DAOs.Implementations
                 using (var connection = await _databaseConnection.GetConnectionAsync())
                 {
                     var query = @"
-                        INSERT INTO Users (Name, LastName, Alias, Email, Password, Country, Avatar, Active, CreatedBy)
-                        VALUES (@Name, @LastName, @Alias, @Email, @Password, @Country, @Avatar, @Active, @CreatedBy)";
+                        INSERT INTO Users (Name, LastName, Alias, Email, Password, Country, Avatar, Role, Active, CreatedBy)
+        VALUES          (@Name, @LastName, @Alias, @Email, @Password, @Country, @Avatar, @Role, @Active, @CreatedBy)";
 
                     await connection.ExecuteAsync(query, userDto);
                 }
