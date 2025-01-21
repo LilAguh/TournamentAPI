@@ -31,6 +31,26 @@ namespace TournamentAPI.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        [HttpPost("register/player")]
+        public async Task<IActionResult> RegisterPlayer([FromBody] PlayerRegisterDto playerRegisterDto)
+        {
+            try
+            {
+                var userResponse = await _userService.RegisterPlayer(playerRegisterDto);
+                return Ok(userResponse);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An unexpected error occurred.", details = ex.Message });
+            }
+        }
+
+
         [HttpPost("login")]
         public async Task<IActionResult> Login(UserLoginDto userLoginDto)
         {
