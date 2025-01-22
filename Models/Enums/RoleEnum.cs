@@ -8,9 +8,9 @@ namespace Models.Enums
 {
     public enum RoleEnum
     {
-        player,
-        admin,
-        judge,
-        organizer
+        Player,
+        Admin,
+        Organizer,
+        Judge
     }
 }
