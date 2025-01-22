@@ -50,7 +50,7 @@ namespace TournamentAPI.Controllers
             }
         }
 
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = "Admin")]
         [HttpPost("register/admin")]
         public async Task<IActionResult> RegisterAdmin([FromBody] AdminsRegisterDto adminsRegisterDto)
         {
