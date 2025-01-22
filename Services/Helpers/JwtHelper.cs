@@ -39,11 +39,11 @@ namespace Services.Helpers
 
             var claims = new[]
             {
-            new Claim(JwtRegisteredClaimNames.Sub, userDto.Email),
-            new Claim(JwtRegisteredClaimNames.Email, userDto.Email),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(ClaimTypes.Role, userDto.Role)
-        };
+        new Claim(JwtRegisteredClaimNames.Sub, userDto.ID.ToString()), // Usar ID aquí
+        new Claim(JwtRegisteredClaimNames.Email, userDto.Email),
+        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+        new Claim(ClaimTypes.Role, userDto.Role)
+    };
 
             var token = new JwtSecurityToken(
                 issuer: _jwtConfig.Issuer,
