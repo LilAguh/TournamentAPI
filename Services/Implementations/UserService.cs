@@ -5,6 +5,7 @@ using Models.DTOs;
 using Models.Exceptions;
 using Microsoft.AspNetCore.Http.HttpResults;
 using System.Linq.Expressions;
+using Models.Enums;
 
 namespace Services.Implementations
 {
@@ -132,6 +133,7 @@ namespace Services.Implementations
 
         public async Task<UserResponseDto> RegisterAdmin(AdminsRegisterDto adminsRegisterDto, int createdBy)
         {
+            Console.WriteLine(createdBy);
             if (adminsRegisterDto == null)
                 throw new ArgumentNullException(nameof(adminsRegisterDto), "adminsRegisterDto object cannot be null.");
 
@@ -145,6 +147,8 @@ namespace Services.Implementations
                     throw new ArgumentException("Name is required.");
                 if (string.IsNullOrWhiteSpace(adminsRegisterDto.Alias))
                     throw new ArgumentException("Alias is required.");
+                if (!Enum.IsDefined(typeof(RoleEnum), adminsRegisterDto.Role))
+                    throw new ArgumentException("Invalid role specified.");
 
                 var existingEmail = await _userDao.GetUserByEmail(adminsRegisterDto.Email);
                 if (existingEmail != null)
@@ -210,6 +214,7 @@ namespace Services.Implementations
 
             var userDto = new UserDto
             {
+                ID = user.ID,
                 Email = user.Email,
                 Role = user.Role
             };
