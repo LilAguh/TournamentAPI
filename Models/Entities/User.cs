@@ -12,7 +12,7 @@ namespace Models.Entities
         public string Email { get; set; }
         public string PasswordHash { get; set; }
         public string CountryCode { get; set; }
-        public string ImageUrl { get; set; }
+        public string AvatarUrl { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? LastLogin { get; set; }
         public bool IsActive { get; set; }
