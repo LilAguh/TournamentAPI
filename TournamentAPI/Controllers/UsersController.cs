@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Models.DTOs;
 using Models.Exceptions;
 using Services.Interfaces;
+using Shared;
 
 namespace TournamentAPI.Controllers
 {
@@ -37,16 +38,20 @@ namespace TournamentAPI.Controllers
         {
             try
             {
-                var userResponse = await _userService.RegisterPlayer(playerRegisterDto);
-                return Ok(userResponse);
+                var response = await _userService.RegisterPlayer(playerRegisterDto);
+                return Ok(response);
             }
-            catch (ArgumentException ex)
+            catch (Models.Exceptions.ValidationException ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(ApiResponse<object>.ErrorResponse(ex.Message));
+            }
+            catch (DuplicateEntryException ex)
+            {
+                return Conflict(ApiResponse<object>.ErrorResponse(ex.Message));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An unexpected error occurred.", details = ex.Message });
+                return StatusCode(500, ApiResponse<object>.ErrorResponse("An unexpected error occurred."));
             }
         }
 

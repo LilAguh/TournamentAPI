@@ -6,6 +6,10 @@ using Models.Exceptions;
 using Microsoft.AspNetCore.Http.HttpResults;
 using System.Linq.Expressions;
 using Models.Enums;
+using FluentValidation;
+using System.ComponentModel.DataAnnotations;
+using Shared;
+using System.Threading.Tasks;
 
 namespace Services.Implementations
 {
@@ -14,12 +18,14 @@ namespace Services.Implementations
         private readonly IUserDao _userDao;
         private readonly PasswordHasher _passwordHasher;
         private readonly JwtHelper _jwtHelper;
+        private readonly IValidator<PlayerRegisterDto> _validator;
 
-        public UserService(IUserDao userDao, PasswordHasher passwordHasher, JwtHelper jwtHelper)
+        public UserService(IUserDao userDao, PasswordHasher passwordHasher, JwtHelper jwtHelper, IValidator<PlayerRegisterDto> validator)
         {
             _userDao = userDao;
             _passwordHasher = passwordHasher;
             _jwtHelper = jwtHelper;
+            _validator = validator;
         }
 
         public async Task<UserResponseDto> Register(UserDto userDto)
@@ -68,67 +74,62 @@ namespace Services.Implementations
             }
         }
 
-        public async Task<UserResponseDto> RegisterPlayer(PlayerRegisterDto playerRegisterDto)
+        public async Task<ApiResponse<UserResponseDto>> RegisterPlayer(PlayerRegisterDto playerRegisterDto)
         {
-            if (playerRegisterDto == null)
-                throw new ArgumentNullException(nameof(playerRegisterDto), "PlayerRegisterDto object cannot be null.");
-
-            try
+            // Validar el DTO
+            var validationResult = await _validator.ValidateAsync(playerRegisterDto);
+            if (!validationResult.IsValid)
             {
-                if (string.IsNullOrWhiteSpace(playerRegisterDto.Email))
-                    throw new ArgumentException("Email is required.");
-                if (string.IsNullOrWhiteSpace(playerRegisterDto.Password))
-                    throw new ArgumentException("Password is required.");
-                if (string.IsNullOrWhiteSpace(playerRegisterDto.Name))
-                    throw new ArgumentException("Name is required.");
-                if (string.IsNullOrWhiteSpace(playerRegisterDto.Alias))
-                    throw new ArgumentException("Alias is required.");
-
-                var existingEmail = await _userDao.GetUserByEmail(playerRegisterDto.Email);
-                if (existingEmail != null)
-                    throw new Exception("The email is already registered.");
-
-                var existingUser = await _userDao.GetUserByAlias(playerRegisterDto.Alias);
-                if (existingUser != null)
-                    throw new Exception("The alias is already registered.");
-
-                var passwordHash = _passwordHasher.HashPassword(playerRegisterDto.Password);
-
-
-                var newUser = new UserDto
-                {
-                    Name = playerRegisterDto.Name,
-                    LastName = playerRegisterDto.LastName,
-                    Alias = playerRegisterDto.Alias,
-                    Email = playerRegisterDto.Email,
-                    Password = passwordHash,
-                    Country = playerRegisterDto.Country,
-                    Avatar = playerRegisterDto.Avatar ?? "missingAvatar.png",
-                    Role = "player",
-                    Active = true,
-                    CreatedBy = 0
-                };
-
-
-                await _userDao.AddUser(newUser);
-
-
-                return new UserResponseDto
-                {
-                    Name = newUser.Name,
-                    LastName = newUser.LastName,
-                    Alias = newUser.Alias,
-                    Email = newUser.Email,
-                    Country = newUser.Country,
-                    Avatar = newUser.Avatar
-                };
+                throw new Models.Exceptions.ValidationException(validationResult.Errors.First().ErrorMessage);
             }
-            catch (Exception ex)
+
+            // Verificar si el email ya está registrado
+            var existingEmail = await _userDao.GetUserByEmail(playerRegisterDto.Email);
+            if (existingEmail != null)
             {
-                if (ex.Message.Contains("Duplicate Entry") && ex.Message.Contains("Alias"))
-                    throw new Exception("The alias is already in use.");
-                throw;
+                throw new DuplicateEntryException(ErrorMessages.EmailAlreadyRegistered);
             }
+
+            // Verificar si el alias ya está registrado
+            var existingUser = await _userDao.GetUserByAlias(playerRegisterDto.Alias);
+            if (existingUser != null)
+            {
+                throw new DuplicateEntryException(ErrorMessages.AliasAlreadyRegistered);
+            }
+
+            // Hashear la contraseña
+            var passwordHash = _passwordHasher.HashPassword(playerRegisterDto.Password);
+
+            // Crear el nuevo usuario
+            var newUser = new UserDto
+            {
+                Name = playerRegisterDto.Name,
+                LastName = playerRegisterDto.LastName,
+                Alias = playerRegisterDto.Alias,
+                Email = playerRegisterDto.Email,
+                Password = passwordHash,
+                Country = playerRegisterDto.Country,
+                Avatar = playerRegisterDto.Avatar ?? "missingAvatar.png",
+                Role = "player",
+                Active = true,
+                CreatedBy = 0 // 0 indica que el usuario se registró por sí mismo
+            };
+
+            // Guardar el usuario en la base de datos
+            await _userDao.AddUser(newUser);
+
+            // Devolver la respuesta
+            var userResponse = new UserResponseDto
+            {
+                Name = newUser.Name,
+                LastName = newUser.LastName,
+                Alias = newUser.Alias,
+                Email = newUser.Email,
+                Country = newUser.Country,
+                Avatar = newUser.Avatar
+            };
+
+            return ApiResponse<UserResponseDto>.SuccessResponse(userResponse, "Player registered successfully.");
         }
 
         public async Task<UserResponseDto> RegisterAdmin(AdminsRegisterDto adminsRegisterDto, int createdBy)

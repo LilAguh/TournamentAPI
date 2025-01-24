@@ -10,6 +10,10 @@ using Services.Implementations;
 using Services.Interfaces;
 using System.Text;
 using TournamentAPI.Middleware;
+using FluentValidation;
+using Models.DTOs;
+using Models.Validators;
+using FluentValidation.AspNetCore; // Agrega esta línea
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,6 +60,11 @@ builder.Services.AddScoped<IUserDao, UserDao>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddSingleton<PasswordHasher>();
 builder.Services.AddSingleton<JwtHelper>();
+
+// Configuración de FluentValidation
+builder.Services.AddFluentValidationAutoValidation(); // Agrega esta línea
+builder.Services.AddFluentValidationClientsideAdapters(); // Agrega esta línea
+builder.Services.AddScoped<IValidator<PlayerRegisterDto>, PlayerRegisterDtoValidator>(); // Validador registrado
 
 // Configuración de controladores
 builder.Services.AddControllers();

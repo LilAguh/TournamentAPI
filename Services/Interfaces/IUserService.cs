@@ -1,11 +1,12 @@
 ﻿using Models.DTOs;
+using Shared;
 
 namespace Services.Interfaces
 {
     public interface IUserService
     {
         Task<UserResponseDto> Register(UserDto userDto);
-        Task<UserResponseDto> RegisterPlayer(PlayerRegisterDto playerRegisterDto);
+        Task<ApiResponse<UserResponseDto>> RegisterPlayer(PlayerRegisterDto playerRegisterDto);
         Task<UserResponseDto> RegisterAdmin(AdminsRegisterDto adminsRegisterDto, int createdBy);
         Task<string> Login(UserLoginDto userLoginDto);
         Task<UserResponseDto> GetUserById(int id);
