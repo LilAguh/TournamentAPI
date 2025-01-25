@@ -1,8 +1,5 @@
 ﻿using Dapper;
-using MySqlConnector;
 using Models.DTOs;
-using Config;
-using Microsoft.Extensions.Options;
 using DataAccess.DAOs.Interfaces;
 using Models.Entities;
 using DataAccess.Database;
@@ -17,17 +14,6 @@ namespace DataAccess.DAOs.Implementations
         {
             _databaseConnection = databaseConnection;
         }
-
-
-        //public async Task AddUserAsync(CreateUserDto userDto)
-        //{
-        //    using var connection = new MySqlConnection(_databaseConfig.ConnectionString);
-        //    var query = """
-        //        INSERT INTO users (role, first_name, last_name, alias, email, password_hash, country_code, avatar, created_at, active, created_by)
-        //        VALUES (@Role, @FirstName, @LastName, @Alias, @Email, @PasswordHash, @CountryCode, @AvatarUrl, @CreatedAt, @IsActive, @CreatedBy);
-        //    """;
-        //    await connection.ExecuteAsync(query, userDto);
-        //}
 
         public async Task AddUserAsync(CreateUserDto userDto)
         {
