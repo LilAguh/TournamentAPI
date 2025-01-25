@@ -18,6 +18,7 @@ builder.Services.AddSingleton<IDatabaseConnection>(provider =>
 });
 // Registrar DAOs y Services
 builder.Services.AddScoped<IUserDao, UserDao>();
+builder.Services.AddScoped<ICountryDao, CountryDao>();
 builder.Services.AddScoped<PasswordHasher>();
 builder.Services.AddScoped<IUserService, UserService>();  // Cambiado de IAuthService a IUserService
 
