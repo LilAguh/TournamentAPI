@@ -12,4 +12,4 @@ namespace Models.DTOs
         public string CountryCode { get; set; }
         public string AvatarUrl { get; set; }
     }
-    }
+}
