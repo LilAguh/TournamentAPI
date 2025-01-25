@@ -1,34 +1,71 @@
-# Visual Studio
-.vscode/
-.vs/
-*.user
-*.suo
-*.userosscache
-*.sln.docstates
-
-# Build results
+# Ignorar archivos de compilación y dependencias
 bin/
 obj/
-**/bin/
-**/obj/
-*.csproj
-
-# NuGet
-*.nupkg
-*.snupkg
-project.lock.json
-project.fragment.lock.json
-artifacts/
-*.nuget.cache
-*.cache
-
-# VS Code
+.vs/
 .vscode/
+*.user
+*.suo
+*.userprefs
+*.csproj.user
+*.pidb
+*.log
+*.nupkg
+*.swp
+*.sln.docstates
+*.DS_Store
 
-# Rider
+# Ignorar archivos de configuración local
+appsettings.Development.json
+appsettings.Local.json
+
+# Ignorar carpetas de dependencias
+packages/
+node_modules/
+
+# Ignorar archivos de salida
+out/
+dist/
+wwwroot/
+
+# Ignorar archivos de migraciones de Entity Framework (si los tienes)
+Migrations/
+
+# Ignorar archivos de configuración de Rider (si usas JetBrains Rider)
 .idea/
 
-# JetBrains Rider
-.idea/
-*.iml
-*.sln.iml
+# Ignorar archivos de configuración de Docker (si los tienes)
+docker-compose.*
+Dockerfile
+
+# Ignorar archivos de configuración de Azure (si los tienes)
+.azure/
+
+# Ignorar archivos de configuración de VS Code (si los tienes)
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Ignorar archivos de configuración de Swagger (si los generas automáticamente)
+swagger.json
+swagger.yaml
+
+# Ignorar archivos de caché de NuGet
+.nuget/
+.nuget/packages/
+
+# Ignorar archivos de caché de npm (si usas npm)
+.npm/
+.npmrc
+
+# Ignorar archivos de caché de Yarn (si usas Yarn)
+.yarn/
+.yarnrc
+
+# Ignorar archivos de caché de dotnet
+.dotnet/
+.dotnet/tools/
+
+# Ignorar archivos de caché de Visual Studio
+.vs/
+.vscode/

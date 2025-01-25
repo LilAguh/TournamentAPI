@@ -1,4 +1,6 @@
-﻿namespace Config
+﻿
+
+namespace Config
 {
     public class DatabaseConfig
     {

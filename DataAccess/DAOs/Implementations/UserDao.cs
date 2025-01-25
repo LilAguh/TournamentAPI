@@ -1,9 +1,11 @@
 ﻿using Dapper;
-using DataAccess.DAOs.Interfaces;
-using DataAccess.Database;
+using MySqlConnector;
 using Models.DTOs;
+using Config;
+using Microsoft.Extensions.Options;
+using DataAccess.DAOs.Interfaces;
 using Models.Entities;
-using System.Threading.Tasks;
+using DataAccess.Database;
 
 namespace DataAccess.DAOs.Implementations
 {
@@ -11,85 +13,43 @@ namespace DataAccess.DAOs.Implementations
     {
         private readonly IDatabaseConnection _databaseConnection;
 
-        public UserDao (IDatabaseConnection databaseConnection)
+        public UserDao(IDatabaseConnection databaseConnection)
         {
             _databaseConnection = databaseConnection;
         }
 
-        public async Task<User> GetUserById(int id)
-        {
-            using (var connection = await _databaseConnection.GetConnectionAsync())
-            {
-                var query = "SELECT * FROM Users WHERE Id = @Id";
-                return await connection.QueryFirstOrDefaultAsync<User>(query, new { Id = id });
-            }
-        }
 
-        public async Task<User> GetUserByEmail(string email)
-        {
-            using (var connection = await _databaseConnection.GetConnectionAsync())
-            {
-                var query = "SELECT * FROM Users WHERE Email = @Email";
-                return await connection.QueryFirstOrDefaultAsync<User>(query, new { Email = email });
-            }
-        }
+        //public async Task AddUserAsync(CreateUserDto userDto)
+        //{
+        //    using var connection = new MySqlConnection(_databaseConfig.ConnectionString);
+        //    var query = """
+        //        INSERT INTO users (role, first_name, last_name, alias, email, password_hash, country_code, avatar, created_at, active, created_by)
+        //        VALUES (@Role, @FirstName, @LastName, @Alias, @Email, @PasswordHash, @CountryCode, @AvatarUrl, @CreatedAt, @IsActive, @CreatedBy);
+        //    """;
+        //    await connection.ExecuteAsync(query, userDto);
+        //}
 
-        public async Task<User> GetUserByAlias(string alias)
-        {
-            using (var connection = await _databaseConnection.GetConnectionAsync())
-            {
-                var query = "SELECT * FROM Users WHERE Alias = @Alias";
-                return await connection.QueryFirstOrDefaultAsync<User>(query, new { Alias = alias });
-            }
-        }
-
-        public async Task AddUser(UserDto userDto)
+        public async Task AddUserAsync(CreateUserDto userDto)
         {
             using (var connection = await _databaseConnection.GetConnectionAsync())
             {
                 var query = @"
-                INSERT INTO Users (Name, LastName, Alias, Email, Password, Country, Avatar, Role, Active, CreatedBy)
-                VALUES (@Name, @LastName, @Alias, @Email, @Password, @Country, @Avatar, @Role, @Active, @CreatedBy)";
+                INSERT INTO users (role, first_name, last_name, alias, email, password_hash, country_code, avatar, created_at, active, created_by)
+                VALUES (@Role, @FirstName, @LastName, @Alias, @Email, @PasswordHash, @CountryCode, @AvatarUrl, @CreatedAt, @IsActive, @CreatedBy)";
 
                 await connection.ExecuteAsync(query, userDto);
             }
         }
 
-        public async Task UpdateUser(int id, UserDto userDto)
+
+        public async Task<User> GetUserByEmailOrAliasAsync(string emailOrAlias)
         {
             using (var connection = await _databaseConnection.GetConnectionAsync())
             {
-                var query = @"
-            UPDATE Users
-            SET Name = @Name, LastName = @LastName, Alias = @Alias, Email = @Email,
-                Password = @Password, Country = @Country, Role = @Role,
-                AvatarUrl = @AvatarUrl
-            WHERE Id = @Id";
-
-                var parameters = new
-                {
-                    Id = id,
-                    userDto.Name,
-                    userDto.LastName,
-                    userDto.Alias,
-                    userDto.Email,
-                    userDto.Password,
-                    userDto.Country,
-                    userDto.Role,
-                    userDto.Avatar
-                };
-
-                await connection.ExecuteAsync(query, parameters);
+                var query = "SELECT * FROM users WHERE email = @EmailOrAlias OR alias = @EmailOrAlias";
+                return await connection.QueryFirstOrDefaultAsync<User>(query, new { EmailOrAlias = emailOrAlias });
             }
         }
 
-        public async Task DeactivateUser(int id)
-        {
-            using (var connection = await _databaseConnection.GetConnectionAsync())
-            {
-                var query = "UPDATE Users SET Active = false WHERE Id = @Id";
-                await connection.ExecuteAsync(query, new { Id = id });
-            }
-        }
     }
 }
