@@ -4,6 +4,7 @@ using Models.Entities;
 using Services.Implementations;
 using Services.Helpers;
 using Microsoft.Extensions.Configuration;
+using Models.Enums;
 
 
 namespace Services.Interfaces
@@ -25,39 +26,60 @@ namespace Services.Interfaces
 
         public async Task<User> Register(PlayerRegisterDto dto)
         {
-            var existingUser = await _userDao.GetUserByEmailOrAliasAsync(dto.Email);
-            if (existingUser != null)
-                throw new Exception("Email or alias already exists.");
-
-            var countryExists = await _countryDao.CountryExists(dto.CountryCode);
-            if (!countryExists)
-                throw new ArgumentException("País no válido");
-
+            // Generar el hash de la contraseña
             var hashedPassword = _passwordHasher.HashPassword(dto.Password);
 
-
-            var defaultAvatar = _config["DefaultSettings:AvatarUrl"];
-            var avatarUrl = !string.IsNullOrEmpty(dto.AvatarUrl)? dto.AvatarUrl : defaultAvatar;
-            if (!Uri.IsWellFormedUriString(avatarUrl, UriKind.Absolute))
-                throw new ArgumentException("URL de avatar inválida");
-
+            // Crear el usuario
             var user = new User
             {
-                Role = "Player",  // Valor predeterminado
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                Alias = dto.Alias,
+                Email = dto.Email,
+                PasswordHash = hashedPassword, // Asegúrate de asignar el hash
+                CountryCode = dto.CountryCode,
+                Role = RoleEnum.Player, // Rol predeterminado
+                CreatedAt = DateTime.UtcNow,
+                IsActive = true
+            };
+
+            // Guardar en la base de datos
+            await _userDao.AddUserAsync(user);
+
+            return user;
+        }
+
+        public async Task<User> CreateUserByAdmin(AdminRegisterDto dto, int adminId)
+        {
+            // Validar que el admin existe y tiene el rol correcto
+            var admin = await _userDao.GetUserByIdAsync(adminId);
+            if (admin == null || admin.Role != RoleEnum.Admin)
+                throw new UnauthorizedAccessException("Acceso denegado");
+
+            // Validar alias/email único
+            var existingUser = await _userDao.GetUserByEmailOrAliasAsync(dto.Email);
+            if (existingUser != null)
+                throw new ArgumentException("El email o alias ya existe");
+
+            // Hash de la contraseña
+            var hashedPassword = _passwordHasher.HashPassword(dto.Password);
+
+            // Crear usuario
+            var user = new User
+            {
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
                 Alias = dto.Alias,
                 Email = dto.Email,
                 PasswordHash = hashedPassword,
                 CountryCode = dto.CountryCode,
-                AvatarUrl = avatarUrl,  // Cambiado de ImageUrl a AvatarUrl
-                CreatedAt = DateTime.UtcNow,  // Valor predeterminado
-                IsActive = true,  // Valor predeterminado
-                CreatedBy = 0  // Valor predeterminado
+                Role = dto.Role,
+                CreatedBy = adminId,
+                CreatedAt = DateTime.UtcNow,
+                IsActive = true
             };
 
             await _userDao.AddUserAsync(user);
-
             return user;
         }
     }
