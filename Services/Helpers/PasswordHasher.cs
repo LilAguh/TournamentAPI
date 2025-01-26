@@ -1,5 +1,4 @@
-﻿using BCrypt.Net;
-
+﻿
 namespace Services.Helpers
 {
     public class PasswordHasher

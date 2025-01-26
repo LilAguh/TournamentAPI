@@ -41,7 +41,7 @@ namespace Services.Interfaces
             if (!Uri.IsWellFormedUriString(avatarUrl, UriKind.Absolute))
                 throw new ArgumentException("URL de avatar inválida");
 
-            var newUser = new CreateUserDto
+            var user = new User
             {
                 Role = "Player",  // Valor predeterminado
                 FirstName = dto.FirstName,
@@ -56,8 +56,9 @@ namespace Services.Interfaces
                 CreatedBy = 0  // Valor predeterminado
             };
 
-            await _userDao.AddUserAsync(newUser);
-            return await _userDao.GetUserByEmailOrAliasAsync(dto.Email);
+            await _userDao.AddUserAsync(user);
+
+            return user;
         }
     }
 }
