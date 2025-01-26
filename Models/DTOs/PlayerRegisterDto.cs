@@ -22,7 +22,7 @@ namespace Models.DTOs
         [RegularExpression(
         @"^[^\s@]+@[^\s@]+\.[^\s@]{2,}$",
         ErrorMessage = "Formato de email inválido. Debe ser: usuario@dominio.com"
-    )]
+        )]
         public string Email { get; set; }
 
         [Required(ErrorMessage = "La contraseña es obligatoria")]
