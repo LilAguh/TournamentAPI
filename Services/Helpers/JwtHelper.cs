@@ -31,11 +31,11 @@ namespace Services.Helpers
         {
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim("role", user.Role),
-                new Claim("alias", user.Alias)
-            };
+        new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+        new Claim(JwtRegisteredClaimNames.Email, user.Email),
+        new Claim("role", user.Role.ToString()),
+        new Claim("alias", user.Alias)
+    };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtConfig.SecretKey));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
