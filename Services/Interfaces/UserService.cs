@@ -26,6 +26,11 @@ namespace Services.Interfaces
 
         public async Task<User> Register(PlayerRegisterDto dto)
         {
+            // Validar que el email o alias no estén en uso
+            var existingUser = await _userDao.GetUserByEmailOrAliasAsync(dto.Email);
+            if (existingUser != null)
+                throw new ArgumentException("El email o alias ya está en uso.");
+
             // Generar el hash de la contraseña
             var hashedPassword = _passwordHasher.HashPassword(dto.Password);
 
@@ -36,11 +41,13 @@ namespace Services.Interfaces
                 LastName = dto.LastName,
                 Alias = dto.Alias,
                 Email = dto.Email,
-                PasswordHash = hashedPassword, // Asegúrate de asignar el hash
+                PasswordHash = hashedPassword,
                 CountryCode = dto.CountryCode,
-                Role = RoleEnum.Player, // Rol predeterminado
+                AvatarUrl = dto.AvatarUrl,
+                Role = RoleEnum.Player, // Rol predeterminado (Player = 1)
                 CreatedAt = DateTime.UtcNow,
-                IsActive = true
+                IsActive = true,
+                CreatedBy = 0 // Creado por el sistema
             };
 
             // Guardar en la base de datos
@@ -73,7 +80,7 @@ namespace Services.Interfaces
                 Email = dto.Email,
                 PasswordHash = hashedPassword,
                 CountryCode = dto.CountryCode,
-                Role = dto.Role,
+                Role = dto.Role, // Rol asignado por el admin
                 CreatedBy = adminId,
                 CreatedAt = DateTime.UtcNow,
                 IsActive = true
