@@ -2,9 +2,9 @@
 {
     public enum RoleEnum
     {
-        Player,
-        Admin,
-        Judge,
-        Organizer
+        Player = 1,      // Jugador
+        Admin = 2,       // Administrador
+        Judge = 3,       // Juez
+        Organizer = 4    // Organizador
     }
 }
