@@ -81,10 +81,10 @@ WHERE email = @EmailOrAlias OR alias = @EmailOrAlias";
             using (var connection = await _databaseConnection.GetConnectionAsync())
             {
                 var query = @"
-INSERT INTO users 
-    (role, first_name, last_name, alias, email, password_hash, country_code, created_by, created_at, active)
-VALUES 
-    (@Role, @FirstName, @LastName, @Alias, @Email, @PasswordHash, @CountryCode, @CreatedBy, @CreatedAt, @IsActive)";
+        INSERT INTO users 
+            (role, first_name, last_name, alias, email, password_hash, country_code, created_by, created_at, active)
+        VALUES 
+            (@Role, @FirstName, @LastName, @Alias, @Email, @PasswordHash, @CountryCode, @CreatedBy, @CreatedAt, @IsActive)";
 
                 await connection.ExecuteAsync(query, new
                 {
@@ -97,10 +97,9 @@ VALUES
                     user.CountryCode,
                     user.CreatedBy,
                     user.CreatedAt,
-                    IsActive = user.IsActive ? 1 : 0
+                    IsActive =  1
                 });
             }
         }
-
     }
 }
