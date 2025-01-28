@@ -44,6 +44,7 @@ namespace Models.DTOs
         public string? AvatarUrl { get; set; }
 
         [Required(ErrorMessage = "El Rol es incorrecto.")]
+        [Range(1, 4, ErrorMessage = "El rol debe estar entre 1 y 4.")]
         public RoleEnum Role { get; set; }
     }
 }
