@@ -56,10 +56,11 @@ WHERE email = @EmailOrAlias OR alias = @EmailOrAlias";
                     CountryCode = result.country_code,
                     AvatarUrl = result.avatar,
                     CreatedAt = result.created_at,
-                    LastLogin = result.last_login,
+                    LastLogin = result.last_login != null ? (DateTime?)result.last_login : null,
                     IsActive = result.active,
                     CreatedBy = result.created_by
                 };
+
             }
         }
 
@@ -98,6 +99,18 @@ WHERE email = @EmailOrAlias OR alias = @EmailOrAlias";
                     user.CreatedBy,
                     user.CreatedAt,
                     IsActive =  1
+                });
+            }
+        }
+        public async Task UpdateLastLoginAsync(int userId)
+        {
+            using (var connection = await _databaseConnection.GetConnectionAsync())
+            {
+                var query = "UPDATE users SET last_login = @LastLogin WHERE id = @UserId";
+                await connection.ExecuteAsync(query, new
+                {
+                    LastLogin = DateTime.UtcNow,
+                    UserId = userId
                 });
             }
         }
