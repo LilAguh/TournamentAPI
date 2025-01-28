@@ -50,6 +50,8 @@ namespace Services.Implementations
                 throw new ArgumentException("Credenciales inválidas.");
             }
 
+            await _userDao.UpdateLastLoginAsync(user.Id);
+
             return user;
         }
 
