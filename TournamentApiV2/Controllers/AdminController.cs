@@ -25,19 +25,34 @@ namespace TournamentApiV2.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromBody] AdminRegisterDto dto)
         {
-            // Obtener el ID del admin autenticado desde el token
-            var adminId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-
-            // Crear el usuario
-            var user = await _userService.CreateUserByAdmin(dto, adminId);
-
-            return Ok(new
+            try
             {
-                user.Id,
-                user.Alias,
-                user.Email,
-                user.Role
-            });
+                // Obtener el ID del admin autenticado desde el token
+                var adminId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+                // Crear el usuario
+                var user = await _userService.CreateUserByAdmin(dto, adminId);
+
+                return Ok(new
+                {
+                    user.Id,
+                    user.Alias,
+                    user.Email,
+                    user.Role
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { Error = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { Error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = "Error interno del servidor." });
+            }
         }
   
     [HttpGet("{id}")]
