@@ -46,7 +46,7 @@ namespace Services.Interfaces
                 AvatarUrl = dto.AvatarUrl,
                 Role = RoleEnum.Player, // Rol predeterminado (Player = 1)
                 CreatedAt = DateTime.UtcNow,
-                IsActive = true,
+                IsActive = true, // esto en un futuro se tiene que cambiar por un false, que se active con un mail
                 CreatedBy = 0 // Creado por el sistema
             };
 
@@ -62,6 +62,12 @@ namespace Services.Interfaces
             var admin = await _userDao.GetUserByIdAsync(adminId);
             if (admin == null || admin.Role != RoleEnum.Admin)
                 throw new UnauthorizedAccessException("Acceso denegado");
+
+            // Validar que el rol es válido
+            if (!Enum.IsDefined(typeof(RoleEnum), dto.Role))
+            {
+                throw new ArgumentException("Rol inválido. Los roles válidos son 1 (Player), 2 (Admin), 3 (Judge), 4 (Organizer).");
+            }
 
             // Validar alias/email único
             var existingUser = await _userDao.GetUserByEmailOrAliasAsync(dto.Email);
