@@ -9,5 +9,6 @@ namespace Services.Implementations
         Task<User> Register(PlayerRegisterDto dto);
         Task<User> CreateUserByAdmin(AdminRegisterDto dto, int adminId);
         Task<User> UpdateUser(int id, UpdateUserDto dto);
+        Task DeleteUser(int id);
     }
 }
