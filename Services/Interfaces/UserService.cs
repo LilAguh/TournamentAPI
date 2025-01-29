@@ -106,5 +106,17 @@ namespace Services.Interfaces
 
             return user;
         }
+
+        public async Task DeleteUser(int id)
+        {
+            // Verificar si el usuario existe
+            var user = await _userDao.GetUserByIdAsync(id);
+            if (user == null)
+                throw new ArgumentException("El usuario no existe.");
+
+            // Cambiar el estado a inactivo
+            user.IsActive = false;
+            await _userDao.UpdateUserStatusAsync(user);
+        }
     }
 }

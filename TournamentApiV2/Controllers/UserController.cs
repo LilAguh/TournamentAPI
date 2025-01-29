@@ -46,5 +46,23 @@ namespace TournamentApiV2.Controllers
                 return StatusCode(500, new { Error = ex.Message });
             }
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            try
+            {
+                await _userService.DeleteUser(id);
+                return NoContent(); // Respuesta 204
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(new { Error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = ex.Message });
+            }
+        }
     }
 }

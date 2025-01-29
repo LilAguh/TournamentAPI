@@ -11,5 +11,6 @@ namespace DataAccess.DAOs.Interfaces
         Task AddUserAsync(User user);
         Task UpdateLastLoginAsync(int userId);
         Task UpdateUserAsync(User user);
+        Task UpdateUserStatusAsync(User user);
     }
 }
