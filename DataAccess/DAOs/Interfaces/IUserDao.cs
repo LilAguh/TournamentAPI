@@ -10,5 +10,6 @@ namespace DataAccess.DAOs.Interfaces
         Task<User> GetUserByIdAsync(int id); // Nuevo método
         Task AddUserAsync(User user);
         Task UpdateLastLoginAsync(int userId);
+        Task UpdateUserAsync(User user);
     }
 }
