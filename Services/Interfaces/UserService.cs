@@ -26,12 +26,46 @@ namespace Services.Interfaces
 
         public async Task<User> Register(PlayerRegisterDto dto)
         {
-            // Validar que el email o alias no estén en uso
-            var existingUser = await _userDao.GetUserByEmailOrAliasAsync(dto.Email);
-            if (existingUser != null)
+            // Validar si el email o alias ya están en uso
+            if (await _userDao.GetUserByEmailOrAliasAsync(dto.Email) != null)
                 throw new ArgumentException("El email o alias ya está en uso.");
 
-            // Generar el hash de la contraseña
+            // Crear el hash de la contraseña
+            var hashedPassword = _passwordHasher.HashPassword(dto.Password);
+
+            // Crear el objeto del usuario
+            var user = new User
+            {
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                Alias = dto.Alias,
+                Email = dto.Email,
+                PasswordHash = hashedPassword,
+                CountryCode = dto.CountryCode,
+                AvatarUrl = dto.AvatarUrl,
+                Role = RoleEnum.Player, // Rol predeterminado para el registro
+                CreatedAt = DateTime.UtcNow,
+                IsActive = true // Cambiar a false si se quiere activar por correo más adelante
+            };
+
+            // Guardar en la base de datos
+            await _userDao.AddUserAsync(user);
+
+            return user;
+        }
+
+        public async Task<User> CreateUserByAdmin(AdminRegisterDto dto, int adminId)
+        {
+            // Validar que el admin existe y tiene rol correcto
+            var admin = await _userDao.GetUserByIdAsync(adminId);
+            if (admin == null || admin.Role != RoleEnum.Admin)
+                throw new UnauthorizedAccessException("Acceso denegado.");
+
+            // Validar alias/email único
+            if (await _userDao.GetUserByEmailOrAliasAsync(dto.Email) != null)
+                throw new ArgumentException("El email o alias ya existe.");
+
+            // Crear el hash de la contraseña
             var hashedPassword = _passwordHasher.HashPassword(dto.Password);
 
             // Crear el usuario
@@ -43,50 +77,14 @@ namespace Services.Interfaces
                 Email = dto.Email,
                 PasswordHash = hashedPassword,
                 CountryCode = dto.CountryCode,
-                AvatarUrl = dto.AvatarUrl,
-                Role = RoleEnum.Player, // Rol predeterminado (Player = 1)
-                CreatedAt = DateTime.UtcNow,
-                IsActive = true,
-                CreatedBy = 0 // Creado por el sistema
-            };
-
-            // Guardar en la base de datos
-            await _userDao.AddUserAsync(user);
-
-            return user;
-        }
-
-        public async Task<User> CreateUserByAdmin(AdminRegisterDto dto, int adminId)
-        {
-            // Validar que el admin existe y tiene el rol correcto
-            var admin = await _userDao.GetUserByIdAsync(adminId);
-            if (admin == null || admin.Role != RoleEnum.Admin)
-                throw new UnauthorizedAccessException("Acceso denegado");
-
-            // Validar alias/email único
-            var existingUser = await _userDao.GetUserByEmailOrAliasAsync(dto.Email);
-            if (existingUser != null)
-                throw new ArgumentException("El email o alias ya existe");
-
-            // Hash de la contraseña
-            var hashedPassword = _passwordHasher.HashPassword(dto.Password);
-
-            // Crear usuario
-            var user = new User
-            {
-                FirstName = dto.FirstName,
-                LastName = dto.LastName,
-                Alias = dto.Alias,
-                Email = dto.Email,
-                PasswordHash = hashedPassword,
-                CountryCode = dto.CountryCode,
-                Role = dto.Role, // Rol asignado por el admin
+                Role = dto.Role, // Asignar rol especificado por el admin
                 CreatedBy = adminId,
                 CreatedAt = DateTime.UtcNow,
                 IsActive = true
             };
 
             await _userDao.AddUserAsync(user);
+
             return user;
         }
     }

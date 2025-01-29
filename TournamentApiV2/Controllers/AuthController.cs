@@ -22,9 +22,13 @@ namespace TournamentApi.Controllers
         {
             try
             {
+                // Autenticar usuario
                 var user = await _authService.AuthenticateAsync(dto.EmailOrAlias, dto.Password);
+
+                // Generar token
                 var token = _authService.GenerateJwtToken(user);
 
+                // Responder con datos relevantes
                 return Ok(new
                 {
                     Token = token,

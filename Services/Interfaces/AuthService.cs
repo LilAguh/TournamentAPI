@@ -28,27 +28,19 @@ namespace Services.Implementations
 
         public async Task<User> AuthenticateAsync(string emailOrAlias, string password)
         {
+            // Obtener el usuario por email o alias
             var user = await _userDao.GetUserByEmailOrAliasAsync(emailOrAlias);
-
             if (user == null)
             {
-                Console.WriteLine("Usuario no encontrado.");
+                Console.WriteLine($"Usuario no encontrado: {emailOrAlias}");
                 throw new ArgumentException("Credenciales inválidas.");
             }
 
-            Console.WriteLine(user.Alias, user.FirstName, user.PasswordHash);
+            Console.WriteLine($"Usuario {user.Alias} encontrado, su nombre es {user.FirstName + user.FirstName}, su rol es {user.Role} y su contraseña {user.PasswordHash}");
 
-            if (string.IsNullOrEmpty(user.PasswordHash))
-            {
-                Console.WriteLine("PasswordHash es nulo o vacío.");
-                throw new ArgumentException("El hash de la contraseña no está configurado.");
-            }
-
+            // Validar la contraseña
             if (!_passwordHasher.VerifyPassword(password, user.PasswordHash))
-            {
-                Console.WriteLine("La contraseña no coincide.");
                 throw new ArgumentException("Credenciales inválidas.");
-            }
 
             return user;
         }
