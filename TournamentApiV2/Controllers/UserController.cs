@@ -28,5 +28,23 @@ namespace TournamentApiV2.Controllers
                 return BadRequest(new { Error = ex.Message });
             }
         }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateUserDto dto)
+        {
+            try
+            {
+                var updatedUser = await _userService.UpdateUser(id, dto);
+                return Ok(updatedUser);
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(new { Error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = ex.Message });
+            }
+        }
     }
 }
