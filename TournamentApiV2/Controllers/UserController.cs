@@ -18,14 +18,6 @@ namespace TournamentApiV2.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(PlayerRegisterDto dto)
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage);
-                return BadRequest(new { Errors = errors });
-            }
-
             try
             {
                 var user = await _userService.Register(dto);
@@ -33,7 +25,7 @@ namespace TournamentApiV2.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new { Error = ex.Message });
             }
         }
     }
