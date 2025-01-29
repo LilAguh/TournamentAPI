@@ -87,5 +87,24 @@ namespace Services.Interfaces
 
             return user;
         }
+
+        public async Task<User> UpdateUser(int id, UpdateUserDto dto)
+        {
+            // Obtener el usuario por ID
+            var user = await _userDao.GetUserByIdAsync(id);
+            if (user == null)
+                throw new ArgumentException("El usuario no existe.");
+
+            // Actualizar los campos permitidos
+            user.FirstName = dto.FirstName ?? user.FirstName;
+            user.LastName = dto.LastName ?? user.LastName;
+            user.CountryCode = dto.CountryCode ?? user.CountryCode;
+            user.AvatarUrl = dto.AvatarUrl ?? user.AvatarUrl;
+
+            // Guardar cambios en la base de datos
+            await _userDao.UpdateUserAsync(user);
+
+            return user;
+        }
     }
 }
