@@ -21,61 +21,35 @@ namespace DataAccess.DAOs.Implementations
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
             var query = @"
-        SELECT id, role, first_name, last_name, alias, email, password_hash, country_code, avatar, created_at, last_login, active, created_by
-        FROM users
-        WHERE email = @EmailOrAlias OR alias = @EmailOrAlias";
+                SELECT Id, Role, FirstName, LastName, Alias, Email, PasswordHash, 
+                       CountryCode, AvatarUrl, CreatedAt, LastLogin, IsActive, CreatedBy
+                FROM users
+                WHERE Email = @EmailOrAlias OR Alias = @EmailOrAlias";
 
-            var result = await connection.QueryFirstOrDefaultAsync<dynamic>(query, new { EmailOrAlias = emailOrAlias });
-
-            if (result == null)
-            {
-                Console.WriteLine($"No se encontró ningún usuario con el alias o email: {emailOrAlias}");
-            }
-            else
-            {
-                Console.WriteLine($"Resultado crudo: {Newtonsoft.Json.JsonConvert.SerializeObject(result)}");
-            }
-
-            // Mapear a User manualmente
-            return result == null ? null : new User
-            {
-                Id = result.id,
-                Role = Enum.Parse<RoleEnum>(result.role.ToString()),
-                FirstName = result.first_name,
-                LastName = result.last_name,
-                Alias = result.alias,
-                Email = result.email,
-                PasswordHash = result.password_hash,
-                CountryCode = result.country_code,
-                AvatarUrl = result.avatar,
-                CreatedAt = result.created_at,
-                LastLogin = result.last_login,
-                IsActive = result.active,
-                CreatedBy = result.created_by
-            };
+            return await connection.QueryFirstOrDefaultAsync<User>(query, new { EmailOrAlias = emailOrAlias });
         }
 
         public async Task<User> GetUserByIdAsync(int id)
         {
-            using (var connection = await _databaseConnection.GetConnectionAsync())
-            {
-                var query = @"
-                SELECT id, role, first_name, last_name, alias, email, password_hash, country_code, avatar, created_at, last_login, active, created_by
+            using var connection = await _databaseConnection.GetConnectionAsync();
+            var query = @"
+                SELECT Id, Role, FirstName, LastName, Alias, Email, PasswordHash, 
+                       CountryCode, AvatarUrl, CreatedAt, LastLogin, IsActive, CreatedBy
                 FROM users
-                WHERE id = @Id";
+                WHERE Id = @Id";
 
-                return await connection.QueryFirstOrDefaultAsync<User>(query, new { Id = id });
-            }
+            return await connection.QueryFirstOrDefaultAsync<User>(query, new { Id = id });
         }
 
         public async Task AddUserAsync(User user)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
             var query = @"
-            INSERT INTO users 
-            (role, first_name, last_name, alias, email, password_hash, country_code, created_by, created_at, active)
-            VALUES 
-            (@Role, @FirstName, @LastName, @Alias, @Email, @PasswordHash, @CountryCode, @CreatedBy, @CreatedAt, @IsActive)";
+                INSERT INTO users 
+                    (Role, FirstName, LastName, Alias, Email, PasswordHash, CountryCode, CreatedBy, CreatedAt, IsActive)
+                VALUES 
+                    (@Role, @FirstName, @LastName, @Alias, @Email, @PasswordHash, @CountryCode, @CreatedBy, @CreatedAt, @IsActive)";
+
             await connection.ExecuteAsync(query, user);
         }
 
@@ -83,13 +57,27 @@ namespace DataAccess.DAOs.Implementations
         {
             using (var connection = await _databaseConnection.GetConnectionAsync())
             {
-                var query = "UPDATE users SET last_login = @LastLogin WHERE id = @UserId";
+                var query = "UPDATE users SET LastLogin = @LastLogin WHERE id = @UserId";
                 await connection.ExecuteAsync(query, new
                 {
                     LastLogin = DateTime.UtcNow,
                     UserId = userId
                 });
             }
+        }
+
+        public async Task UpdateUserAsync(User user)
+        {
+            using var connection = await _databaseConnection.GetConnectionAsync();
+            var query = @"
+                UPDATE users 
+                SET FirstName = @FirstName, 
+                    LastName = @LastName, 
+                    CountryCode = @CountryCode, 
+                    AvatarUrl = @AvatarUrl
+                WHERE Id = @Id";
+
+            await connection.ExecuteAsync(query, user);
         }
     }
 }
