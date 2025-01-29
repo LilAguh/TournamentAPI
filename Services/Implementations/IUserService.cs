@@ -7,6 +7,7 @@ namespace Services.Implementations
     public interface IUserService
     {
         Task<User> Register(PlayerRegisterDto dto);
-        Task<User> CreateUserByAdmin(AdminRegisterDto dto, int adminId); // Nuevo método
+        Task<User> CreateUserByAdmin(AdminRegisterDto dto, int adminId);
+        Task<User> UpdateUser(int id, UpdateUserDto dto);
     }
 }
