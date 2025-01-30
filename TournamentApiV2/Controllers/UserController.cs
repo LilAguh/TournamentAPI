@@ -32,16 +32,14 @@ namespace TournamentApiV2.Controllers
             }
         }
 
-        [Authorize] // Requiere autenticación
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateUserDto dto)
         {
             try
             {
-                // Obtener el ID del usuario autenticado desde el token
                 var userIdFromToken = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-                // Verificar que el usuario autenticado solo pueda modificar su propia cuenta
                 if (userIdFromToken != id)
                     return Forbid(ErrorMessages.IdDiffer);
 
@@ -58,16 +56,14 @@ namespace TournamentApiV2.Controllers
             }
         }
 
-        [Authorize] // Requiere autenticación
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
             try
             {
-                // Obtener el ID del usuario autenticado desde el token
                 var userIdFromToken = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-                // Verificar que el usuario autenticado solo pueda desactivar su propia cuenta
                 if (userIdFromToken != id)
                     return Forbid(ErrorMessages.IdDiffer);
 

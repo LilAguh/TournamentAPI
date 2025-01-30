@@ -22,13 +22,9 @@ namespace TournamentApi.Controllers
         {
             try
             {
-                // Autenticar usuario
                 var user = await _authService.AuthenticateAsync(dto.EmailOrAlias, dto.Password);
 
-                // Generar token
                 var token = _authService.GenerateJwtToken(user);
-
-                // Responder con datos relevantes
                 return Ok(new
                 {
                     Token = token,
@@ -43,12 +39,10 @@ namespace TournamentApi.Controllers
             }
             catch (ArgumentException ex)
             {
-                // Credenciales inválidas
                 return Unauthorized(new { Error = ex.Message });
             }
             catch (Exception ex)
             {
-                // Error interno del servidor
                 return StatusCode(500, new { Error = ex.Message });
             }
         }

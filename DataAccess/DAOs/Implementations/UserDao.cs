@@ -83,10 +83,7 @@ namespace DataAccess.DAOs.Implementations
         public async Task UpdateUserStatusAsync(User user)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
-            var query = @"
-        UPDATE users 
-        SET IsActive = @IsActive
-        WHERE Id = @Id";
+            var query = @"UPDATE users SET IsActive = @IsActive WHERE Id = @Id";
             await connection.ExecuteAsync(query, new { user.IsActive, user.Id });
         }
     }

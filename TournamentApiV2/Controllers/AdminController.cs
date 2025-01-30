@@ -11,7 +11,7 @@ namespace TournamentApiV2.Controllers
 {
     [Authorize(Roles = "Admin")] // Solo accesible por Admins
     [ApiController]
-    [Route("admin/users")]
+    [Route("[controller]")]
     public class AdminController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -28,10 +28,8 @@ namespace TournamentApiV2.Controllers
         {
             try
             {
-                // Obtener el ID del admin autenticado desde el token
                 var adminId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-                // Crear el usuario
                 var user = await _userService.CreateUserByAdmin(dto, adminId);
 
                 return Ok(new
