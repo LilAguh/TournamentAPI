@@ -1,15 +1,16 @@
 ﻿
 
+using Config;
 using System.ComponentModel.DataAnnotations;
 
 namespace Models.DTOs
 {
     public class LoginDto
     {
-        [Required(ErrorMessage = "Email o Alias es requerido")]
+        [Required(ErrorMessage = ErrorMessages.UserDataRequired)]
         public string EmailOrAlias { get; set; }
 
-        [Required(ErrorMessage = "Contraseña es requerida")]
+        [Required(ErrorMessage = ErrorMessages.RequiredPassword)]
         public string Password { get; set; }
     }
 }
