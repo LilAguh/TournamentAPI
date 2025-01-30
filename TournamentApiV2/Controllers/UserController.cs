@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Config;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.DTOs;
 using Services.Implementations;
@@ -42,7 +43,7 @@ namespace TournamentApiV2.Controllers
 
                 // Verificar que el usuario autenticado solo pueda modificar su propia cuenta
                 if (userIdFromToken != id)
-                    return Forbid("No puedes modificar los datos de otro usuario.");
+                    return Forbid(ErrorMessages.IdDiffer);
 
                 var updatedUser = await _userService.UpdateUser(id, dto);
                 return Ok(updatedUser);
@@ -68,11 +69,11 @@ namespace TournamentApiV2.Controllers
 
                 // Verificar que el usuario autenticado solo pueda desactivar su propia cuenta
                 if (userIdFromToken != id)
-                    return Forbid("No puedes desactivar la cuenta de otro usuario.");
+                    return Forbid(ErrorMessages.IdDiffer);
 
                 await _userService.DeleteUser(id);
 
-                return Ok(new { Message = "Tu cuenta ha sido desactivada correctamente." });
+                return Ok(new { Message = ErrorMessages.AccountDeactivated});
             }
             catch (ArgumentException ex)
             {
