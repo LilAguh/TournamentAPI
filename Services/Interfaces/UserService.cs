@@ -5,6 +5,7 @@ using Services.Implementations;
 using Services.Helpers;
 using Microsoft.Extensions.Configuration;
 using Models.Enums;
+using Config;
 
 
 namespace Services.Interfaces
@@ -28,7 +29,7 @@ namespace Services.Interfaces
         {
             // Validar si el email o alias ya están en uso
             if (await _userDao.GetUserByEmailOrAliasAsync(dto.Email) != null)
-                throw new ArgumentException("El email o alias ya está en uso.");
+                throw new ArgumentException(ErrorMessages.DataUserAlreadyUse);
 
             // Crear el hash de la contraseña
             var hashedPassword = _passwordHasher.HashPassword(dto.Password);
@@ -59,11 +60,11 @@ namespace Services.Interfaces
             // Validar que el admin existe y tiene rol correcto
             var admin = await _userDao.GetUserByIdAsync(adminId);
             if (admin == null || admin.Role != RoleEnum.Admin)
-                throw new UnauthorizedAccessException("Acceso denegado.");
+                throw new UnauthorizedAccessException(ErrorMessages.AccesDenied);
 
             // Validar alias/email único
             if (await _userDao.GetUserByEmailOrAliasAsync(dto.Email) != null)
-                throw new ArgumentException("El email o alias ya existe.");
+                throw new ArgumentException(ErrorMessages.DataUserAlreadyUse);
 
             // Crear el hash de la contraseña
             var hashedPassword = _passwordHasher.HashPassword(dto.Password);
@@ -93,7 +94,7 @@ namespace Services.Interfaces
             // Obtener el usuario por ID
             var user = await _userDao.GetUserByIdAsync(id);
             if (user == null)
-                throw new ArgumentException("El usuario no existe.");
+                throw new ArgumentException(ErrorMessages.UserNotFound);
 
             // Actualizar los campos permitidos
             user.FirstName = dto.FirstName ?? user.FirstName;
@@ -112,7 +113,7 @@ namespace Services.Interfaces
             // Verificar si el usuario existe
             var user = await _userDao.GetUserByIdAsync(id);
             if (user == null)
-                throw new ArgumentException("El usuario no existe.");
+                throw new ArgumentException(ErrorMessages.UserNotFound);
 
             // Cambiar el estado a inactivo
             user.IsActive = false;
