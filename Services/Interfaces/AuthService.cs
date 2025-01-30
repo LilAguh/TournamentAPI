@@ -7,6 +7,7 @@ using Services.Interfaces;
 using Models.Entities;
 using Services.Helpers;
 using Models.Exceptions;
+using Config;
 
 namespace Services.Implementations
 {
@@ -32,15 +33,12 @@ namespace Services.Implementations
             var user = await _userDao.GetUserByEmailOrAliasAsync(emailOrAlias);
             if (user == null)
             {
-                Console.WriteLine($"Usuario no encontrado: {emailOrAlias}");
-                throw new ArgumentException("Credenciales inválidas.");
+                throw new ArgumentException(ErrorMessages.InvalidCredentials);
             }
-
-            Console.WriteLine($"Usuario {user.Alias} encontrado, su nombre es {user.FirstName + user.FirstName}, su rol es {user.Role} y su contraseña {user.PasswordHash}");
 
             // Validar la contraseña
             if (!_passwordHasher.VerifyPassword(password, user.PasswordHash))
-                throw new ArgumentException("Credenciales inválidas.");
+                throw new ArgumentException(ErrorMessages.InvalidCredentials);
 
             return user;
         }
