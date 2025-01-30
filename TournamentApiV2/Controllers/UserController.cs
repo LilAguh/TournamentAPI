@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Models.DTOs;
 using Services.Implementations;
+using System.Security.Claims;
 
 namespace TournamentApiV2.Controllers
 {
@@ -29,11 +31,19 @@ namespace TournamentApiV2.Controllers
             }
         }
 
+        [Authorize] // Requiere autenticación
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateUserDto dto)
         {
             try
             {
+                // Obtener el ID del usuario autenticado desde el token
+                var userIdFromToken = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+                // Verificar que el usuario autenticado solo pueda modificar su propia cuenta
+                if (userIdFromToken != id)
+                    return Forbid("No puedes modificar los datos de otro usuario.");
+
                 var updatedUser = await _userService.UpdateUser(id, dto);
                 return Ok(updatedUser);
             }
@@ -47,13 +57,22 @@ namespace TournamentApiV2.Controllers
             }
         }
 
+        [Authorize] // Requiere autenticación
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
             try
             {
+                // Obtener el ID del usuario autenticado desde el token
+                var userIdFromToken = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+                // Verificar que el usuario autenticado solo pueda desactivar su propia cuenta
+                if (userIdFromToken != id)
+                    return Forbid("No puedes desactivar la cuenta de otro usuario.");
+
                 await _userService.DeleteUser(id);
-                return NoContent(); // Respuesta 204
+
+                return Ok(new { Message = "Tu cuenta ha sido desactivada correctamente." });
             }
             catch (ArgumentException ex)
             {
