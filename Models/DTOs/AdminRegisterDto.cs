@@ -1,4 +1,5 @@
-﻿using Models.Enums;
+﻿using Config;
+using Models.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -10,41 +11,35 @@ namespace Models.DTOs
 {
     public class AdminRegisterDto
     {
-        [Required(ErrorMessage = "El nombre es obligatorio")]
-        [StringLength(50, ErrorMessage = "El nombre no puede superar los 50 caracteres")]
+        [Required(ErrorMessage = ErrorMessages.RequiredName)]
+        [StringLength(50, ErrorMessage = ErrorMessages.NameExceedCharacters)]
         public string FirstName { get; set; }
 
-        [Required(ErrorMessage = "El apellido es obligatorio")]
-        [StringLength(50, ErrorMessage = "El apellido no puede superar los 50 caracteres")]
+        [Required(ErrorMessage = ErrorMessages.LastNameRequired)]
+        [StringLength(50, ErrorMessage = ErrorMessages.LastNameExceedCharacters)]
         public string LastName { get; set; }
 
-        [Required(ErrorMessage = "El alias es obligatorio")]
-        [StringLength(30, MinimumLength = 3, ErrorMessage = "El alias debe tener entre 3 y 30 caracteres")]
+        [Required(ErrorMessage = ErrorMessages.RequiredAlias)]
+        [StringLength(30, MinimumLength = 3, ErrorMessage = ErrorMessages.InvalidAlias)]
         public string Alias { get; set; }
 
-        [Required(ErrorMessage = "El email es obligatorio")]
-        [RegularExpression(
-        @"^[^\s@]+@[^\s@]+\.[^\s@]{2,}$",
-        ErrorMessage = "Formato de email inválido. Debe ser: usuario@dominio.com"
-        )]
+        [Required(ErrorMessage = ErrorMessages.RequiredEmail)]
+        [RegularExpression(@"^[^\s@]+@[^\s@]+\.[^\s@]{2,}$",ErrorMessage = ErrorMessages.InvalidEmail)]
         public string Email { get; set; }
 
-        [Required(ErrorMessage = "La contraseña es obligatoria")]
-        [RegularExpression(
-            @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$",
-            ErrorMessage = "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número"
-        )]
+        [Required(ErrorMessage = ErrorMessages.RequiredPassword)]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$",ErrorMessage = ErrorMessages.InvalidPassword)]
         public string Password { get; set; }
 
-        [Required(ErrorMessage = "El código de país es obligatorio")]
-        [StringLength(2, MinimumLength = 2, ErrorMessage = "El código debe tener 2 caracteres")]
+        [Required(ErrorMessage = ErrorMessages.CountryCodeRequired)]
+        [StringLength(2, MinimumLength = 2, ErrorMessage = ErrorMessages.InvalidCode)]
         public string CountryCode { get; set; }
 
-        [Url(ErrorMessage = "La URL del avatar no es válida")]
+        [Url(ErrorMessage = ErrorMessages.InvalidAvatarUrl)]
         public string? AvatarUrl { get; set; }
 
-        [Required(ErrorMessage = "El Rol es incorrecto.")]
-        [Range(1, 4, ErrorMessage = "El rol debe estar entre 1 y 4.")]
+        [Required(ErrorMessage = ErrorMessages.IncorrectRole)]
+        [Range(1, 4, ErrorMessage = ErrorMessages.IncorrectRole)]
         public RoleEnum Role { get; set; }
     }
 }

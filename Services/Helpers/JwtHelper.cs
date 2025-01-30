@@ -21,10 +21,10 @@ namespace Services.Helpers
         private void ValidateConfig()
         {
             if (string.IsNullOrEmpty(_jwtConfig.SecretKey))
-                throw new ArgumentNullException(nameof(_jwtConfig.SecretKey), "SecretKey no configurada");
+                throw new ArgumentNullException(nameof(_jwtConfig.SecretKey), ErrorMessages.UnconfiguredSecretKey);
 
             if (string.IsNullOrEmpty(_jwtConfig.Issuer))
-                throw new ArgumentNullException(nameof(_jwtConfig.Issuer), "Issuer no configurado");
+                throw new ArgumentNullException(nameof(_jwtConfig.Issuer), ErrorMessages.UnconfiguredIssuer);
         }
 
         public string GenerateToken(User user)

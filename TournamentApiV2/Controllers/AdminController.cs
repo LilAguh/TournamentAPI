@@ -1,4 +1,5 @@
-﻿using DataAccess.DAOs.Interfaces;
+﻿using Config;
+using DataAccess.DAOs.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.DTOs;
@@ -51,7 +52,7 @@ namespace TournamentApiV2.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { Error = "Error interno del servidor." });
+                return StatusCode(500, new { Error = ErrorMessages.InternalServerError });
             }
         }
   
@@ -60,7 +61,7 @@ namespace TournamentApiV2.Controllers
         {
             var user = await _userDao.GetUserByIdAsync(id);
             if (user == null)
-                return NotFound(new { Error = "Usuario no encontrado" });
+                return NotFound(new { Error = ErrorMessages.UserNotFound });
 
             return Ok(user);
         }
