@@ -85,13 +85,17 @@ namespace Services.Implementations
             if (user == null)
                 throw new NotFoundException(ErrorMessages.UserNotFound);
 
-            user.FirstName = dto.FirstName ?? user.FirstName;
-            user.LastName = dto.LastName ?? user.LastName;
-            user.CountryCode = dto.CountryCode ?? user.CountryCode;
-            user.AvatarUrl = dto.AvatarUrl ?? user.AvatarUrl;
+            user.FirstName = !string.IsNullOrEmpty(dto.FirstName) ? dto.FirstName : user.FirstName;
+            user.LastName = !string.IsNullOrEmpty(dto.LastName) ? dto.LastName : user.LastName;
+            user.Alias = !string.IsNullOrEmpty(dto.Alias) ? dto.Alias : user.Alias;
+            user.Email = !string.IsNullOrEmpty(dto.Email) ? dto.Email : user.Email;
+            user.CountryCode = !string.IsNullOrEmpty(dto.CountryCode) ? dto.CountryCode : user.CountryCode;
+            user.AvatarUrl = !string.IsNullOrEmpty(dto.AvatarUrl) ? dto.AvatarUrl : user.AvatarUrl;
+
+            if (!string.IsNullOrEmpty(dto.Password))
+                user.PasswordHash = _passwordHasher.HashPassword(dto.Password);
 
             await _userDao.UpdateUserAsync(user);
-
             return user;
         }
 
