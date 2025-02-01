@@ -72,7 +72,10 @@ namespace DataAccess.DAOs.Implementations
             var query = @"
                 UPDATE users 
                 SET FirstName = @FirstName, 
-                    LastName = @LastName, 
+                    LastName = @LastName,
+                    Alias = @Alias,
+                    Email = @Email,
+                    PasswordHash = @PasswordHash,
                     CountryCode = @CountryCode, 
                     AvatarUrl = @AvatarUrl
                 WHERE Id = @Id";
