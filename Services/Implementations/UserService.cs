@@ -31,6 +31,10 @@ namespace Services.Implementations
             if (await _userDao.GetUserByEmailOrAliasAsync(dto.Email) != null)
                 throw new ValidationException(ErrorMessages.DataUserAlreadyUse);
 
+            bool countryExists = await _countryDao.CountryExists(dto.CountryCode);
+            if (!countryExists)
+                throw new ValidationException(ErrorMessages.InvalidCountryCode);
+
             var hashedPassword = _passwordHasher.HashPassword(dto.Password);
 
             var user = new User
@@ -58,6 +62,10 @@ namespace Services.Implementations
             if (admin?.Role != RoleEnum.Admin)
                 throw new ForbiddenException(ErrorMessages.AccesDenied);
 
+            bool countryExists = await _countryDao.CountryExists(dto.CountryCode);
+            if (!countryExists)
+                throw new ValidationException(ErrorMessages.InvalidCountryCode);
+
             var hashedPassword = _passwordHasher.HashPassword(dto.Password);
 
             var user = new User
@@ -84,6 +92,13 @@ namespace Services.Implementations
             var user = await _userDao.GetUserByIdAsync(id);
             if (user == null)
                 throw new NotFoundException(ErrorMessages.UserNotFound);
+
+            if (!string.IsNullOrEmpty(dto.CountryCode))
+            {
+                bool countryExists = await _countryDao.CountryExists(dto.CountryCode);
+                if (!countryExists)
+                    throw new ValidationException(ErrorMessages.InvalidCountryCode);
+            }
 
             user.FirstName = !string.IsNullOrEmpty(dto.FirstName) ? dto.FirstName : user.FirstName;
             user.LastName = !string.IsNullOrEmpty(dto.LastName) ? dto.LastName : user.LastName;
