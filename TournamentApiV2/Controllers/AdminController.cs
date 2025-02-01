@@ -26,41 +26,22 @@ namespace TournamentApiV2.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromBody] AdminRegisterDto dto)
         {
-            try
-            {
-                var adminId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var adminId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var user = await _userService.CreateUserByAdmin(dto, adminId);
 
-                var user = await _userService.CreateUserByAdmin(dto, adminId);
-
-                return Ok(new
-                {
-                    user.Id,
-                    user.Alias,
-                    user.Email,
-                    user.Role
-                });
-            }
-            catch (ArgumentException ex)
+            return Ok(new
             {
-                return BadRequest(new { Error = ex.Message });
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new { Error = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { Error = ErrorMessages.InternalServerError });
-            }
+                user.Id,
+                user.Alias,
+                user.Email,
+                user.Role
+            });
         }
   
     [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById(int id)
         {
-            var user = await _userDao.GetUserByIdAsync(id);
-            if (user == null)
-                return NotFound(new { Error = ErrorMessages.UserNotFound });
-
+            var user = await _userService.GetUserById(id);
             return Ok(user);
         }
     }
