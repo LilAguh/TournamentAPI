@@ -39,5 +39,8 @@ namespace Config
         //admincontroller:
         public const string UserNotFound = "User not found.";
         public const string InternalServerError = "Internal server error.";
+
+        //Country:
+        public const string InvalidCountryCode = "Código de país inválido.";
     }
 }
