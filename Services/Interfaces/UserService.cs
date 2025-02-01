@@ -6,6 +6,7 @@ using Services.Helpers;
 using Microsoft.Extensions.Configuration;
 using Models.Enums;
 using Config;
+using static Models.Exceptions.CustomException;
 
 
 namespace Services.Interfaces
@@ -27,14 +28,11 @@ namespace Services.Interfaces
 
         public async Task<User> Register(PlayerRegisterDto dto)
         {
-            // Validar si el email o alias ya están en uso
             if (await _userDao.GetUserByEmailOrAliasAsync(dto.Email) != null)
-                throw new ArgumentException(ErrorMessages.DataUserAlreadyUse);
+                throw new ValidationException(ErrorMessages.DataUserAlreadyUse);
 
-            // Crear el hash de la contraseña
             var hashedPassword = _passwordHasher.HashPassword(dto.Password);
 
-            // Crear el objeto del usuario
             var user = new User
             {
                 FirstName = dto.FirstName,
@@ -44,12 +42,11 @@ namespace Services.Interfaces
                 PasswordHash = hashedPassword,
                 CountryCode = dto.CountryCode,
                 AvatarUrl = dto.AvatarUrl,
-                Role = RoleEnum.Player, // Rol predeterminado para el registro
+                Role = RoleEnum.Player,
                 CreatedAt = DateTime.UtcNow,
-                IsActive = true // Cambiar a false si se quiere activar por correo más adelante
+                IsActive = true
             };
 
-            // Guardar en la base de datos
             await _userDao.AddUserAsync(user);
 
             return user;
@@ -57,19 +54,12 @@ namespace Services.Interfaces
 
         public async Task<User> CreateUserByAdmin(AdminRegisterDto dto, int adminId)
         {
-            // Validar que el admin existe y tiene rol correcto
             var admin = await _userDao.GetUserByIdAsync(adminId);
-            if (admin == null || admin.Role != RoleEnum.Admin)
-                throw new UnauthorizedAccessException(ErrorMessages.AccesDenied);
+            if (admin?.Role != RoleEnum.Admin)
+                throw new ForbiddenException(ErrorMessages.AccesDenied);
 
-            // Validar alias/email único
-            if (await _userDao.GetUserByEmailOrAliasAsync(dto.Email) != null)
-                throw new ArgumentException(ErrorMessages.DataUserAlreadyUse);
-
-            // Crear el hash de la contraseña
             var hashedPassword = _passwordHasher.HashPassword(dto.Password);
 
-            // Crear el usuario
             var user = new User
             {
                 FirstName = dto.FirstName,
@@ -78,7 +68,7 @@ namespace Services.Interfaces
                 Email = dto.Email,
                 PasswordHash = hashedPassword,
                 CountryCode = dto.CountryCode,
-                Role = dto.Role, // Asignar rol especificado por el admin
+                Role = dto.Role,
                 CreatedBy = adminId,
                 CreatedAt = DateTime.UtcNow,
                 IsActive = true
@@ -91,18 +81,15 @@ namespace Services.Interfaces
 
         public async Task<User> UpdateUser(int id, UpdateUserDto dto)
         {
-            // Obtener el usuario por ID
             var user = await _userDao.GetUserByIdAsync(id);
             if (user == null)
-                throw new ArgumentException(ErrorMessages.UserNotFound);
+                throw new NotFoundException(ErrorMessages.UserNotFound);
 
-            // Actualizar los campos permitidos
             user.FirstName = dto.FirstName ?? user.FirstName;
             user.LastName = dto.LastName ?? user.LastName;
             user.CountryCode = dto.CountryCode ?? user.CountryCode;
             user.AvatarUrl = dto.AvatarUrl ?? user.AvatarUrl;
 
-            // Guardar cambios en la base de datos
             await _userDao.UpdateUserAsync(user);
 
             return user;
@@ -110,14 +97,21 @@ namespace Services.Interfaces
 
         public async Task DeleteUser(int id)
         {
-            // Verificar si el usuario existe
             var user = await _userDao.GetUserByIdAsync(id);
             if (user == null)
-                throw new ArgumentException(ErrorMessages.UserNotFound);
+                throw new NotFoundException(ErrorMessages.UserNotFound);
 
-            // Cambiar el estado a inactivo
             user.IsActive = false;
             await _userDao.UpdateUserStatusAsync(user);
+        }
+
+        public async Task<User> GetUserById(int id)
+        {
+            var user = await _userDao.GetUserByIdAsync(id);
+            if (user == null || !user.IsActive)
+                throw new NotFoundException(ErrorMessages.UserNotFound);
+
+            return user;
         }
     }
 }

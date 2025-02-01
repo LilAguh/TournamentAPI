@@ -14,14 +14,13 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Security.Claims;
 using Microsoft.OpenApi.Models;
+using TournamentApiV2.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configurar JWT
 builder.Services.Configure<JwtConfig>(builder.Configuration.GetSection("JwtSettings"));
 var jwtConfig = builder.Configuration.GetSection("JwtSettings").Get<JwtConfig>();
 
-// Autenticación JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -44,27 +43,21 @@ builder.Services.AddSingleton<IDatabaseConnection>(provider =>
     return new MySqlConnectionFactory(connectionString);
 });
 
-// Registrar JwtHelper
 builder.Services.AddScoped<JwtHelper>();
-
-// Registrar servicios de autenticación/autorización
 builder.Services.AddAuthorization();
 
-// Registrar DAOs y Services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserDao, UserDao>();
 builder.Services.AddScoped<ICountryDao, CountryDao>();
 builder.Services.AddScoped<PasswordHasher>();
-builder.Services.AddScoped<IUserService, UserService>();  // Cambiado de IAuthService a IUserService
+builder.Services.AddScoped<IUserService, UserService>();
 
 
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Tournament API", Version = "v1" });
-});
+builder.Services.AddSwaggerGen();
+
 
 var app = builder.Build();
 
@@ -72,8 +65,9 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Tournament API v1"));
+    app.UseSwaggerUI();
 }
+app.UseMiddleware<ErrorMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();

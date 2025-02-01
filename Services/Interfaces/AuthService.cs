@@ -29,16 +29,9 @@ namespace Services.Implementations
 
         public async Task<User> AuthenticateAsync(string emailOrAlias, string password)
         {
-            // Obtener el usuario por email o alias
             var user = await _userDao.GetUserByEmailOrAliasAsync(emailOrAlias);
-            if (user == null)
-            {
-                throw new ArgumentException(ErrorMessages.InvalidCredentials);
-            }
-
-            // Validar la contraseña
-            if (!_passwordHasher.VerifyPassword(password, user.PasswordHash))
-                throw new ArgumentException(ErrorMessages.InvalidCredentials);
+            if (user == null || !_passwordHasher.VerifyPassword(password, user.PasswordHash))
+                throw new UnauthorizedException(ErrorMessages.InvalidCredentials);
 
             return user;
         }
