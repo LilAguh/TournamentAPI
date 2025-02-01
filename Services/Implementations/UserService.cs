@@ -116,11 +116,21 @@ namespace Services.Implementations
             user.CountryCode = !string.IsNullOrEmpty(dto.CountryCode) ? dto.CountryCode : user.CountryCode;
             user.AvatarUrl = !string.IsNullOrEmpty(dto.AvatarUrl) ? dto.AvatarUrl : user.AvatarUrl;
 
-            if (!string.IsNullOrEmpty(dto.Password))
-                user.PasswordHash = _passwordHasher.HashPassword(dto.Password);
-
             await _userDao.UpdateUserAsync(user);
             return user;
+        }
+
+        public async Task ChangePasswordAsync(int userId, ChangePasswordDto dto)
+        {
+            var user = await _userDao.GetUserByIdAsync(userId);
+            if (user == null)
+                throw new NotFoundException(ErrorMessages.UserNotFound);
+
+            if (!_passwordHasher.VerifyPassword(dto.CurrentPassword, user.PasswordHash))
+                throw new ValidationException(ErrorMessages.InvalidCredentials);
+
+            user.PasswordHash = _passwordHasher.HashPassword(dto.NewPassword);
+            await _userDao.UpdateUserAsync(user);
         }
 
         public async Task DeleteUser(int id)

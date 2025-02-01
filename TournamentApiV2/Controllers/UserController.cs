@@ -44,6 +44,18 @@ namespace TournamentApiV2.Controllers
         }
 
         [Authorize]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+        {
+            var userIdFromToken = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+            await _userService.ChangePasswordAsync(userIdFromToken, dto);
+            return Ok(new { Message = "Contraseña actualizada correctamente." });
+        }
+
+        
+
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
