@@ -59,7 +59,16 @@ namespace Services.Implementations
         public async Task<User> CreateUserByAdmin(AdminRegisterDto dto, int adminId)
         {
             var admin = await _userDao.GetUserByIdAsync(adminId);
-            if (admin?.Role != RoleEnum.Admin)
+            if (admin == null || admin.Role != RoleEnum.Admin)
+                throw new ForbiddenException(ErrorMessages.AccesDenied);
+
+            if (dto.Role is RoleEnum.Admin or RoleEnum.Organizer or RoleEnum.Judge
+                && admin.Role != RoleEnum.Admin)
+            {
+                throw new ForbiddenException(ErrorMessages.AccesDenied);
+            }
+
+            if (admin.Role == RoleEnum.Organizer && dto.Role != RoleEnum.Judge)
                 throw new ForbiddenException(ErrorMessages.AccesDenied);
 
             bool countryExists = await _countryDao.CountryExists(dto.CountryCode);
