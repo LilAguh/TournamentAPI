@@ -53,7 +53,7 @@ namespace TournamentApiV2.Controllers
             return Ok(new { Message = "Contraseña actualizada correctamente." });
         }
 
-
+        
 
         [Authorize]
         [HttpDelete("{id}")]
