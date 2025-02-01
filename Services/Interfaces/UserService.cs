@@ -6,6 +6,7 @@ using Services.Helpers;
 using Microsoft.Extensions.Configuration;
 using Models.Enums;
 using Config;
+using static Models.Exceptions.CustomException;
 
 
 namespace Services.Interfaces
@@ -28,7 +29,7 @@ namespace Services.Interfaces
         public async Task<User> Register(PlayerRegisterDto dto)
         {
             if (await _userDao.GetUserByEmailOrAliasAsync(dto.Email) != null)
-                throw new ArgumentException(ErrorMessages.DataUserAlreadyUse);
+                throw new ValidationException(ErrorMessages.DataUserAlreadyUse);
 
             var hashedPassword = _passwordHasher.HashPassword(dto.Password);
 
@@ -54,11 +55,8 @@ namespace Services.Interfaces
         public async Task<User> CreateUserByAdmin(AdminRegisterDto dto, int adminId)
         {
             var admin = await _userDao.GetUserByIdAsync(adminId);
-            if (admin == null || admin.Role != RoleEnum.Admin)
-                throw new UnauthorizedAccessException(ErrorMessages.AccesDenied);
-
-            if (await _userDao.GetUserByEmailOrAliasAsync(dto.Email) != null)
-                throw new ArgumentException(ErrorMessages.DataUserAlreadyUse);
+            if (admin?.Role != RoleEnum.Admin)
+                throw new ForbiddenException(ErrorMessages.AccesDenied);
 
             var hashedPassword = _passwordHasher.HashPassword(dto.Password);
 
@@ -85,7 +83,7 @@ namespace Services.Interfaces
         {
             var user = await _userDao.GetUserByIdAsync(id);
             if (user == null)
-                throw new ArgumentException(ErrorMessages.UserNotFound);
+                throw new NotFoundException(ErrorMessages.UserNotFound);
 
             user.FirstName = dto.FirstName ?? user.FirstName;
             user.LastName = dto.LastName ?? user.LastName;
@@ -101,10 +99,19 @@ namespace Services.Interfaces
         {
             var user = await _userDao.GetUserByIdAsync(id);
             if (user == null)
-                throw new ArgumentException(ErrorMessages.UserNotFound);
+                throw new NotFoundException(ErrorMessages.UserNotFound);
 
             user.IsActive = false;
             await _userDao.UpdateUserStatusAsync(user);
+        }
+
+        public async Task<User> GetUserById(int id)
+        {
+            var user = await _userDao.GetUserByIdAsync(id);
+            if (user == null || !user.IsActive)
+                throw new NotFoundException(ErrorMessages.UserNotFound);
+
+            return user;
         }
     }
 }
