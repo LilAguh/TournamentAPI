@@ -3,7 +3,7 @@ using DataAccess.DAOs.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.DTOs;
-using Services.Implementations;
+using Services.Interfaces;
 using System.Security.Claims;
 
 

@@ -3,7 +3,7 @@
 
 using Models.Entities;
 
-namespace Services.Implementations
+namespace Services.Interfaces
 {
     public interface IAuthService
     {

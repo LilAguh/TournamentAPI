@@ -1,15 +1,15 @@
 ﻿using DataAccess.DAOs.Interfaces;
 using Models.DTOs;
 using Models.Entities;
-using Services.Implementations;
 using Services.Helpers;
 using Microsoft.Extensions.Configuration;
 using Models.Enums;
 using Config;
 using static Models.Exceptions.CustomException;
+using Services.Interfaces;
 
 
-namespace Services.Interfaces
+namespace Services.Implementations
 {
     public class UserService : IUserService
     {

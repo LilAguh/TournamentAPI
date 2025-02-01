@@ -1,9 +1,8 @@
 ﻿using Models.DTOs;
 using Models.Entities;
-using Services.Interfaces;
 using System.Threading.Tasks;
 
-namespace Services.Implementations
+namespace Services.Interfaces
 {
     public interface IUserService
     {

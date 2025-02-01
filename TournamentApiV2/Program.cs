@@ -3,7 +3,6 @@
 using Config;
 using DataAccess.DAOs.Interfaces;
 using Services.Implementations;
-using Services.Interfaces;
 using DataAccess.DAOs.Implementations;
 using Services.Helpers;
 using MySqlConnector;
@@ -15,6 +14,7 @@ using System.Text;
 using System.Security.Claims;
 using Microsoft.OpenApi.Models;
 using TournamentApiV2.Middleware;
+using Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 

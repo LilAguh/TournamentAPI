@@ -8,6 +8,7 @@ using Models.Entities;
 using Services.Helpers;
 using Models.Exceptions;
 using Config;
+using static Models.Exceptions.CustomException;
 
 namespace Services.Implementations
 {

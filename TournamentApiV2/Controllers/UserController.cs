@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.DTOs;
-using Services.Implementations;
+using Services.Interfaces;
 using System.Security.Claims;
 using static Models.Exceptions.CustomException;
 
