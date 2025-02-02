@@ -1,14 +1,13 @@
 ﻿
 
-using DataAccess.DAOs.Implementations;
+
 using DataAccess.DAOs.Interfaces;
-using Microsoft.Extensions.Configuration;
 using Services.Interfaces;
 using Models.Entities;
 using Services.Helpers;
-using Models.Exceptions;
 using Config;
 using static Models.Exceptions.CustomException;
+using Models.DTOs;
 
 namespace Services.Implementations
 {
@@ -28,7 +27,7 @@ namespace Services.Implementations
             _jwtHelper = jwtHelper;
         }
 
-        public async Task<User> AuthenticateAsync(string emailOrAlias, string password)
+        public async Task<UserResponseDto> AuthenticateAsync(string emailOrAlias, string password)
         {
             var user = await _userDao.GetUserByEmailOrAliasAsync(emailOrAlias);
             if (user == null || !_passwordHasher.VerifyPassword(password, user.PasswordHash))
@@ -37,7 +36,7 @@ namespace Services.Implementations
             return user;
         }
 
-        public string GenerateJwtToken(User user)
+        public string GenerateJwtToken(UserResponseDto user)
         {
             return _jwtHelper.GenerateToken(user);
         }
