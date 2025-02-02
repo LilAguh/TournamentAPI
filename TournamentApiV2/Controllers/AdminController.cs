@@ -9,18 +9,16 @@ using System.Security.Claims;
 
 namespace TournamentApiV2.Controllers
 {
-    [Authorize(Roles = "Admin")] // Solo accesible por Admins
+    [Authorize(Roles = "Admin")]
     [ApiController]
     [Route("[controller]")]
     public class AdminController : ControllerBase
     {
         private readonly IUserService _userService;
-        private readonly IUserDao _userDao;
 
-        public AdminController(IUserService userService, IUserDao userDao)
+        public AdminController(IUserService userService)
         {
             _userService = userService;
-            _userDao = userDao;
         }
 
         [HttpPost]
