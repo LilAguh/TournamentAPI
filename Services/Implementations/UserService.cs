@@ -26,7 +26,7 @@ namespace Services.Implementations
             _config = config;
         }
 
-        public async Task<User> Register(PlayerRegisterDto dto)
+        public async Task<UserResponseDto> Register(PlayerRegisterDto dto)
         {
             if (await _userDao.GetUserByEmailOrAliasAsync(dto.Email) != null)
                 throw new ValidationException(ErrorMessages.DataUserAlreadyUse);
@@ -37,7 +37,7 @@ namespace Services.Implementations
 
             var hashedPassword = _passwordHasher.HashPassword(dto.Password);
 
-            var user = new User
+            var user = new UserCreateDto
             {
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
@@ -52,11 +52,10 @@ namespace Services.Implementations
             };
 
             await _userDao.AddUserAsync(user);
-
-            return user;
+            return await _userDao.GetUserByEmailOrAliasAsync(dto.Email);
         }
 
-        public async Task<User> CreateUserByAdmin(AdminRegisterDto dto, int adminId)
+        public async Task<UserResponseDto> CreateUserByAdmin(AdminRegisterDto dto, int adminId)
         {
             var admin = await _userDao.GetUserByIdAsync(adminId);
             if (admin == null || admin.Role != RoleEnum.Admin)
@@ -77,7 +76,7 @@ namespace Services.Implementations
 
             var hashedPassword = _passwordHasher.HashPassword(dto.Password);
 
-            var user = new User
+            var user = new UserCreateDto
             {
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
@@ -92,11 +91,11 @@ namespace Services.Implementations
             };
 
             await _userDao.AddUserAsync(user);
-
-            return user;
+            return await _userDao.GetUserByEmailOrAliasAsync(dto.Email);
         }
 
-        public async Task<User> UpdateUser(int id, UpdateUserDto dto)
+
+        public async Task<UserResponseDto> UpdateUser(int id, UpdateUserDto dto)
         {
             var user = await _userDao.GetUserByIdAsync(id);
             if (user == null)
@@ -109,15 +108,20 @@ namespace Services.Implementations
                     throw new ValidationException(ErrorMessages.InvalidCountryCode);
             }
 
-            user.FirstName = !string.IsNullOrEmpty(dto.FirstName) ? dto.FirstName : user.FirstName;
-            user.LastName = !string.IsNullOrEmpty(dto.LastName) ? dto.LastName : user.LastName;
-            user.Alias = !string.IsNullOrEmpty(dto.Alias) ? dto.Alias : user.Alias;
-            user.Email = !string.IsNullOrEmpty(dto.Email) ? dto.Email : user.Email;
-            user.CountryCode = !string.IsNullOrEmpty(dto.CountryCode) ? dto.CountryCode : user.CountryCode;
-            user.AvatarUrl = !string.IsNullOrEmpty(dto.AvatarUrl) ? dto.AvatarUrl : user.AvatarUrl;
+            var userUpdateDto = new UserUpdateDto
+            {
+                Id = id,
+                FirstName = !string.IsNullOrEmpty(dto.FirstName) ? dto.FirstName : user.FirstName,
+                LastName = !string.IsNullOrEmpty(dto.LastName) ? dto.LastName : user.LastName,
+                Alias = !string.IsNullOrEmpty(dto.Alias) ? dto.Alias : user.Alias,
+                Email = !string.IsNullOrEmpty(dto.Email) ? dto.Email : user.Email,
+                CountryCode = !string.IsNullOrEmpty(dto.CountryCode) ? dto.CountryCode : user.CountryCode,
+                AvatarUrl = !string.IsNullOrEmpty(dto.AvatarUrl) ? dto.AvatarUrl : user.AvatarUrl,
+                IsActive = true
+            };
 
-            await _userDao.UpdateUserAsync(user);
-            return user;
+            await _userDao.UpdateUserAsync(userUpdateDto);
+            return await _userDao.GetUserByIdAsync(id);
         }
 
         public async Task ChangePasswordAsync(int userId, ChangePasswordDto dto)
@@ -129,8 +133,13 @@ namespace Services.Implementations
             if (!_passwordHasher.VerifyPassword(dto.CurrentPassword, user.PasswordHash))
                 throw new ValidationException(ErrorMessages.InvalidCredentials);
 
-            user.PasswordHash = _passwordHasher.HashPassword(dto.NewPassword);
-            await _userDao.UpdateUserAsync(user);
+            var userUpdateDto = new UserUpdateDto
+            {
+                Id = userId,
+                PasswordHash = _passwordHasher.HashPassword(dto.NewPassword)
+            };
+
+            await _userDao.UpdateUserAsync(userUpdateDto);
         }
 
         public async Task DeleteUser(int id)
@@ -139,11 +148,10 @@ namespace Services.Implementations
             if (user == null)
                 throw new NotFoundException(ErrorMessages.UserNotFound);
 
-            user.IsActive = false;
-            await _userDao.UpdateUserStatusAsync(user);
+            await _userDao.UpdateUserStatusAsync(id, false);
         }
 
-        public async Task<User> GetUserById(int id)
+        public async Task<UserResponseDto> GetUserById(int id)
         {
             var user = await _userDao.GetUserByIdAsync(id);
             if (user == null || !user.IsActive)
