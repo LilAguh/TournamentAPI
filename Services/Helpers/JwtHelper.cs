@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Text;
 using Config;
 using Models.Entities;
+using Models.DTOs;
 
 namespace Services.Helpers
 {
@@ -27,15 +28,15 @@ namespace Services.Helpers
                 throw new ArgumentNullException(nameof(_jwtConfig.Issuer), ErrorMessages.UnconfiguredIssuer);
         }
 
-        public string GenerateToken(User user)
+        public string GenerateToken(UserResponseDto user)
         {
             var claims = new[]
             {
-        new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-        new Claim(JwtRegisteredClaimNames.Email, user.Email),
-        new Claim("role", user.Role.ToString()),
-        new Claim("alias", user.Alias)
-    };
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                new Claim("role", user.Role.ToString()),
+                new Claim("alias", user.Alias)
+            };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtConfig.SecretKey));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
