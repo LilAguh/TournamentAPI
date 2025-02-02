@@ -20,7 +20,7 @@ namespace TournamentApiV2.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(PlayerRegisterDto dto)
+        public async Task<IActionResult> Register([FromBody] PlayerRegisterDto dto)
         {
             var user = await _userService.Register(dto);
             return Ok(new
@@ -32,7 +32,7 @@ namespace TournamentApiV2.Controllers
         }
 
         [Authorize]
-        [HttpPut("{id}")]
+        [HttpPut("update/{id}")]
         public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateUserDto dto)
         {
             var userIdFromToken = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
