@@ -20,15 +20,10 @@ namespace TournamentApiV2.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(PlayerRegisterDto dto)
+        public async Task<IActionResult> Register([FromBody] PlayerRegisterDto dto)
         {
             var user = await _userService.Register(dto);
-            return Ok(new
-            {
-                user.Id,
-                user.Alias,
-                user.Email
-            });
+            return Ok(user);
         }
 
         [Authorize]

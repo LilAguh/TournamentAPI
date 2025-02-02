@@ -7,6 +7,8 @@ using Models.Enums;
 using Config;
 using static Models.Exceptions.CustomException;
 using Services.Interfaces;
+using Core.DTOs;
+using AutoMapper;
 
 
 namespace Services.Implementations
@@ -14,20 +16,23 @@ namespace Services.Implementations
     public class UserService : IUserService
     {
         private readonly IUserDao _userDao;
+        private readonly IMapper _mapper;
         private readonly PasswordHasher _passwordHasher;
         private readonly ICountryDao _countryDao;
         private readonly IConfiguration _config;
 
-        public UserService(IUserDao userDao, PasswordHasher passwordHasher, ICountryDao countryDao, IConfiguration config)
+        public UserService(IUserDao userDao, IMapper mapper, PasswordHasher passwordHasher, ICountryDao countryDao, IConfiguration config)
         {
             _userDao = userDao;
+            _mapper = mapper;
             _passwordHasher = passwordHasher;
             _countryDao = countryDao;
             _config = config;
         }
 
-        public async Task<User> Register(PlayerRegisterDto dto)
+        public async Task<UserResponseDto> Register(PlayerRegisterDto dto)
         {
+            var user = _mapper.Map<User>(dto);
             if (await _userDao.GetUserByEmailOrAliasAsync(dto.Email) != null)
                 throw new ValidationException(ErrorMessages.DataUserAlreadyUse);
 
@@ -37,23 +42,9 @@ namespace Services.Implementations
 
             var hashedPassword = _passwordHasher.HashPassword(dto.Password);
 
-            var user = new User
-            {
-                FirstName = dto.FirstName,
-                LastName = dto.LastName,
-                Alias = dto.Alias,
-                Email = dto.Email,
-                PasswordHash = hashedPassword,
-                CountryCode = dto.CountryCode,
-                AvatarUrl = dto.AvatarUrl,
-                Role = RoleEnum.Player,
-                CreatedAt = DateTime.UtcNow,
-                IsActive = true
-            };
-
             await _userDao.AddUserAsync(user);
 
-            return user;
+            return _mapper.Map<UserResponseDto>(user);
         }
 
         public async Task<User> CreateUserByAdmin(AdminRegisterDto dto, int adminId)
@@ -143,13 +134,13 @@ namespace Services.Implementations
             await _userDao.UpdateUserStatusAsync(user);
         }
 
-        public async Task<User> GetUserById(int id)
+        public async Task<UserResponseDto> GetUserById(int id)
         {
             var user = await _userDao.GetUserByIdAsync(id);
             if (user == null || !user.IsActive)
                 throw new NotFoundException(ErrorMessages.UserNotFound);
 
-            return user;
+            return _mapper.Map<UserResponseDto>(user);
         }
     }
 }

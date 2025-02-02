@@ -37,8 +37,8 @@ namespace TournamentApiV2.Controllers
                 user.Role
             });
         }
-  
-    [HttpGet("{id}")]
+
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById(int id)
         {
             var user = await _userService.GetUserById(id);

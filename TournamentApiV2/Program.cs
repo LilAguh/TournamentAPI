@@ -43,6 +43,8 @@ builder.Services.AddSingleton<IDatabaseConnection>(provider =>
     return new MySqlConnectionFactory(connectionString);
 });
 
+builder.Services.AddAutoMapper(typeof(MappingProfiles));
+
 builder.Services.AddScoped<JwtHelper>();
 builder.Services.AddAuthorization();
 
