@@ -17,38 +17,36 @@ namespace DataAccess.DAOs.Implementations
             _databaseConnection = databaseConnection;
         }
 
-        public async Task<User> GetUserByEmailOrAliasAsync(string emailOrAlias)
+        public async Task<UserResponseDto> GetUserByEmailOrAliasAsync(string emailOrAlias)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
             var query = @"
-                SELECT Id, Role, FirstName, LastName, Alias, Email, PasswordHash, 
-                       CountryCode, AvatarUrl, CreatedAt, LastLogin, IsActive, CreatedBy
+                SELECT Id, Alias, Email, CountryCode, AvatarUrl, Role, CreatedAt
                 FROM users
                 WHERE Email = @EmailOrAlias OR Alias = @EmailOrAlias";
 
-            return await connection.QueryFirstOrDefaultAsync<User>(query, new { EmailOrAlias = emailOrAlias });
+            return await connection.QueryFirstOrDefaultAsync<UserResponseDto>(query, new { EmailOrAlias = emailOrAlias });
         }
 
-        public async Task<User> GetUserByIdAsync(int id)
+        public async Task<UserResponseDto> GetUserByIdAsync(int id)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
             var query = @"
-                SELECT Id, Role, FirstName, LastName, Alias, Email, PasswordHash, 
-                       CountryCode, AvatarUrl, CreatedAt, LastLogin, IsActive, CreatedBy
+                SELECT Id, Alias, FirstName, LastName, Email, CountryCode, PasswordHash, AvatarUrl, Role, CreatedAt, IsAvtive
                 FROM users
                 WHERE Id = @Id";
 
-            return await connection.QueryFirstOrDefaultAsync<User>(query, new { Id = id });
+            return await connection.QueryFirstOrDefaultAsync<UserResponseDto>(query, new { Id = id });
         }
 
-        public async Task AddUserAsync(User user)
+        public async Task AddUserAsync(UserCreateDto user)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
             var query = @"
                 INSERT INTO users 
-                    (Role, FirstName, LastName, Alias, Email, PasswordHash, CountryCode, CreatedBy, CreatedAt, IsActive)
+                    (FirstName, LastName, Alias, Email, PasswordHash, CountryCode, Role, CreatedBy, CreatedAt, IsActive)
                 VALUES 
-                    (@Role, @FirstName, @LastName, @Alias, @Email, @PasswordHash, @CountryCode, @CreatedBy, @CreatedAt, @IsActive)";
+                    (@FirstName, @LastName, @Alias, @Email, @PasswordHash, @CountryCode, @Role, @CreatedBy, @CreatedAt, @IsActive)";
 
             await connection.ExecuteAsync(query, user);
         }
@@ -66,28 +64,29 @@ namespace DataAccess.DAOs.Implementations
             }
         }
 
-        public async Task UpdateUserAsync(User user)
+        public async Task UpdateUserAsync(UserUpdateDto user)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
             var query = @"
                 UPDATE users 
                 SET FirstName = @FirstName, 
-                    LastName = @LastName,
-                    Alias = @Alias,
-                    Email = @Email,
-                    PasswordHash = @PasswordHash,
+                    LastName = @LastName, 
+                    Alias = @Alias, 
+                    Email = @Email, 
                     CountryCode = @CountryCode, 
-                    AvatarUrl = @AvatarUrl
+                    AvatarUrl = @AvatarUrl,
+                    PasswordHash = @PasswordHash,
+                    IsActive = @IsActive
                 WHERE Id = @Id";
 
             await connection.ExecuteAsync(query, user);
         }
 
-        public async Task UpdateUserStatusAsync(User user)
+        public async Task UpdateUserStatusAsync(int userId, bool isActive)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
-            var query = @"UPDATE users SET IsActive = @IsActive WHERE Id = @Id";
-            await connection.ExecuteAsync(query, new { user.IsActive, user.Id });
+            var query = "UPDATE users SET IsActive = @IsActive WHERE Id = @UserId";
+            await connection.ExecuteAsync(query, new { UserId = userId, IsActive = isActive });
         }
     }
 }
