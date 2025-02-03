@@ -44,5 +44,14 @@ namespace TournamentApiV2.Controllers
             var updated = await _cardService.UpdateCardAsync(id, cardDto, adminId);
             return updated ? Ok("Carta actualizada") : NotFound("Carta no encontrada");
         }
+
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCard(int id)
+        {
+            var adminId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            var deleted = await _cardService.DeleteCardAsync(id, adminId);
+            return deleted ? Ok("Carta eliminada") : NotFound("Carta no encontrada");
+        }
     }
 }
