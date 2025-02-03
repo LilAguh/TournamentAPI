@@ -65,5 +65,13 @@ namespace DataAccess.DAOs.Implementations
             });
             return rowsAffected > 0;
         }
+
+        public async Task<bool> DeleteCardAsync(int id)
+        {
+            using var connection = await _databaseConnection.GetConnectionAsync();
+            var query = "DELETE FROM Cards WHERE ID = @Id";
+            var rowsAffected = await connection.ExecuteAsync(query, new { Id = id });
+            return rowsAffected > 0;
+        }
     }
 }
