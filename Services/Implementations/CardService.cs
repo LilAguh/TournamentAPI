@@ -29,5 +29,14 @@ namespace Services.Implementations
             return await _cardDao.GetCardByIdAsync(id);
         }
 
+        public async Task<bool> UpdateCardAsync(int id, CardRequestDto card, int adminId)
+        {
+            var existingCard = await _cardDao.GetCardByIdAsync(id);
+            if (existingCard == null)
+                throw new KeyNotFoundException("Carta no encontrada");
+
+            return await _cardDao.UpdateCardAsync(id, card);
+        }
+
     }
 }
