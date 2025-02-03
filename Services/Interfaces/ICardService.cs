@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Models.DTOs.Cards;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,11 @@ using System.Threading.Tasks;
 
 namespace Services.Interfaces
 {
-    internal class ICardService
+    public interface ICardService
     {
+        Task<int> CreateCardAsync(CardRequestDto card, int adminId);
+        Task<IEnumerable<CardResponseDto>> GetAllCardsAsync();
+        Task<CardResponseDto?> GetCardByIdAsync(int id);
+
     }
 }
