@@ -17,16 +17,34 @@ namespace DataAccess.DAOs.Implementations
             _databaseConnection = databaseConnection;
         }
 
-        public async Task<User> GetUserByEmailOrAliasAsync(string emailOrAlias)
+        public async Task<User> GetUserByAliasAsync(string alias)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
             var query = @"
                 SELECT Id, Role, FirstName, LastName, Alias, Email, PasswordHash, 
                        CountryCode, AvatarUrl, CreatedAt, LastLogin, IsActive, CreatedBy
                 FROM users
-                WHERE Email = @EmailOrAlias OR Alias = @EmailOrAlias";
-
-            return await connection.QueryFirstOrDefaultAsync<User>(query, new { EmailOrAlias = emailOrAlias });
+                WHERE Alias = @Alias";
+            return await connection.QueryFirstOrDefaultAsync<User>(query, new { Alias = alias });
+        }
+        public async Task<User> GetActiveUserByEmailAsync(string email)
+        {
+            using var connection = await _databaseConnection.GetConnectionAsync();
+            var query = @"
+                SELECT Id, Role, FirstName, LastName, Alias, Email, PasswordHash, 
+                       CountryCode, AvatarUrl, CreatedAt, LastLogin, IsActive, CreatedBy
+                FROM users
+                WHERE Email = @Email AND IsActive = 1";
+            return await connection.QueryFirstOrDefaultAsync<User>(query, new { Email = email });
+        }
+        public async Task<User> GetUserByIdentifierAsync(string identifier)
+        {
+            // Primero se intenta obtener por alias
+            var user = await GetUserByAliasAsync(identifier);
+            if (user != null)
+                return user;
+            // Si no se encuentra por alias, se busca por email (solo entre activos)
+            return await GetActiveUserByEmailAsync(identifier);
         }
 
         public async Task<User> GetUserByIdAsync(int id)

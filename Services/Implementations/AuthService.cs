@@ -28,13 +28,28 @@ namespace Services.Implementations
             _jwtHelper = jwtHelper;
         }
 
-        public async Task<User> AuthenticateAsync(string emailOrAlias, string password)
+        public async Task<User> AuthenticateAsync(string identifier, string password)
         {
-            var user = await _userDao.GetUserByEmailOrAliasAsync(emailOrAlias);
-            if (user == null || !_passwordHasher.VerifyPassword(password, user.PasswordHash))
-                throw new UnauthorizedException(ErrorMessages.InvalidCredentials);
+            // Primero se intenta buscar el usuario por alias
+            var user = await _userDao.GetUserByAliasAsync(identifier);
 
-            return user;
+            // Si se encontró por alias, se verifica si está activo
+            if (user != null)
+            {
+                if (!user.IsActive)
+                    throw new UnauthorizedException("Usuario no activo");
+                if (!_passwordHasher.VerifyPassword(password, user.PasswordHash))
+                    throw new UnauthorizedException("Credenciales inválidas");
+                return user;
+            }
+            else
+            {
+                // Si no se encontró por alias, se busca por email (solo entre activos)
+                user = await _userDao.GetActiveUserByEmailAsync(identifier);
+                if (user == null || !_passwordHasher.VerifyPassword(password, user.PasswordHash))
+                    throw new UnauthorizedException("Credenciales inválidas");
+                return user;
+            }
         }
 
         public string GenerateJwtToken(User user)
