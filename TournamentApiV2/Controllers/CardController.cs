@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Models.DTOs.Cards;
 using Services.Implementations;
 using System.Security.Claims;
@@ -16,6 +17,7 @@ namespace TournamentApiV2.Controllers
             _cardService = cardService;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateCard([FromBody] CardRequestDto card)
         {
@@ -32,6 +34,15 @@ namespace TournamentApiV2.Controllers
                 return NotFound("Carta no encontrada");
 
             return Ok(card);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateCard(int id, [FromBody] CardRequestDto cardDto)
+        {
+            var adminId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            var updated = await _cardService.UpdateCardAsync(id, cardDto, adminId);
+            return updated ? Ok("Carta actualizada") : NotFound("Carta no encontrada");
         }
     }
 }
