@@ -31,10 +31,6 @@ namespace Services.Implementations
             if (await _userDao.GetUserByEmailOrAliasAsync(dto.Email) != null)
                 throw new ValidationException(ErrorMessages.DataUserAlreadyUse);
 
-            bool countryExists = await _countryDao.CountryExists(dto.CountryCode);
-            if (!countryExists)
-                throw new ValidationException(ErrorMessages.InvalidCountryCode);
-
             var hashedPassword = _passwordHasher.HashPassword(dto.Password);
 
             var user = new UserCreateDto
@@ -43,7 +39,7 @@ namespace Services.Implementations
                 LastName = dto.LastName,
                 Alias = dto.Alias,
                 Email = dto.Email,
-                PasswordHash = hashedPassword,
+                PasswordHash = hashedPassword, // Asegúrate de que esto no sea nulo
                 CountryCode = dto.CountryCode,
                 AvatarUrl = dto.AvatarUrl,
                 Role = RoleEnum.Player,
