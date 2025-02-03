@@ -8,5 +8,6 @@ namespace DataAccess.DAOs.Interfaces
         Task<IEnumerable<CardResponseDto>> GetAllCardsAsync();
         Task<CardResponseDto?> GetCardByIdAsync(int id);
         Task<bool> UpdateCardAsync(int id, CardRequestDto card);
+        Task<bool> DeleteCardAsync(int id);
     }
 }
