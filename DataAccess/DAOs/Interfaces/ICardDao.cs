@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Models.DTOs.Cards;
 
 namespace DataAccess.DAOs.Interfaces
 {
-    internal class ICardDao
+    public interface ICardDao
     {
+        Task<int> AddCardAsync(CardRequestDto card, int adminId);
+        Task<IEnumerable<CardResponseDto>> GetAllCardsAsync();
+        Task<CardResponseDto?> GetCardByIdAsync(int id);
     }
 }
