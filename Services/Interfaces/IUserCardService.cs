@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Models.DTOs.UserCards;
 
 namespace Services.Interfaces
 {
-    internal class IUserCardService
+    public interface IUserCardService
     {
+        Task<bool> AddUserCardAsync(int userId, AddUserCardRequestDto dto);
     }
 }
