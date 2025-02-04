@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+using Models.DTOs.UserCards;
 
 namespace DataAccess.DAOs.Interfaces
 {
-    internal class iUserCardDao
+    public interface IUserCardDao
     {
+        Task<bool> AddUserCardAsync(int userId, AddUserCardRequestDto dto);
     }
 }
