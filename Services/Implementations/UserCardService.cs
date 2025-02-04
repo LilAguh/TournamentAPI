@@ -17,5 +17,14 @@ namespace Services.Implementations
         {
             return await _userCardDao.AddUserCardAsync(userId, dto);
         }
+        public async Task<IEnumerable<UserCardResponseDto>> GetUserCardsAsync(int userId)
+        {
+            return await _userCardDao.GetUserCardsAsync(userId);
+        }
+
+        public async Task<bool> RemoveUserCardAsync(int userId, int cardId)
+        {
+            return await _userCardDao.RemoveUserCardAsync(userId, cardId);
+        }
     }
 }
