@@ -53,6 +53,8 @@ builder.Services.AddScoped<PasswordHasher>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICardDao, CardDao>();
 builder.Services.AddScoped<CardService>();
+builder.Services.AddScoped<IUserCardDao, UserCardDao>();
+builder.Services.AddScoped<UserCardService>();
 
 
 builder.Services.AddControllers();
