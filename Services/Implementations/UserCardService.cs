@@ -1,12 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+using DataAccess.DAOs.Interfaces;
+using Models.DTOs.UserCards;
 
 namespace Services.Implementations
 {
-    internal class UserCardService
+    public class UserCardService
     {
+        private readonly IUserCardDao _userCardDao;
+
+        public UserCardService(IUserCardDao userCardDao)
+        {
+            _userCardDao = userCardDao;
+        }
+
+        public async Task<bool> AddUserCardAsync(int userId, AddUserCardRequestDto dto)
+        {
+            return await _userCardDao.AddUserCardAsync(userId, dto);
+        }
     }
 }
