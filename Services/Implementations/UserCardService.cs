@@ -1,10 +1,11 @@
 ﻿
 using DataAccess.DAOs.Interfaces;
 using Models.DTOs.UserCards;
+using Services.Interfaces;
 
 namespace Services.Implementations
 {
-    public class UserCardService
+    public class UserCardService : IUserCardService
     {
         private readonly IUserCardDao _userCardDao;
 

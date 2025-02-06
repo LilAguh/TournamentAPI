@@ -1,10 +1,11 @@
 ﻿
 using DataAccess.DAOs.Interfaces;
 using Models.DTOs.Series;
+using Services.Interfaces;
 
 namespace Services.Implementations
 {
-    public class SerieService
+    public class SerieService : ISerieService
     {
         private readonly ISerieDao _seriesDao;
 

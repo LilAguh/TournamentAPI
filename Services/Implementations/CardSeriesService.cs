@@ -1,10 +1,11 @@
 ﻿
 using DataAccess.DAOs.Interfaces;
 using Models.DTOs.CardSeries;
+using Services.Interfaces;
 
 namespace Services.Implementations
 {
-    public class CardSeriesService
+    public class CardSeriesService : ICardSeriesService
     {
         private readonly ICardSeriesDao _cardSeriesDao;
 

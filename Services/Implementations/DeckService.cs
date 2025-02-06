@@ -4,7 +4,7 @@ using Services.Interfaces;
 
 namespace Services.Implementations
 {
-    public class DeckService
+    public class DeckService : IDeckService
     {
         private readonly IDeckDao _deckDao;
 
