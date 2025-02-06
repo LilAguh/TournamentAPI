@@ -59,6 +59,10 @@ builder.Services.AddScoped<IDeckDao, DeckDao>();
 builder.Services.AddScoped<DeckService>();
 builder.Services.AddScoped<ICardDeckDao, CardDeckDao>();
 builder.Services.AddScoped<CardDeckService>();
+builder.Services.AddScoped<ISerieDao, SerieDao>();
+builder.Services.AddScoped<SerieService>();
+builder.Services.AddScoped<ICardSeriesDao, CardSeriesDao>();
+builder.Services.AddScoped<CardSeriesService>();
 
 
 builder.Services.AddControllers();
