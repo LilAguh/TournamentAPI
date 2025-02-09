@@ -42,5 +42,9 @@ namespace Config
 
         //Country:
         public const string InvalidCountryCode = "Código de país inválido.";
+
+        //UserCard
+        //public const string
+        public const string CardNotFound = "Carta no encontrada.";
     }
 }
