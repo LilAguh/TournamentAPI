@@ -1,5 +1,5 @@
 ﻿using Dapper;
-using Models.DTOs;
+using Models.DTOs.User;
 using DataAccess.DAOs.Interfaces;
 using Models.Entities;
 using DataAccess.Database;
@@ -17,15 +17,11 @@ namespace DataAccess.DAOs.Implementations
             _databaseConnection = databaseConnection;
         }
 
-        public async Task<User> GetUserByAliasAsync(string alias)
+        public async Task<UserResponseDto> GetUserByAliasAsync(string alias)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
-            var query = @"
-                SELECT Id, Role, FirstName, LastName, Alias, Email, PasswordHash, 
-                       CountryCode, AvatarUrl, CreatedAt, LastLogin, IsActive, CreatedBy
-                FROM users
-                WHERE Alias = @Alias";
-            return await connection.QueryFirstOrDefaultAsync<User>(query, new { Alias = alias });
+            var query = @" SELECT * FROM users WHERE Alias = @Alias";
+            return await connection.QueryFirstOrDefaultAsync<UserResponseDto>(query, new { Alias = alias });
         }
         public async Task<User> GetActiveUserByEmailAsync(string email)
         {
