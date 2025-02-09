@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Text;
 using Config;
 using Models.Entities;
+using Models.DTOs.User;
 
 namespace Services.Helpers
 {
@@ -27,7 +28,7 @@ namespace Services.Helpers
                 throw new ArgumentNullException(nameof(_jwtConfig.Issuer), ErrorMessages.UnconfiguredIssuer);
         }
 
-        public string GenerateToken(User user)
+        public string GenerateToken(UserResponseDto user)
         {
             var claims = new[]
             {

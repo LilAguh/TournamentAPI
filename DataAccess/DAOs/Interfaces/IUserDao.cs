@@ -8,8 +8,8 @@ namespace DataAccess.DAOs.Interfaces
     public interface IUserDao
     {
         Task<UserResponseDto> GetUserByAliasAsync(string alias);
-        Task<User> GetActiveUserByEmailAsync(string email);
-        Task<User> GetUserByIdentifierAsync(string identifier);
+        Task<UserResponseDto> GetActiveUserByEmailAsync(string email);
+        Task<UserResponseDto> GetUserByIdentifierAsync(string identifier);
         Task<User> GetUserByIdAsync(int id);
         Task AddUserAsync(User user);
         Task UpdateLastLoginAsync(int userId);

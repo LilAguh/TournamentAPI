@@ -20,10 +20,10 @@ namespace DataAccess.DAOs.Implementations
         public async Task<UserResponseDto> GetUserByAliasAsync(string alias)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
-            var query = @" SELECT * FROM users WHERE Alias = @Alias";
+            var query = @" SELECT * FROM users WHERE Alias = @Alias AND IsActive = 1";
             return await connection.QueryFirstOrDefaultAsync<UserResponseDto>(query, new { Alias = alias });
         }
-        public async Task<User> GetActiveUserByEmailAsync(string email)
+        public async Task<UserResponseDto> GetActiveUserByEmailAsync(string email)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
             var query = @"
@@ -31,9 +31,9 @@ namespace DataAccess.DAOs.Implementations
                        CountryCode, AvatarUrl, CreatedAt, LastLogin, IsActive, CreatedBy
                 FROM users
                 WHERE Email = @Email AND IsActive = 1";
-            return await connection.QueryFirstOrDefaultAsync<User>(query, new { Email = email });
+            return await connection.QueryFirstOrDefaultAsync<UserResponseDto>(query, new { Email = email });
         }
-        public async Task<User> GetUserByIdentifierAsync(string identifier)
+        public async Task<UserResponseDto> GetUserByIdentifierAsync(string identifier)
         {
             // Primero se intenta obtener por alias
             var user = await GetUserByAliasAsync(identifier);
