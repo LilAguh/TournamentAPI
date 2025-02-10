@@ -2,7 +2,7 @@
 using DataAccess.DAOs.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Models.DTOs;
+using Models.DTOs.User;
 using Services.Interfaces;
 using System.Security.Claims;
 
@@ -24,7 +24,7 @@ namespace TournamentApiV2.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateUser([FromBody] AdminRegisterDto dto)
+        public async Task<IActionResult> CreateUser([FromBody] AdminRegisterRequestDto dto)
         {
             var adminId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             var user = await _userService.CreateUserByAdmin(dto, adminId);
