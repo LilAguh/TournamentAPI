@@ -19,14 +19,6 @@ namespace TournamentApiV2.Controllers
             _userCardService = userCardService;
         }
 
-        //[HttpPost]
-        //public async Task<IActionResult> AddUserCard([FromBody] AddUserCardRequestDto dto)
-        //{
-        //    var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-        //    var success = await _userCardService.AddUserCardAsync(userId, dto);
-        //    return success ? Ok("Carta acreditada exitosamente") : BadRequest("Error al acreditar la carta");
-        //}
-
         [HttpPost]
         public async Task<IActionResult> AddUserCard([FromBody] AddUserCardRequestDto dto)
         {
@@ -47,8 +39,8 @@ namespace TournamentApiV2.Controllers
         public async Task<IActionResult> RemoveUserCard(int cardId)
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-            var success = await _userCardService.RemoveUserCardAsync(userId, cardId);
-            return success ? Ok("Carta removida exitosamente") : NotFound("Carta no encontrada en el registro del usuario");
+            await _userCardService.RemoveUserCardAsync(userId, cardId);
+            return Ok("Carta removida de tu colección");
         }
     }
 }

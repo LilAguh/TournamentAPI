@@ -44,12 +44,18 @@ namespace Services.Implementations
         }
         public async Task<IEnumerable<UserCardResponseDto>> GetUserCardsAsync(int userId)
         {
-            return await _userCardDao.GetUserCardsAsync(userId);
+            var userCards = await _userCardDao.GetUserCardsAsync(userId);
+            if (!userCards.Any())
+                throw new NotFoundException("No se encontraron cartas en tu colección.");
+
+            return userCards;
         }
 
-        public async Task<bool> RemoveUserCardAsync(int userId, int cardId)
+        public async Task RemoveUserCardAsync(int userId, int cardId)
         {
-            return await _userCardDao.RemoveUserCardAsync(userId, cardId);
+            var success = await _userCardDao.RemoveUserCardAsync(userId, cardId);
+            if (!success)
+                throw new NotFoundException("La carta no existe en tu colección.");
         }
     }
 }

@@ -6,6 +6,6 @@ namespace Services.Interfaces
     {
         Task AddUserCardAsync(int userId, AddUserCardRequestDto dto);
         Task<IEnumerable<UserCardResponseDto>> GetUserCardsAsync(int userId);
-        Task<bool> RemoveUserCardAsync(int userId, int cardId);
+        Task RemoveUserCardAsync(int userId, int cardId);
     }
 }
