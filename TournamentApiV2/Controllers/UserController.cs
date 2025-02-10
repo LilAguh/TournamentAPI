@@ -25,7 +25,6 @@ namespace TournamentApiV2.Controllers
             var user = await _userService.Register(dto);
             return Ok(new
             {
-                user.Id,
                 user.Alias,
                 user.Email
             });

@@ -31,7 +31,6 @@ namespace TournamentApiV2.Controllers
 
             return Ok(new
             {
-                user.Id,
                 user.Alias,
                 user.Email,
                 user.Role

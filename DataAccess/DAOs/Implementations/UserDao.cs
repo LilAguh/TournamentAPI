@@ -20,17 +20,13 @@ namespace DataAccess.DAOs.Implementations
         public async Task<UserResponseDto> GetUserByAliasAsync(string alias)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
-            var query = @" SELECT * FROM users WHERE Alias = @Alias AND IsActive = 1";
+            var query = "SELECT * FROM users WHERE Alias = @Alias AND IsActive = 1";
             return await connection.QueryFirstOrDefaultAsync<UserResponseDto>(query, new { Alias = alias });
         }
         public async Task<UserResponseDto> GetActiveUserByEmailAsync(string email)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
-            var query = @"
-                SELECT Id, Role, FirstName, LastName, Alias, Email, PasswordHash, 
-                       CountryCode, AvatarUrl, CreatedAt, LastLogin, IsActive, CreatedBy
-                FROM users
-                WHERE Email = @Email AND IsActive = 1";
+            var query = "SELECT * FROM users WHERE Email = @Email AND IsActive = 1";
             return await connection.QueryFirstOrDefaultAsync<UserResponseDto>(query, new { Email = email });
         }
         public async Task<UserResponseDto> GetUserByIdentifierAsync(string identifier)
@@ -43,19 +39,14 @@ namespace DataAccess.DAOs.Implementations
             return await GetActiveUserByEmailAsync(identifier);
         }
 
-        public async Task<User> GetUserByIdAsync(int id)
+        public async Task<UserResponseDto> GetUserByIdAsync(int id)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
-            var query = @"
-                SELECT Id, Role, FirstName, LastName, Alias, Email, PasswordHash, 
-                       CountryCode, AvatarUrl, CreatedAt, LastLogin, IsActive, CreatedBy
-                FROM users
-                WHERE Id = @Id";
-
-            return await connection.QueryFirstOrDefaultAsync<User>(query, new { Id = id });
+            var query = "SELECT * FROM users WHERE Id = @Id";
+            return await connection.QueryFirstOrDefaultAsync<UserResponseDto>(query, new { Id = id });
         }
 
-        public async Task AddUserAsync(User user)
+        public async Task AddUserAsync(UserRequestDto userDto)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
             var query = @"
@@ -64,7 +55,7 @@ namespace DataAccess.DAOs.Implementations
                 VALUES 
                     (@Role, @FirstName, @LastName, @Alias, @Email, @PasswordHash, @CountryCode, @CreatedBy, @CreatedAt, @IsActive)";
 
-            await connection.ExecuteAsync(query, user);
+            await connection.ExecuteAsync(query, userDto);
         }
 
         public async Task UpdateLastLoginAsync(int userId)
@@ -80,7 +71,7 @@ namespace DataAccess.DAOs.Implementations
             }
         }
 
-        public async Task UpdateUserAsync(User user)
+        public async Task UpdateUserAsync(UserResponseDto userDto)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
             var query = @"
@@ -94,14 +85,14 @@ namespace DataAccess.DAOs.Implementations
                     AvatarUrl = @AvatarUrl
                 WHERE Id = @Id";
 
-            await connection.ExecuteAsync(query, user);
+            await connection.ExecuteAsync(query, userDto);
         }
 
-        public async Task UpdateUserStatusAsync(User user)
+        public async Task UpdateUserStatusAsync(UserResponseDto userDto)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
-            var query = @"UPDATE users SET IsActive = @IsActive WHERE Id = @Id";
-            await connection.ExecuteAsync(query, new { user.IsActive, user.Id });
+            var query = "UPDATE users SET IsActive = @IsActive WHERE Id = @Id";
+            await connection.ExecuteAsync(query, new { userDto.IsActive, userDto.Id });
         }
     }
 }

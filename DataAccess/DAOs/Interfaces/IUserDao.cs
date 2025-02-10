@@ -10,10 +10,10 @@ namespace DataAccess.DAOs.Interfaces
         Task<UserResponseDto> GetUserByAliasAsync(string alias);
         Task<UserResponseDto> GetActiveUserByEmailAsync(string email);
         Task<UserResponseDto> GetUserByIdentifierAsync(string identifier);
-        Task<User> GetUserByIdAsync(int id);
-        Task AddUserAsync(User user);
+        Task<UserResponseDto> GetUserByIdAsync(int id);
+        Task AddUserAsync(UserRequestDto userDto);
         Task UpdateLastLoginAsync(int userId);
-        Task UpdateUserAsync(User user);
-        Task UpdateUserStatusAsync(User user);
+        Task UpdateUserAsync(UserResponseDto userDto);
+        Task UpdateUserStatusAsync(UserResponseDto userDto);
     }
 }
