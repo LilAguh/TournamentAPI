@@ -40,7 +40,7 @@ namespace DataAccess.DAOs.Implementations
             return await connection.QueryAsync<CardResponseDto>(query);
         }
 
-        public async Task<CardResponseDto?> GetCardByIdAsync(int id)
+        public async Task<CardResponseDto> GetCardByIdAsync(int id)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
             var query = "SELECT * FROM Cards WHERE ID = @Id";
