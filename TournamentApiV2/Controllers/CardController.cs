@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Models.DTOs.Cards;
 using Services.Implementations;
+using Services.Interfaces;
 using System.Security.Claims;
+using static Models.Exceptions.CustomException;
 
 namespace TournamentApiV2.Controllers
 {
@@ -10,9 +12,9 @@ namespace TournamentApiV2.Controllers
     [Route("[controller]")]
     public class CardController : ControllerBase
     {
-        private readonly CardService _cardService;
+        private readonly ICardService _cardService;
 
-        public CardController(CardService cardService)
+        public CardController(ICardService cardService)
         {
             _cardService = cardService;
         }
@@ -31,7 +33,7 @@ namespace TournamentApiV2.Controllers
         {
             var card = await _cardService.GetCardByIdAsync(id);
             if (card == null)
-                return NotFound("Carta no encontrada");
+                throw new NotFoundException("Carta no encontrada");
 
             return Ok(card);
         }
