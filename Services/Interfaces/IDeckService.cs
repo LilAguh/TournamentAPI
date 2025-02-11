@@ -7,7 +7,7 @@ namespace Services.Interfaces
     {
         Task<DeckResponseDto> CreateDeckAsync(DeckRequestDto dto, int userId);
         Task<IEnumerable<DeckResponseDto>> GetDecksByUserAsync(int userId);
-        Task<DeckResponseDto?> GetDeckByIdAsync(int deckId);
-        Task<bool> DeleteDeckAsync(int deckId);
+        Task<DeckResponseDto> GetDeckByIdAsync(int deckId);
+        Task DeleteDeckAsync(int deckId, int userId);
     }
 }
