@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.DTOs.CardDecks;
-using Services.Implementations;
+using Services.Interfaces;
 
 namespace TournamentApiV2.Controllers
 {
@@ -10,22 +10,20 @@ namespace TournamentApiV2.Controllers
     [ApiController]
     public class CardDecksController : ControllerBase
     {
-        private readonly CardDeckService _cardDeckService;
+        private readonly ICardDeckService _cardDeckService;
 
-        public CardDecksController(CardDeckService cardDeckService)
+        public CardDecksController(ICardDeckService cardDeckService)
         {
             _cardDeckService = cardDeckService;
         }
 
-        // Agregar una carta al mazo
         [HttpPost]
         public async Task<IActionResult> AddCardToDeck(int deckId, [FromBody] AddCardDeckRequestDto dto)
         {
-            var success = await _cardDeckService.AddCardToDeckAsync(deckId, dto);
-            return success ? Ok("Carta agregada al mazo") : BadRequest("No se pudo agregar la carta (posiblemente ya existe o se alcanzó el límite de 15)");
+            await _cardDeckService.AddCardToDeckAsync(deckId, dto.CardId);
+            return Ok("Carta agregada al mazo");
         }
 
-        // Obtener las cartas del mazo
         [HttpGet]
         public async Task<IActionResult> GetCardsInDeck(int deckId)
         {
@@ -33,12 +31,11 @@ namespace TournamentApiV2.Controllers
             return Ok(cards);
         }
 
-        // Remover una carta del mazo
         [HttpDelete("{cardId}")]
         public async Task<IActionResult> RemoveCardFromDeck(int deckId, int cardId)
         {
-            var success = await _cardDeckService.RemoveCardFromDeckAsync(deckId, cardId);
-            return success ? Ok("Carta removida del mazo") : BadRequest("No se pudo remover la carta");
+            await _cardDeckService.RemoveCardFromDeckAsync(deckId, cardId);
+            return Ok("Carta removida del mazo");
         }
     }
 }

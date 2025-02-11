@@ -2,6 +2,7 @@
 using DataAccess.DAOs.Interfaces;
 using Models.DTOs.CardDecks;
 using Services.Interfaces;
+using static Models.Exceptions.CustomException;
 
 namespace Services.Implementations
 {
@@ -14,19 +15,31 @@ namespace Services.Implementations
             _cardDeckDao = cardDeckDao;
         }
 
-        public async Task<bool> AddCardToDeckAsync(int deckId, AddCardDeckRequestDto dto)
+        public async Task AddCardToDeckAsync(int deckId, int cardId)
         {
-            return await _cardDeckDao.AddCardToDeckAsync(deckId, dto.CardId);
+            var currentCount = await _cardDeckDao.GetCardCountInDeckAsync(deckId);
+            if (currentCount >= 15)
+                throw new ValidationException("El mazo ya tiene 15 cartas.");
+
+            var success = await _cardDeckDao.AddCardToDeckAsync(deckId, cardId);
+            if (!success)
+                throw new ValidationException("La carta ya está en el mazo.");
         }
 
-        public async Task<bool> RemoveCardFromDeckAsync(int deckId, int cardId)
+        public async Task RemoveCardFromDeckAsync(int deckId, int cardId)
         {
-            return await _cardDeckDao.RemoveCardFromDeckAsync(deckId, cardId);
+            var success = await _cardDeckDao.RemoveCardFromDeckAsync(deckId, cardId);
+            if (!success)
+                throw new NotFoundException("La carta no está en el mazo.");
         }
 
         public async Task<IEnumerable<CardDeckResponseDto>> GetCardsInDeckAsync(int deckId)
         {
-            return await _cardDeckDao.GetCardsInDeckAsync(deckId);
+            var cards = await _cardDeckDao.GetCardsInDeckAsync(deckId);
+            if (!cards.Any())
+                throw new NotFoundException("El mazo está vacío.");
+
+            return cards;
         }
     }
 }
