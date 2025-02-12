@@ -7,8 +7,8 @@ namespace Services.Interfaces
     {
         Task<SeriesResponseDto> CreateSeriesAsync(SeriesRequestDto dto);
         Task<IEnumerable<SeriesResponseDto>> GetAllSeriesAsync();
-        Task<SeriesResponseDto?> GetSeriesByIdAsync(int id);
-        Task<SeriesResponseDto?> UpdateSeriesAsync(int id, SeriesRequestDto dto);
-        Task<bool> DeleteSeriesAsync(int id);
+        Task<SeriesResponseDto> GetSeriesByIdAsync(int id);
+        Task<SeriesResponseDto> UpdateSeriesAsync(int id, SeriesRequestDto dto);
+        Task DeleteSeriesAsync(int id);
     }
 }

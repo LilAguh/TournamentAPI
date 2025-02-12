@@ -18,14 +18,13 @@ namespace Services.Implementations
         public async Task<int> CreateDeckAsync(DeckRequestDto dto, int userId)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
-            var query = @"
-            INSERT INTO Decks (UserID, Name)
-            VALUES (@UserId, @Name);
-            SELECT LAST_INSERT_ID();";
-            return await connection.ExecuteScalarAsync<int>(query, new { UserId = userId, Name = dto.Name });
+            var query = @"INSERT INTO Decks (UserId, Name) 
+                          VALUES (@UserId, @Name);
+                          SELECT LAST_INSERT_ID();";
+            return await connection.ExecuteScalarAsync<int>(query, new { UserId = userId, dto.Name });
         }
 
-        public async Task<DeckResponseDto?> GetDeckByIdAsync(int deckId)
+        public async Task<DeckResponseDto> GetDeckByIdAsync(int deckId)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
             var query = "SELECT * FROM Decks WHERE Id = @DeckId";
@@ -35,7 +34,7 @@ namespace Services.Implementations
         public async Task<IEnumerable<DeckResponseDto>> GetDecksByUserAsync(int userId)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
-            var query = "SELECT * FROM Decks WHERE UserID = @UserId";
+            var query = "SELECT * FROM Decks WHERE UserId = @UserId";
             return await connection.QueryAsync<DeckResponseDto>(query, new { UserId = userId });
         }
 

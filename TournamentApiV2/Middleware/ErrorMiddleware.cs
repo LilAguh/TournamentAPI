@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Config;
+using Microsoft.AspNetCore.Http;
 using Models.Exceptions;
+using MySqlConnector;
 using System.Net;
 using System.Text.Json;
+using static Models.Exceptions.CustomException;
 
 namespace TournamentApiV2.Middleware
 {
@@ -22,43 +25,66 @@ namespace TournamentApiV2.Middleware
             {
                 await _next(context);
             }
-            catch (CustomException ex)
-            {
-                await HandleCustomExceptionAsync(context, ex);
-            }
             catch (Exception ex)
             {
-                await HandleGenericExceptionAsync(context, ex);
+                await HandleExceptionAsync(context, ex);
             }
         }
 
-        private static async Task HandleCustomExceptionAsync(HttpContext context, CustomException exception)
+        private async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
-            context.Response.StatusCode = exception.StatusCode;
-            context.Response.ContentType = "application/json";
+            var statusCode = (int)HttpStatusCode.InternalServerError;
+            var errorCode = "INTERNAL_ERROR";
+            var message = ErrorMessages.InternalServerError;
 
+            // Mapeo de excepciones personalizadas
+            switch (exception)
+            {
+                case ValidationException vex:
+                    statusCode = (int)HttpStatusCode.BadRequest;
+                    errorCode = "VALIDATION_ERROR";
+                    message = vex.Message;
+                    break;
+                case NotFoundException nex:
+                    statusCode = (int)HttpStatusCode.NotFound;
+                    errorCode = "NOT_FOUND";
+                    message = nex.Message;
+                    break;
+                case ForbiddenException fex:
+                    statusCode = (int)HttpStatusCode.Forbidden;
+                    errorCode = "FORBIDDEN";
+                    message = fex.Message;
+                    break;
+                case UnauthorizedException uex:
+                    statusCode = (int)HttpStatusCode.Unauthorized;
+                    errorCode = "UNAUTHORIZED";
+                    message = uex.Message;
+                    break;
+                case InvalidOperationException ioe when ioe.Message.Contains("no existen"):
+                    statusCode = (int)HttpStatusCode.BadRequest;
+                    errorCode = "INVALID_DATA";
+                    message = ioe.Message;
+                    break;
+                case MySqlException myex:
+                    statusCode = (int)HttpStatusCode.BadRequest;
+                    errorCode = "DATABASE_ERROR";
+                    message = "Error en la base de datos: " + myex.Message;
+                    break;
+                default:
+                    _logger.LogError(exception, "Error no manejado");
+                    break;
+            }
+
+            // Estructura estándar de respuesta de error
             var response = new
             {
-                Error = exception.Message,
-                StatusCode = exception.StatusCode
+                Code = errorCode,
+                Message = message,
+                Timestamp = DateTime.UtcNow
             };
 
-            await context.Response.WriteAsync(JsonSerializer.Serialize(response));
-        }
-
-        private async Task HandleGenericExceptionAsync(HttpContext context, Exception exception)
-        {
-            _logger.LogError(exception, "Unhandled exception occurred");
-
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            context.Response.StatusCode = statusCode;
             context.Response.ContentType = "application/json";
-
-            var response = new
-            {
-                Error = "Ocurrió un error interno en el servidor",
-                StatusCode = context.Response.StatusCode
-            };
-
             await context.Response.WriteAsync(JsonSerializer.Serialize(response));
         }
     }

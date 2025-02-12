@@ -1,10 +1,12 @@
 ﻿
+using DataAccess.Database;
 using Models.DTOs.Decks;
 using Services.Interfaces;
+using static Models.Exceptions.CustomException;
 
 namespace Services.Implementations
 {
-    public class DeckService
+    public class DeckService : IDeckService
     {
         private readonly IDeckDao _deckDao;
 
@@ -18,22 +20,36 @@ namespace Services.Implementations
             int deckId = await _deckDao.CreateDeckAsync(dto, userId);
             var deck = await _deckDao.GetDeckByIdAsync(deckId);
             if (deck == null)
-                throw new Exception("Error al crear el mazo.");
+                throw new ValidationException("Error al crear el mazo.");
+
             return deck;
         }
+
         public async Task<IEnumerable<DeckResponseDto>> GetDecksByUserAsync(int userId)
         {
-            return await _deckDao.GetDecksByUserAsync(userId);
+            var decks = await _deckDao.GetDecksByUserAsync(userId);
+            if (!decks.Any())
+                throw new NotFoundException("No tienes mazos registrados.");
+
+            return decks;
         }
 
-        public async Task<DeckResponseDto?> GetDeckByIdAsync(int deckId)
+        public async Task<DeckResponseDto> GetDeckByIdAsync(int deckId)
         {
-            return await _deckDao.GetDeckByIdAsync(deckId);
+            var deck = await _deckDao.GetDeckByIdAsync(deckId);
+            if (deck == null)
+                throw new NotFoundException("Mazo no encontrado.");
+
+            return deck;
         }
 
-        public async Task<bool> DeleteDeckAsync(int deckId)
+        public async Task DeleteDeckAsync(int deckId, int userId)
         {
-            return await _deckDao.DeleteDeckAsync(deckId);
+            var deck = await _deckDao.GetDeckByIdAsync(deckId);
+            if (deck == null || deck.UserId != userId)
+                throw new ForbiddenException("No puedes eliminar este mazo.");
+
+            await _deckDao.DeleteDeckAsync(deckId);
         }
     }
 }

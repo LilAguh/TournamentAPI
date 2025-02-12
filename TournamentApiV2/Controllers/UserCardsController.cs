@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Models.DTOs.UserCards;
 using Services.Implementations;
+using Services.Interfaces;
 using System.Security.Claims;
 
 namespace TournamentApiV2.Controllers
@@ -11,9 +12,9 @@ namespace TournamentApiV2.Controllers
     [Route("[controller]")]
     public class UserCardsController : ControllerBase
     {
-        private readonly UserCardService _userCardService;
+        private readonly IUserCardService _userCardService;
 
-        public UserCardsController(UserCardService userCardService)
+        public UserCardsController(IUserCardService userCardService)
         {
             _userCardService = userCardService;
         }
@@ -22,8 +23,8 @@ namespace TournamentApiV2.Controllers
         public async Task<IActionResult> AddUserCard([FromBody] AddUserCardRequestDto dto)
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-            var success = await _userCardService.AddUserCardAsync(userId, dto);
-            return success ? Ok("Carta acreditada exitosamente") : BadRequest("Error al acreditar la carta");
+            await _userCardService.AddUserCardAsync(userId, dto);
+            return Ok("Carta agregada a tu colección");
         }
 
         [HttpGet]
@@ -38,8 +39,8 @@ namespace TournamentApiV2.Controllers
         public async Task<IActionResult> RemoveUserCard(int cardId)
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-            var success = await _userCardService.RemoveUserCardAsync(userId, cardId);
-            return success ? Ok("Carta removida exitosamente") : NotFound("Carta no encontrada en el registro del usuario");
+            await _userCardService.RemoveUserCardAsync(userId, cardId);
+            return Ok("Carta removida de tu colección");
         }
     }
 }

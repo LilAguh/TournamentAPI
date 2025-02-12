@@ -1,7 +1,7 @@
 ﻿using Config;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Models.DTOs;
+using Models.DTOs.User;
 using Services.Interfaces;
 using System.Security.Claims;
 using static Models.Exceptions.CustomException;
@@ -20,12 +20,11 @@ namespace TournamentApiV2.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(PlayerRegisterDto dto)
+        public async Task<IActionResult> Register(PlayerRegisterRequestDto dto)
         {
             var user = await _userService.Register(dto);
             return Ok(new
             {
-                user.Id,
                 user.Alias,
                 user.Email
             });
@@ -33,7 +32,7 @@ namespace TournamentApiV2.Controllers
 
         [Authorize]
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateUserDto dto)
+        public async Task<IActionResult> UpdateUser(int id, [FromBody] UserUpdateRequestDto dto)
         {
             var userIdFromToken = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             if (userIdFromToken != id)
@@ -45,7 +44,7 @@ namespace TournamentApiV2.Controllers
 
         [Authorize]
         [HttpPost("change-password")]
-        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDto dto)
         {
             var userIdFromToken = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 

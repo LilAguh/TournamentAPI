@@ -1,4 +1,4 @@
-﻿using Models.DTOs;
+﻿using Models.DTOs.User;
 using Models.Entities;
 using System.Threading.Tasks;
 
@@ -6,11 +6,11 @@ namespace Services.Interfaces
 {
     public interface IUserService
     {
-        Task<User> Register(PlayerRegisterDto dto);
-        Task<User> CreateUserByAdmin(AdminRegisterDto dto, int adminId);
-        Task<User> UpdateUser(int id, UpdateUserDto dto);
-        Task ChangePasswordAsync(int userId, ChangePasswordDto dto);
+        Task<UserRequestDto> Register(PlayerRegisterRequestDto dto);
+        Task<UserRequestDto> CreateUserByAdmin(AdminRegisterRequestDto dto, int adminId);
+        Task<UserResponseDto> UpdateUser(int id, UserUpdateRequestDto dto);
+        Task ChangePasswordAsync(int userId, ChangePasswordRequestDto dto);
         Task DeleteUser(int id);
-        Task<User> GetUserById(int id);
+        Task<UserResponseDto> GetUserById(int id);
     }
 }

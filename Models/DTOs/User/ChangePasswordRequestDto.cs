@@ -1,9 +1,9 @@
 ﻿using Config;
 using System.ComponentModel.DataAnnotations;
 
-namespace Models.DTOs
+namespace Models.DTOs.User
 {
-    public class ChangePasswordDto
+    public class ChangePasswordRequestDto
     {
         [Required(ErrorMessage = ErrorMessages.RequiredPassword)]
         public string CurrentPassword { get; set; }

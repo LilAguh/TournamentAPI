@@ -6,9 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Models.DTOs
+namespace Models.DTOs.User
 {
-    public class UpdateUserDto
+    public class UserUpdateRequestDto
     {
         [StringLength(50, ErrorMessage = ErrorMessages.NameExceedCharacters)]
         public string? FirstName { get; set; }

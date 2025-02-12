@@ -3,9 +3,9 @@
 using Config;
 using System.ComponentModel.DataAnnotations;
 
-namespace Models.DTOs
+namespace Models.DTOs.User
 {
-    public class PlayerRegisterDto
+    public class PlayerRegisterRequestDto
     {
         [Required(ErrorMessage = ErrorMessages.RequiredName)]
         [StringLength(50, ErrorMessage = ErrorMessages.NameExceedCharacters)]

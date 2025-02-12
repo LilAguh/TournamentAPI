@@ -1,5 +1,5 @@
 ﻿using DataAccess.DAOs.Interfaces;
-using Models.DTOs;
+using Models.DTOs.User;
 using Models.Entities;
 using Services.Helpers;
 using Microsoft.Extensions.Configuration;
@@ -26,7 +26,7 @@ namespace Services.Implementations
             _config = config;
         }
 
-        public async Task<User> Register(PlayerRegisterDto dto)
+        public async Task<UserRequestDto> Register(PlayerRegisterRequestDto dto)
         {
             // Validar que el alias sea único (sin importar el estado)
             var existingAlias = await _userDao.GetUserByAliasAsync(dto.Alias);
@@ -40,7 +40,7 @@ namespace Services.Implementations
 
             var hashedPassword = _passwordHasher.HashPassword(dto.Password);
 
-            var user = new User
+            var user = new UserRequestDto
             {
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
@@ -58,7 +58,7 @@ namespace Services.Implementations
             return user;
         }
 
-        public async Task<User> CreateUserByAdmin(AdminRegisterDto dto, int adminId)
+        public async Task<UserRequestDto> CreateUserByAdmin(AdminRegisterRequestDto dto, int adminId)
         {
             // Validar que el admin que realiza la acción exista y tenga rol de Admin
             var admin = await _userDao.GetUserByIdAsync(adminId);
@@ -88,7 +88,7 @@ namespace Services.Implementations
 
             var hashedPassword = _passwordHasher.HashPassword(dto.Password);
 
-            var user = new User
+            var user = new UserRequestDto
             {
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
@@ -107,7 +107,7 @@ namespace Services.Implementations
             return user;
         }
 
-        public async Task<User> UpdateUser(int id, UpdateUserDto dto)
+        public async Task<UserResponseDto> UpdateUser(int id, UserUpdateRequestDto dto)
         {
             var user = await _userDao.GetUserByIdAsync(id);
             if (user == null)
@@ -131,7 +131,7 @@ namespace Services.Implementations
             return user;
         }
 
-        public async Task ChangePasswordAsync(int userId, ChangePasswordDto dto)
+        public async Task ChangePasswordAsync(int userId, ChangePasswordRequestDto dto)
         {
             var user = await _userDao.GetUserByIdAsync(userId);
             if (user == null)
@@ -154,7 +154,7 @@ namespace Services.Implementations
             await _userDao.UpdateUserStatusAsync(user);
         }
 
-        public async Task<User> GetUserById(int id)
+        public async Task<UserResponseDto> GetUserById(int id)
         {
             var user = await _userDao.GetUserByIdAsync(id);
             if (user == null || !user.IsActive)

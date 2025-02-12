@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.DTOs.Decks;
-using Models.Entities;
-using Services.Implementations;
+using Services.Interfaces;
 using System.Security.Claims;
 
 namespace TournamentApiV2.Controllers
@@ -12,9 +11,9 @@ namespace TournamentApiV2.Controllers
     [ApiController]
     public class DecksController : ControllerBase
     {
-        private readonly DeckService _deckService;
+        private readonly IDeckService _deckService;
 
-        public DecksController(DeckService deckService)
+        public DecksController(IDeckService deckService)
         {
             _deckService = deckService;
         }
@@ -39,17 +38,15 @@ namespace TournamentApiV2.Controllers
         public async Task<IActionResult> GetDeckById(int deckId)
         {
             var deck = await _deckService.GetDeckByIdAsync(deckId);
-            if (deck == null)
-                return NotFound("Mazo no encontrado");
             return Ok(deck);
         }
 
         [HttpDelete("{deckId}")]
         public async Task<IActionResult> DeleteDeck(int deckId)
         {
-            // Opcional: verificar que el mazo pertenezca al usuario
-            var success = await _deckService.DeleteDeckAsync(deckId);
-            return success ? Ok("Mazo eliminado") : NotFound("Mazo no encontrado");
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            await _deckService.DeleteDeckAsync(deckId, userId);
+            return Ok("Mazo eliminado");
         }
     }
 }

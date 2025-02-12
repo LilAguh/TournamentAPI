@@ -7,9 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Models.DTOs
+namespace Models.DTOs.User
 {
-    public class AdminRegisterDto
+    public class AdminRegisterRequestDto
     {
         [Required(ErrorMessage = ErrorMessages.RequiredName)]
         [StringLength(50, ErrorMessage = ErrorMessages.NameExceedCharacters)]
@@ -24,11 +24,11 @@ namespace Models.DTOs
         public string Alias { get; set; }
 
         [Required(ErrorMessage = ErrorMessages.RequiredEmail)]
-        [RegularExpression(@"^[^\s@]+@[^\s@]+\.[^\s@]{2,}$",ErrorMessage = ErrorMessages.InvalidEmail)]
+        [RegularExpression(@"^[^\s@]+@[^\s@]+\.[^\s@]{2,}$", ErrorMessage = ErrorMessages.InvalidEmail)]
         public string Email { get; set; }
 
         [Required(ErrorMessage = ErrorMessages.RequiredPassword)]
-        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$",ErrorMessage = ErrorMessages.InvalidPassword)]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$", ErrorMessage = ErrorMessages.InvalidPassword)]
         public string Password { get; set; }
 
         [Required(ErrorMessage = ErrorMessages.CountryCodeRequired)]
