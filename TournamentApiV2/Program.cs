@@ -56,13 +56,13 @@ builder.Services.AddScoped<ICardService, CardService>();
 builder.Services.AddScoped<IUserCardDao, UserCardDao>();
 builder.Services.AddScoped<IUserCardService, UserCardService>();
 builder.Services.AddScoped<IDeckDao, DeckDao>();
-builder.Services.AddScoped<DeckService>();
+builder.Services.AddScoped<IDeckService, DeckService>();
 builder.Services.AddScoped<ICardDeckDao, CardDeckDao>();
-builder.Services.AddScoped<CardDeckService>();
+builder.Services.AddScoped<ICardDeckService, CardDeckService>();
 builder.Services.AddScoped<ISerieDao, SerieDao>();
-builder.Services.AddScoped<SerieService>();
+builder.Services.AddScoped<ISerieService, SerieService>();
 builder.Services.AddScoped<ICardSeriesDao, CardSeriesDao>();
-builder.Services.AddScoped<CardSeriesService>();
+builder.Services.AddScoped<ICardSeriesService, CardSeriesService>();
 
 
 builder.Services.AddControllers();
