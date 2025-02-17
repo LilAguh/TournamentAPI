@@ -12,8 +12,7 @@ namespace Models.DTOs.Tournament
         public DateTime EndDate { get; set; }
         public TimeSpan StartTime { get; set; }
         public TimeSpan EndTime { get; set; }
-        public string Country { get; set; }
-        public PhaseEnum Phase { get; set; }
+        public string CountryCode { get; set; }
         public int WinnerID { get; set; }
     }
 }

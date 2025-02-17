@@ -22,23 +22,24 @@ namespace DataAccess.DAOs.Implementations
         public async Task<int> AddTournamentAsync(TournamentRequestDto dto, int organizerId)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
-            var query = @" INSERT INTO Tournaments (Name, OrganizerID, StartDate, EndDate, StartTime, EndTime, Country, Phase)
-                           VALUES (@Name, @OrganizerID, @StartDate, @EndDate, @StartTime, @EndTime, @Country, @Phase)
-                           SELECT LAST_INSERT_ID()";
 
-            int newTournament = await connection.ExecuteScalarAsync<int>(query,
-                new
-                {
-                    dto.Name,
-                    OrganizerID = organizerId,
-                    dto.StartDate,
-                    dto.EndDate,
-                    dto.StartTime,
-                    dto.EndTime,
-                    dto.Country,
-                    Phase = PhaseEnum.Registration
-                });
-            return newTournament;
+            var query = @"INSERT INTO Tournament (Name, OrganizerID, StartDate, EndDate, StartTime, EndTime, CountryCode, Phase)
+                          VALUES (@Name, @OrganizerID, @StartDate, @EndDate, @StartTime, @EndTime, @CountryCode, @Phase)";
+
+            await connection.ExecuteAsync(query, new
+            {
+                dto.Name,
+                OrganizerID = organizerId,
+                dto.StartDate,
+                dto.EndDate,
+                dto.StartTime,
+                dto.EndTime,
+                dto.CountryCode,
+                Phase = PhaseEnum.Registration.ToString().ToLowerInvariant()
+            });
+
+            int newId = await connection.ExecuteScalarAsync<int>("SELECT LAST_INSERT_ID();");
+            return newId;
         }
 
         public async Task<TournamentResponseDto> GetTournamentByIdAsync(int tournamentID)

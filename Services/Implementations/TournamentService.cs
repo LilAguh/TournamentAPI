@@ -1,7 +1,7 @@
 ﻿
+using Config;
 using DataAccess.DAOs.Interfaces;
 using Models.DTOs.Tournament;
-using Models.Exceptions;
 using Services.Interfaces;
 using static Models.Exceptions.CustomException;
 
@@ -10,9 +10,11 @@ namespace Services.Implementations
     public class TournamentService : ITournamentService
     {
         private readonly ITournamentDao _tournamentDao;
-        public TournamentService(ITournamentDao tournamentDao)
+        private readonly ICountryDao _countryDao;
+        public TournamentService(ITournamentDao tournamentDao, ICountryDao countryDao)
         {
-            tournamentDao = _tournamentDao;
+            _tournamentDao = tournamentDao;
+            _countryDao = countryDao;
         }
 
         public async Task<TournamentResponseDto> CreateTournamentAsync(TournamentRequestDto dto, int organizerId)
@@ -26,6 +28,13 @@ namespace Services.Implementations
             if (dto.StartTime >= dto.EndTime)
             {
                 throw new ValidationException("La hora de inicio diaria debe ser anterior a la hora de fin diaria");
+            }
+
+            if (!string.IsNullOrEmpty(dto.CountryCode))
+            {
+                bool countryExists = await _countryDao.CountryExists(dto.CountryCode);
+                if (!countryExists)
+                    throw new ValidationException(ErrorMessages.InvalidCountryCode);
             }
 
             int newTournament = await _tournamentDao.AddTournamentAsync(dto, organizerId);
