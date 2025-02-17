@@ -2,6 +2,7 @@
 using Dapper;
 using DataAccess.DAOs.Interfaces;
 using DataAccess.Database;
+using Models.DTOs.Cards;
 using Models.DTOs.Tournament;
 using Models.DTOs.User;
 using Models.Enums;
@@ -45,6 +46,20 @@ namespace DataAccess.DAOs.Implementations
             using var connection = await _databaseConnection.GetConnectionAsync();
             var query = "SELECT * FROM Tournament WHERE ID = @Id";
             return await connection.QueryFirstOrDefaultAsync<TournamentResponseDto>(query, new { Id = tournamentID });
+        }
+
+        public async Task<IEnumerable<TournamentResponseDto>> GetAllTournamentsAsync()
+        {
+            using var connection = await _databaseConnection.GetConnectionAsync();
+            var query = "SELECT * FROM Tournament";
+            return await connection.QueryAsync<TournamentResponseDto>(query);
+        }
+
+        public async Task<TournamentResponseDto> GetTournamentByPhaseAsync(int tournamentPhase)
+        {
+            using var connection = await _databaseConnection.GetConnectionAsync();
+            var query = "SELECT * FROM Tournament WHERE Phase = @Phase";
+            return await connection.QueryFirstOrDefaultAsync<TournamentResponseDto>(query, new { Phase = tournamentPhase });
         }
     }
 }
