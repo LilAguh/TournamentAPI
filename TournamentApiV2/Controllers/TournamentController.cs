@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.DTOs.Tournament;
+using Models.DTOs.TournamentPlayers;
 using Models.Entities;
+using Models.Exceptions;
 using Services.Interfaces;
 using System.Security.Claims;
 using static Models.Exceptions.CustomException;
@@ -40,6 +42,19 @@ namespace TournamentApiV2.Controllers
             if (tournament == null)
                 return NotFound("Torneo no encontrado");
             return Ok(tournament);
+        }
+
+        [HttpPost("{tournamentId}/register")]
+        public async Task<IActionResult> RegisterPlayer(int tournamentId, [FromBody] TournamentPlayerRegistrationDto dto)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+                throw new ValidationException("No se encontró el identificador del usuario en el token");
+
+            int userId = int.Parse(userIdClaim.Value);
+
+            await _tournamentService.RegisterPlayerAsync(tournamentId, userId, dto.DeckId);
+            return Ok("Inscripción exitosa");
         }
 
     }
