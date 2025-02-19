@@ -25,7 +25,7 @@ namespace DataAccess.DAOs.Implementations
         public async Task<bool> IsPlayerRegisteredAsync(int tournamentId, int userId)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
-            var query = "SELECT * FROM TournamentPlayers WHERE TournamentID = @TournamentId AND UserID = @UserId";
+            var query = "SELECT COUNT(*) FROM TournamentPlayers WHERE TournamentID = @TournamentId AND UserID = @UserId";
             int count = await connection.ExecuteScalarAsync<int>(query, new { TournamentId = tournamentId, UserId = userId });
             return count > 0;
         }
