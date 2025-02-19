@@ -9,5 +9,6 @@ namespace Services.Interfaces
         Task<DeckResponseDto?> GetDeckByIdAsync(int deckId);
         Task<IEnumerable<DeckResponseDto>> GetDecksByUserAsync(int userId);
         Task<bool> DeleteDeckAsync(int deckId);
+        Task<bool> IsDeckOwnedByUser(int deckId, int userId);
     }
 }

@@ -45,5 +45,13 @@ namespace Services.Implementations
             var rowsAffected = await connection.ExecuteAsync(query, new { DeckId = deckId });
             return rowsAffected > 0;
         }
+
+        public async Task<bool> IsDeckOwnedByUser(int deckId, int userId)
+        {
+            using var connection = await _databaseConnection.GetConnectionAsync();
+            var query = "SELECT COUNT(*) FROM Decks WHERE ID = @DeckId AND UserID = @UserId";
+            int count = await connection.ExecuteScalarAsync<int>(query, new { DeckId = deckId, UserId = userId });
+            return count > 0; // Devuelve true si el mazo pertenece al usuario, false en caso contrario
+        }
     }
 }

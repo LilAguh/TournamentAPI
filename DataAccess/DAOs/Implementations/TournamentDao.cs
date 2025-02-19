@@ -6,7 +6,9 @@ using Models.DTOs.Cards;
 using Models.DTOs.Tournament;
 using Models.DTOs.User;
 using Models.Enums;
+using Models.Exceptions;
 using System.Diagnostics.Metrics;
+using static Models.Exceptions.CustomException;
 
 namespace DataAccess.DAOs.Implementations
 {
@@ -23,8 +25,11 @@ namespace DataAccess.DAOs.Implementations
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
 
-            var query = @"INSERT INTO Tournament (Name, OrganizerID, StartDate, EndDate, StartTime, EndTime, CountryCode, Phase)
-                          VALUES (@Name, @OrganizerID, @StartDate, @EndDate, @StartTime, @EndTime, @CountryCode, @Phase)";
+            int maxPlayers = await CalculateMaxPlayersAsync(dto);
+            int maxGames = maxPlayers - 1;
+
+            var query = @"INSERT INTO Tournament (Name, OrganizerID, StartDate, EndDate, StartTime, EndTime, CountryCode, MaxPlayers, MaxGames, CountPlayers, Phase)
+                          VALUES (@Name, @OrganizerID, @StartDate, @EndDate, @StartTime, @EndTime, @CountryCode, @MaxPlayers, @MaxGames, 0, @Phase)";
 
             await connection.ExecuteAsync(query, new
             {
@@ -35,11 +40,12 @@ namespace DataAccess.DAOs.Implementations
                 dto.StartTime,
                 dto.EndTime,
                 dto.CountryCode,
+                MaxPlayers = maxPlayers,
+                MaxGames = maxGames,
                 Phase = PhaseEnum.Registration.ToString().ToLowerInvariant()
             });
 
-            int newId = await connection.ExecuteScalarAsync<int>("SELECT LAST_INSERT_ID();");
-            return newId;
+            return await connection.ExecuteScalarAsync<int>("SELECT LAST_INSERT_ID();");
         }
 
         public async Task<TournamentResponseDto> GetTournamentByIdAsync(int tournamentID)
@@ -61,6 +67,50 @@ namespace DataAccess.DAOs.Implementations
             using var connection = await _databaseConnection.GetConnectionAsync();
             var query = "SELECT * FROM Tournament WHERE Phase = @Phase";
             return await connection.QueryFirstOrDefaultAsync<TournamentResponseDto>(query, new { Phase = tournamentPhase });
+        }
+
+        public async Task<int> CalculateMaxPlayersAsync(TournamentRequestDto dto)
+        { 
+            int dayAvailable = 1 + (dto.EndDate - dto.StartDate).Days;
+
+            int minutesDay = (int)(dto.EndTime - dto.StartTime).TotalMinutes;
+
+            int totalMatches = (dayAvailable * minutesDay) / 30;
+
+            int maxPlayers = 2;
+            int matches = 1;
+            while (matches * 2 - 1 <= totalMatches)
+            {
+                maxPlayers *= 2;
+                matches = maxPlayers - 1;
+            }
+
+            return maxPlayers;
+        }
+
+        public async Task UpdateTournamentPhaseAsync(int tournamentId, string newPhase)
+        {
+            using var connection = await _databaseConnection.GetConnectionAsync();
+            var query = @"UPDATE Tournament
+                          SET Phase = @NewPhase
+                          WHERE ID = @TournamentId";
+
+            int rowsAffected = await connection.ExecuteAsync(query, new
+            {
+                TournamentId = tournamentId,
+                NewPhase = newPhase
+            });
+            if (rowsAffected == 0)
+            {
+                throw new NotFoundException("No se encontró el torneo para actualizar su fase");
+            }
+        }
+
+        public async Task IncrementCountPlayersAsync(int tournamentId)
+        {
+            using var connection = await _databaseConnection.GetConnectionAsync();
+            var query = "UPDATE Tournament SET CountPlayers = CountPlayers + 1 WHERE ID = @TournamentId";
+            await connection.ExecuteAsync(query, new { TournamentId = tournamentId });
         }
     }
 }
