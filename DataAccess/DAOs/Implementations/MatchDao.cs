@@ -2,6 +2,7 @@
 using Dapper;
 using DataAccess.DAOs.Interfaces;
 using DataAccess.Database;
+using Models.DTOs.Matches;
 
 namespace DataAccess.DAOs.Implementations
 {
@@ -65,6 +66,13 @@ namespace DataAccess.DAOs.Implementations
 
                 matchNumber++;
             }
+        }
+
+        public async Task<IEnumerable<MatchResponseDto>> GetMatchesByTournamentAsync(int tournamentId)
+        {
+            using var connection = await _databaseConnection.GetConnectionAsync();
+            var query = "SELECT * FROM Matches WHERE TournamentID = @TournamentId ORDER BY Round, MatchNumber";
+            return await connection.QueryAsync<MatchResponseDto>(query, new { TournamentId = tournamentId });
         }
     }
 }
