@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Models.DTOs.Matches;
 using Models.DTOs.Tournament;
 using Models.DTOs.TournamentPlayers;
-using Models.Entities;
-using Models.Exceptions;
 using Services.Interfaces;
 using System.Security.Claims;
 using static Models.Exceptions.CustomException;
@@ -15,10 +14,12 @@ namespace TournamentApiV2.Controllers
     public class TournamentController : ControllerBase
     {
         private readonly ITournamentService _tournamentService;
+        private readonly IMatchService _matchService;
 
-        public TournamentController(ITournamentService tournamentService)
+        public TournamentController(ITournamentService tournamentService, IMatchService matchService)
         {
             _tournamentService = tournamentService;
+            _matchService = matchService;
         }
 
 
@@ -55,6 +56,13 @@ namespace TournamentApiV2.Controllers
 
             await _tournamentService.RegisterPlayerAsync(tournamentId, userId, dto.DeckId);
             return Ok("Inscripción exitosa");
+        }
+
+        [HttpGet("{tournamentId}/matches")]
+        public async Task<IActionResult> GetTournamentMatches(int tournamentId)
+        {
+            IEnumerable<MatchResponseDto> matches = await _matchService.GetMatchesByTournamentAsync(tournamentId);
+            return Ok(matches);
         }
 
     }

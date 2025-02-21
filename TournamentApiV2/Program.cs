@@ -66,6 +66,8 @@ builder.Services.AddScoped<ICardSeriesService, CardSeriesService>();
 builder.Services.AddScoped<ITournamentDao, TournamentDao>();
 builder.Services.AddScoped<ITournamentService, TournamentService>();
 builder.Services.AddScoped<ITournamentPlayerDao, TournamentPlayerDao>();
+builder.Services.AddScoped<IMatchDao, MatchDao>();
+builder.Services.AddScoped<IMatchService, MatchService>();
 
 
 builder.Services.AddControllers();
