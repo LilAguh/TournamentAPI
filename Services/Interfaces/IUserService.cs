@@ -12,5 +12,6 @@ namespace Services.Interfaces
         Task ChangePasswordAsync(int userId, ChangePasswordRequestDto dto);
         Task DeleteUser(int id);
         Task<UserResponseDto> GetUserById(int id);
+        Task DeletePermanentUser(int id);
     }
 }

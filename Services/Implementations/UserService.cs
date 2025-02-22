@@ -162,5 +162,11 @@ namespace Services.Implementations
 
             return user;
         }
+
+        public async Task DeletePermanentUser(int id)
+        {
+            var user = await _userDao.GetUserByIdAsync(id);
+            await _userDao.PermanentDeleteUserAsync(id);
+        }
     }
 }
