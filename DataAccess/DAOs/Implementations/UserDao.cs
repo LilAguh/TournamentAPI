@@ -94,5 +94,13 @@ namespace DataAccess.DAOs.Implementations
             var query = "UPDATE users SET IsActive = @IsActive WHERE Id = @Id";
             await connection.ExecuteAsync(query, new { userDto.IsActive, userDto.Id });
         }
+
+        //Solo va a funcionar para el testing
+        public async Task<bool> PermanentDeleteUserAsync(int userId)
+        {
+            using var connection = await _databaseConnection.GetConnectionAsync();
+            var query = "DELETE FROM Users WHERE ID = @Id";
+            return await connection.ExecuteAsync(query, new { Id = userId }) > 0;
+        }
     }
 }
