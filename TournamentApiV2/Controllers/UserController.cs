@@ -52,8 +52,6 @@ namespace TournamentApiV2.Controllers
             return Ok(new { Message = "Contraseña actualizada correctamente." });
         }
 
-        
-
         [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
@@ -64,6 +62,13 @@ namespace TournamentApiV2.Controllers
 
             await _userService.DeleteUser(id);
             return Ok(new { Message = ErrorMessages.AccountDeactivated });
+        }
+
+        [HttpDelete("DeletePermanent/{id}")]
+        public async Task<IActionResult> DeleteUserPermanently(int id)
+        {
+            await _userService.DeletePermanentUser(id);
+            return NoContent();
         }
     }
 }
