@@ -1,12 +1,10 @@
 ﻿using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
-using TournamentApiV2;
 using Models.DTOs.User;
 using Xunit;
 using System.Net.Http.Headers;
 using System.Net;
 using Xunit.Abstractions;
-using Microsoft.VisualStudio.TestPlatform.Utilities;
 
 namespace Testing
 {
@@ -24,7 +22,6 @@ namespace Testing
         [Fact]
         public async Task CreateNewUserAndLogin()
         {
-            _output.WriteLine("Se esta creando el primer usuario de prueba");
 
             var newUser = new
             {
@@ -41,13 +38,11 @@ namespace Testing
             response.EnsureSuccessStatusCode();
             var createdUser = await response.Content.ReadFromJsonAsync<UserResponseDto>();
 
-            _output.WriteLine("Usuario Creado");
 
             Assert.NotNull(createdUser);
             Assert.Equal(newUser.email, createdUser.Email);
             Assert.Equal(newUser.alias, createdUser.Alias);
 
-            _output.WriteLine("Se esta logueando el usuario de prueba");
 
             var loginUser = new
             {
@@ -60,7 +55,6 @@ namespace Testing
 
             var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponseDto>();
 
-            _output.WriteLine("Usuario logueado");
 
             Assert.NotNull(loginResult);
             Assert.NotNull(loginResult.Token);
