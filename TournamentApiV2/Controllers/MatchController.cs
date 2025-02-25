@@ -15,14 +15,12 @@ namespace TournamentApiV2.Controllers
             _matchService = matchService;
         }
 
-        [Authorize(Roles = "Admin,Organizer")]
+        //[Authorize(Roles = "Admin,Organizer")]
         [HttpPost("first-round/{tournamentId}")]
-        public async Task<IActionResult> GenerateRoundMatches(int tournamentId, [FromBody] List<int> playerIds)
+        public async Task<IActionResult> GenerateRoundMatches(int tournamentId)
         {
-            if (playerIds == null || playerIds.Count % 2 != 0)
-                return BadRequest("La cantidad de jugadores debe ser par");
 
-            await _matchService.CreateRoundMatchAsync(tournamentId, playerIds);
+            await _matchService.CreateRoundMatchAsync(tournamentId);
             return Ok("Partidos de la primera ronda generados exitosamente");
         }
     }
