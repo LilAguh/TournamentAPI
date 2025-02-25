@@ -23,7 +23,7 @@ namespace TournamentApiV2.Controllers
         }
 
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, Organizer")]
         [HttpPost]
         public async Task<IActionResult> CreateTournament([FromBody] TournamentRequestDto dto)
         {

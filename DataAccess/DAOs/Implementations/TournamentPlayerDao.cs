@@ -30,11 +30,12 @@ namespace DataAccess.DAOs.Implementations
             return count > 0;
         }
 
-        public async Task<int> GetPlayerCountAsync(int tournamentId)
+        public async Task<List<int>> GetPlayerIdsAsync(int tournamentId)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
-            var query = "SELECT COUNT(*) FROM TournamentPlayers WHERE TournamentID = @TournamentId";
-            return await connection.ExecuteScalarAsync<int>(query, new { TournamentId = tournamentId });
+            var query = "SELECT UserID FROM TournamentPlayers WHERE TournamentID = @TournamentId";
+            var result = await connection.QueryAsync<int>(query, new { TournamentId = tournamentId });
+            return result.ToList();
         }
     }
 }
