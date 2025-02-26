@@ -9,6 +9,7 @@ namespace Models.DTOs.Matches
         public int TournamentID { get; set; }
         public int MatchNumber { get; set; }
         public int TotalMatches { get; set; }
+        public int Round { get; set; }
         public int Player1ID { get; set; }
         public int Player2ID { get; set; }
         public DateTime MatchStartTime { get; set; }
