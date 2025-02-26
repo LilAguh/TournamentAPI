@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Models.DTOs.Matches;
 using Services.Interfaces;
 
 namespace TournamentApiV2.Controllers
@@ -22,6 +23,18 @@ namespace TournamentApiV2.Controllers
 
             await _matchService.CreateRoundMatchAsync(tournamentId);
             return Ok("Partidos de la primera ronda generados exitosamente");
+        }
+
+        //[Authorize(Roles = "Judge")]
+        [HttpPost("result")]
+        public async Task<IActionResult> SubmitMatchResult([FromBody] MatchResultDto dto)
+        {
+            bool success = await _matchService.UpdateMatchWinnerAsync(dto.MatchId, dto.WinnerId);
+            if (success)
+            {
+                return Ok("Resultado registrado exitosamente");
+            }
+            return NotFound("Partido no encontrado o error al actualizar");
         }
     }
 }
