@@ -17,12 +17,12 @@ namespace TournamentApiV2.Controllers
         }
 
         //[Authorize(Roles = "Admin,Organizer")]
-        [HttpPost("first-round/{tournamentId}")]
+        [HttpPost("generate-round/{tournamentId}")]
         public async Task<IActionResult> GenerateRoundMatches(int tournamentId)
         {
 
             await _matchService.CreateRoundMatchAsync(tournamentId);
-            return Ok("Partidos de la primera ronda generados exitosamente");
+            return Ok("Partidos de la ronda generados correctamente");
         }
 
         //[Authorize(Roles = "Judge")]
