@@ -1,8 +1,6 @@
 ﻿
-using DataAccess.DAOs.Implementations;
 using DataAccess.DAOs.Interfaces;
 using Models.DTOs.Matches;
-using Models.Exceptions;
 using Services.Interfaces;
 using static Models.Exceptions.CustomException;
 
@@ -12,11 +10,13 @@ namespace Services.Implementations
     {
         private readonly IMatchDao _matchDao;
         private readonly ITournamentPlayerDao _tournamentPlayerDao;
+        private readonly ITournamentDao _tournamentDao;
 
-        public MatchService(IMatchDao matchDao, ITournamentPlayerDao tournamentPlayerDao)
+        public MatchService(IMatchDao matchDao, ITournamentPlayerDao tournamentPlayerDao, ITournamentDao tournamentDao)
         {
             _matchDao = matchDao;
             _tournamentPlayerDao = tournamentPlayerDao;
+            _tournamentDao = tournamentDao;
         }
 
         public async Task CreateRoundMatchAsync(int tournamentId)
@@ -24,14 +24,23 @@ namespace Services.Implementations
             // Obtener la lista de IDs de jugadores inscritos en el torneo
             var playerIds = await _tournamentPlayerDao.GetPlayerIdsAsync(tournamentId);
 
-            // Validaciones adicionales: asegurarse de que la cantidad de jugadores sea par, etc.
-            if (playerIds.Count % 2 != 0)
+            // Obtener la última ronda generada para el torneo
+            int lastRound = await _matchDao.GetLastRoundAsync(tournamentId);
+
+            Console.WriteLine(lastRound);
+
+            var tournament = await _tournamentDao.GetTournamentByIdAsync(tournamentId);
+
+            // Calcular la siguiente ronda
+            int nextRound = lastRound == 0 ? tournament.MaxPlayers / 2 : lastRound / 2;
+
+            if (lastRound == 1)
             {
-                throw new ValidationException("La cantidad de jugadores debe ser par para formar los partidos");
+                throw new ForbiddenException("No se pueden generar más partidos. Ya se jugo la final.");
             }
 
             // Llamar al DAO de matches para crear los partidos de la ronda
-            await _matchDao.CreateRoundMatchAsync(tournamentId, playerIds);
+            await _matchDao.CreateRoundMatchAsync(tournamentId, playerIds, nextRound);
         }
 
         public async Task<IEnumerable<MatchResponseDto>> GetMatchesByTournamentAsync(int tournamentId)

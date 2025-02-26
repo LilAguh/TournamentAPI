@@ -17,30 +17,24 @@ namespace DataAccess.DAOs.Implementations
             _databaseConnection = databaseConnection;
         }
 
-        public async Task CreateRoundMatchAsync(int tournamentId, List<int> playerIds)
+        public async Task CreateRoundMatchAsync(int tournamentId, List<int> playerIds, int round)
         {
             if (playerIds == null)
                 throw new Exception("La lista de jugadores no puede ser nula");
 
-            // Aca algo que se puede hacer es en caso de que solo hay un solo jugador dar el partido como ganado
-            // Asi podes sumar mayor cantidad de partidos en un torneo
-            // Continuando el formato de playoff pero recorriendo esto segun etapas
-            // Es decir que si un match de 16avos de final no consigue un jugador
-            // Este pasa directamente a octavos
-
+            // Validar si la ronda es 2 (la siguiente es la final)
+            if (round == 2)
+            {
+                throw new Exception("No se pueden generar más partidos. El siguiente juego es la final.");
+            }
 
             // Eliminar duplicados para evitar que un jugador se repita
             playerIds = playerIds.Distinct().ToList();
-
 
             // Validar que la cantidad de jugadores es par
             if (playerIds.Count % 2 != 0)
                 throw new Exception("La cantidad de jugadores debe ser par para formar los partidos");
 
-            // Mezclar aleatoriamente los IDs de los jugadores (para la primera ronda)
-            var randomizedPlayerIds = playerIds.OrderBy(x => Guid.NewGuid()).ToList();
-
-            // Se asume que se tiene la información del torneo para asignar el horario de inicio
             using var connection = await _databaseConnection.GetConnectionAsync();
 
             // Consultamos los datos del torneo (para obtener el horario de inicio y maxPlayers)
@@ -49,11 +43,10 @@ namespace DataAccess.DAOs.Implementations
             if (tournament == null)
                 throw new NotFoundException("Torneo no encontrado");
 
-
             // Verificar que StartTime y EndTime no sean nulos
             if (tournament.StartTime == null)
                 throw new NotFoundException("StartTime no definido en el torneo");
-            if (tournament == null)
+            if (tournament.EndTime == null)
                 throw new NotFoundException("EndTime no definido en el torneo");
 
             // Programar el MatchStartTime como la combinación de StartDate y StartTime
@@ -61,21 +54,85 @@ namespace DataAccess.DAOs.Implementations
             TimeSpan tournamentStartTime = (TimeSpan)tournament.StartTime;
             TimeSpan tournamentEndTime = (TimeSpan)tournament.EndTime;
 
-            DateTime currentMatchTime = tournamentStartDate.Date + tournamentStartTime;
+            DateTime currentMatchTime;
+            int matchNumber;
+
+            // Si no es la primera ronda, obtenemos el horario del último partido de la ronda anterior
+            if (round != tournament.MaxPlayers / 2) // Si no es la primera ronda
+            {
+                var lastMatchQuery = @"
+            SELECT MatchNumber, TotalMatches, MatchStartTime 
+            FROM Matches 
+            WHERE TournamentID = @TournamentId 
+              AND Round = @PreviousRound 
+            ORDER BY MatchStartTime DESC 
+            LIMIT 1";
+                var lastMatch = await connection.QueryFirstOrDefaultAsync<(int MatchNumber, int TotalMatches, DateTime MatchStartTime)?>(lastMatchQuery, new { TournamentId = tournamentId, PreviousRound = round * 2 });
+
+                if (lastMatch.HasValue)
+                {
+                    // Calcular el horario de inicio del siguiente partido
+                    DateTime lastMatchEndTime = lastMatch.Value.MatchStartTime.AddMinutes(30); // Suponiendo que cada partido dura 30 minutos
+
+                    // Si el último partido termina después del horario de finalización, comenzamos al día siguiente
+                    if (lastMatchEndTime.TimeOfDay >= tournamentEndTime)
+                    {
+                        currentMatchTime = lastMatchEndTime.Date.AddDays(1) + tournamentStartTime;
+                    }
+                    else
+                    {
+                        currentMatchTime = lastMatchEndTime; // Siguiente partido comienza inmediatamente después
+                    }
+
+                    // Continuar el MatchNumber desde el último partido
+                    matchNumber = lastMatch.Value.MatchNumber + 1;
+                }
+                else
+                {
+                    // Si no hay partidos anteriores, comenzamos desde el inicio del torneo
+                    currentMatchTime = tournamentStartDate.Date + tournamentStartTime;
+                    matchNumber = 1;
+                }
+            }
+            else
+            {
+                // Primera ronda: comenzamos desde el inicio del torneo
+                currentMatchTime = tournamentStartDate.Date + tournamentStartTime;
+                matchNumber = 1;
+            }
 
             // Se calcula el total de partidos del bracket: TotalMatches = MaxPlayers - 1
-            int totalMatches = (int)(tournament.MaxPlayers)  - 1;
+            int totalMatches = (int)(tournament.MaxPlayers) - 1;
 
-            // Primera ronda: cada partido reúne 2 jugadores, cantidad de partidos es playerIds.Count /
-            int matchNumber = 1;
-            var insertQuery = @"INSERT INTO Matches (TournamentID, MatchNumber, TotalMatches, Player1ID, Player2ID, MatchStartTime, Status)
-                                VALUES (@TournamentID, @MatchNumber, @TotalMatches, @Player1ID, @Player2ID, @MatchStartTime, @Status)";
+            // Si no es la primera ronda, obtenemos los ganadores de la ronda anterior
+            if (round != tournament.MaxPlayers / 2) // Si no es la primera ronda
+            {
+                var winnersQuery = @"
+            SELECT WinnerID 
+            FROM Matches 
+            WHERE TournamentID = @TournamentId 
+              AND Round = @PreviousRound 
+              AND Status = 'Finished' 
+            ORDER BY MatchNumber";
+                var winners = await connection.QueryAsync<int>(winnersQuery, new { TournamentId = tournamentId, PreviousRound = round * 2 });
+                playerIds = winners.ToList();
+            }
+
+            // Mezclar aleatoriamente los IDs de los jugadores solo para la primera ronda
+            if (round == tournament.MaxPlayers / 2) // Si es la primera ronda
+            {
+                playerIds = playerIds.OrderBy(x => Guid.NewGuid()).ToList();
+            }
+
+            var insertQuery = @"
+        INSERT INTO Matches (TournamentID, MatchNumber, TotalMatches, Player1ID, Player2ID, MatchStartTime, Status, Round)
+        VALUES (@TournamentID, @MatchNumber, @TotalMatches, @Player1ID, @Player2ID, @MatchStartTime, @Status, @Round)";
 
             // Recorrer la lista de jugadores emparejándolos
-            for (int i = 0; i < randomizedPlayerIds.Count; i +=2)
+            for (int i = 0; i < playerIds.Count; i += 2)
             {
-                int player1Id = randomizedPlayerIds[i];
-                int player2Id = randomizedPlayerIds[i + 1];
+                int player1Id = playerIds[i];
+                int player2Id = playerIds[i + 1];
 
                 await connection.ExecuteAsync(insertQuery, new
                 {
@@ -84,8 +141,9 @@ namespace DataAccess.DAOs.Implementations
                     TotalMatches = totalMatches,
                     Player1ID = player1Id,
                     Player2ID = player2Id,
-                    MatchStartTime = currentMatchTime,  // O puedes calcular distintos horarios si se juegan en serie
-                    Status = "confirmed"  // Usamos string; alternativamente, MatchStatusEnum.Confirmed.ToString().ToLowerInvariant()
+                    MatchStartTime = currentMatchTime,
+                    Status = "confirmed",
+                    Round = round // Usamos la ronda actual
                 });
 
                 matchNumber++;
@@ -120,6 +178,47 @@ namespace DataAccess.DAOs.Implementations
             var query = @" UPDATE Matches SET WinnerID = @WinnerId, Status = 'Finished' WHERE ID = @MatchId";
             int rowsAffected = await connection.ExecuteAsync(query, new { WinnerId = winnerId, MatchId = matchId });
             return rowsAffected > 0;
+        }
+
+        public async Task<List<int>> GetWinnersByRoundAsync(int tournamentId, int round)
+        {
+            using var connection = await _databaseConnection.GetConnectionAsync();
+            var query = @" SELECT WinnerID FROM Matches WHERE TournamentID = @TournamentId 
+                           AND Round = @Round AND WinnerID IS NOT NULL";
+            var winners = await connection.QueryAsync<int>(query, new { TournamentId = tournamentId, Round = round });
+            return winners.ToList();
+        }
+
+        public async Task<bool> IsFirstRoundAsync(int tournamentId)
+        {
+            using var connection = await _databaseConnection.GetConnectionAsync();
+
+            // Consulta para contar cuántos partidos hay en el torneo
+            var query = "SELECT COUNT(*) FROM Matches WHERE TournamentID = @TournamentId";
+
+            // Ejecutamos la consulta y obtenemos el número de partidos
+            int matchCount = await connection.ExecuteScalarAsync<int>(query, new { TournamentId = tournamentId });
+
+            // Si no hay partidos, es la primera ronda
+            return matchCount == 0;
+        }
+
+        public async Task<int> GetLastRoundAsync(int tournamentId)
+        {
+            using var connection = await _databaseConnection.GetConnectionAsync();
+
+            // Consulta para obtener la última ronda (Round) agregada para el torneo
+            var query = @"
+        SELECT MIN(Round) 
+        FROM Matches 
+        WHERE TournamentID = @TournamentId
+          AND Status = 'Finished'";
+
+            // Ejecutar la consulta y obtener el resultado
+            var lastRound = await connection.ExecuteScalarAsync<int?>(query, new { TournamentId = tournamentId });
+
+            // Si no hay partidos registrados, devolver 0
+            return lastRound ?? 0;
         }
     }
 }
