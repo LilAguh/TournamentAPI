@@ -7,5 +7,7 @@ namespace DataAccess.DAOs.Interfaces
     {
         Task CreateRoundMatchAsync(int tournamentId, List<int> playerIds);
         Task<IEnumerable<MatchResponseDto>> GetMatchesByTournamentAsync(int tournamentId);
+        Task<MatchResponseDto?> GetMatchByIdAsync(int matchId);
+        Task<bool> UpdateMatchWinnerAsync(int matchId, int winnerId);
     }
 }

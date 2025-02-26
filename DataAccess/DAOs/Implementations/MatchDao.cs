@@ -106,5 +106,20 @@ namespace DataAccess.DAOs.Implementations
             var query = "SELECT * FROM Matches WHERE TournamentID = @TournamentId ORDER BY MatchNumber";
             return await connection.QueryAsync<MatchResponseDto>(query, new { TournamentId = tournamentId });
         }
+
+        public async Task<MatchResponseDto?> GetMatchByIdAsync(int matchId)
+        {
+            using var connection = await _databaseConnection.GetConnectionAsync();
+            var query = "SELECT * FROM Matches WHERE ID = @MatchId";
+            return await connection.QueryFirstOrDefaultAsync<MatchResponseDto>(query, new { MatchId = matchId });
+        }
+
+        public async Task<bool> UpdateMatchWinnerAsync(int matchId, int winnerId)
+        {
+            using var connection = await _databaseConnection.GetConnectionAsync();
+            var query = @" UPDATE Matches SET WinnerID = @WinnerId, Status = 'Finished' WHERE ID = @MatchId";
+            int rowsAffected = await connection.ExecuteAsync(query, new { WinnerId = winnerId, MatchId = matchId });
+            return rowsAffected > 0;
+        }
     }
 }
