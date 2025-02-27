@@ -17,14 +17,16 @@ namespace Services.Implementations
         private readonly ITournamentPlayerDao _tournamentPlayerDao;
         private readonly IDeckDao _deckDao;
         private readonly ICardDeckDao _cardDeckDao;
+        private readonly ICardSeriesDao _cardSeriesDao;
 
-        public TournamentService(ITournamentDao tournamentDao, ICountryDao countryDao, ITournamentPlayerDao tournamentPlayerDao, IDeckDao deckDao, ICardDeckDao cardDeckDao)
+        public TournamentService(ITournamentDao tournamentDao, ICountryDao countryDao, ITournamentPlayerDao tournamentPlayerDao, IDeckDao deckDao, ICardDeckDao cardDeckDao, ICardSeriesDao cardSeriesDao)
         {
             _tournamentDao = tournamentDao;
             _countryDao = countryDao;
             _tournamentPlayerDao = tournamentPlayerDao;
             _deckDao = deckDao;
             _cardDeckDao = cardDeckDao;
+            _cardSeriesDao = cardSeriesDao;
         }
 
         public async Task<TournamentResponseDto> CreateTournamentAsync(TournamentRequestDto dto, int organizerId)
@@ -68,9 +70,31 @@ namespace Services.Implementations
 
         public async Task<bool> RegisterPlayerAsync(int tournamentId, int userId, int deckId)
         {
+
+            // 1. Validar que el torneo está en fase de registro
             var tournament = await _tournamentDao.GetTournamentByIdAsync(tournamentId);
+            if (tournament.Phase != PhaseEnum.Registration)
+                throw new ValidationException("El torneo no está en fase de registro");
             if (tournament == null)
                 throw new NotFoundException("Torneo no encontrado");
+
+            // 2. Obtener las series permitidas del torneo
+            var allowedSeries = await GetAllowedSeriesAsync(tournamentId);
+
+            // 3. Obtener las cartas del mazo
+            var deckCards = await _cardDeckDao.GetCardsInDeckAsync(deckId);
+            if (deckCards.Count() != 15)
+                throw new ValidationException("El mazo debe tener exactamente 15 cartas.");
+
+            // 4. Validar que todas las cartas pertenezcan a series permitidas
+            foreach (var card in deckCards)
+            {
+                var cardSeries = await _cardSeriesDao.GetSeriesByCardAsync(card.CardId);
+                if (!cardSeries.Any(s => allowedSeries.Contains(s.SeriesId)))
+                    throw new ValidationException($"La carta {card.CardName} no pertenece a las series permitidas");
+            }
+
+           
 
             if (tournament.Phase != PhaseEnum.Registration)
                 throw new ValidationException("Las inscripciones estan cerradas");
@@ -81,9 +105,7 @@ namespace Services.Implementations
             if (!await _deckDao.IsDeckOwnedByUser(deckId, userId))
                 throw new ValidationException("El mazo no esta permitido");
 
-            var deckCards = await _cardDeckDao.GetCardsInDeckAsync(deckId);
-            if (deckCards.Count() != 15)
-                throw new ValidationException("El mazo debe tener exactamente 15 cartas.");
+            
 
             //var tournamentSeries = await _tournamentDao.GetEnabledSeriesAsync(tournamentId);
             //var invalidCards = deckCards.Where(c => !c.Series.Intersect(tournamentSeries).Any());
@@ -105,6 +127,21 @@ namespace Services.Implementations
 
             return await _tournamentPlayerDao.RegisterPlayerAsync(tournamentId, userId, deckId);
 
+        }
+
+        public async Task AddAllowedSeriesAsync(int tournamentId, int seriesId)
+        {
+            await _tournamentDao.AddAllowedSeriesAsync(tournamentId, seriesId);
+        }
+
+        public async Task RemoveAllowedSeriesAsync(int tournamentId, int seriesId)
+        {
+            await _tournamentDao.RemoveAllowedSeriesAsync(tournamentId, seriesId);
+        }
+
+        public async Task<List<int>> GetAllowedSeriesAsync(int tournamentId)
+        {
+            return await _tournamentDao.GetAllowedSeriesAsync(tournamentId);
         }
     }
 }
