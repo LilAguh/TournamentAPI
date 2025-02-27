@@ -35,7 +35,7 @@ namespace DataAccess.DAOs.Implementations
             var user = await GetUserByAliasAsync(identifier);
             if (user != null)
                 return user;
-            // Si no se encuentra por alias, se busca por email (solo entre activos)
+            // Si no se encuentra por alias, se busca por email
             return await GetActiveUserByEmailAsync(identifier);
         }
 
@@ -49,11 +49,8 @@ namespace DataAccess.DAOs.Implementations
         public async Task AddUserAsync(UserRequestDto userDto)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
-            var query = @"
-                INSERT INTO users 
-                    (Role, FirstName, LastName, Alias, Email, PasswordHash, CountryCode, CreatedBy, CreatedAt, IsActive)
-                VALUES 
-                    (@Role, @FirstName, @LastName, @Alias, @Email, @PasswordHash, @CountryCode, @CreatedBy, @CreatedAt, @IsActive)";
+            var query = @" INSERT INTO users (Role, FirstName, LastName, Alias, Email, PasswordHash, CountryCode, CreatedBy, CreatedAt, IsActive)
+                           VALUES (@Role, @FirstName, @LastName, @Alias, @Email, @PasswordHash, @CountryCode, @CreatedBy, @CreatedAt, @IsActive)";
 
             await connection.ExecuteAsync(query, userDto);
         }
@@ -74,16 +71,15 @@ namespace DataAccess.DAOs.Implementations
         public async Task UpdateUserAsync(UserResponseDto userDto)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
-            var query = @"
-                UPDATE users 
-                SET FirstName = @FirstName, 
-                    LastName = @LastName,
-                    Alias = @Alias,
-                    Email = @Email,
-                    PasswordHash = @PasswordHash,
-                    CountryCode = @CountryCode, 
-                    AvatarUrl = @AvatarUrl
-                WHERE Id = @Id";
+            var query = @" UPDATE users 
+                           SET FirstName = @FirstName, 
+                           LastName = @LastName,
+                           Alias = @Alias,
+                           Email = @Email,
+                           PasswordHash = @PasswordHash,
+                           CountryCode = @CountryCode, 
+                           AvatarUrl = @AvatarUrl
+                           WHERE Id = @Id";
 
             await connection.ExecuteAsync(query, userDto);
         }

@@ -60,13 +60,12 @@ namespace DataAccess.DAOs.Implementations
             // Si no es la primera ronda, obtenemos el horario del último partido de la ronda anterior
             if (round != tournament.MaxPlayers / 2) // Si no es la primera ronda
             {
-                var lastMatchQuery = @"
-            SELECT MatchNumber, TotalMatches, MatchStartTime 
-            FROM Matches 
-            WHERE TournamentID = @TournamentId 
-              AND Round = @PreviousRound 
-            ORDER BY MatchStartTime DESC 
-            LIMIT 1";
+                var lastMatchQuery = @" SELECT MatchNumber, TotalMatches, MatchStartTime 
+                                        FROM Matches 
+                                        WHERE TournamentID = @TournamentId 
+                                        AND Round = @PreviousRound 
+                                        ORDER BY MatchStartTime DESC 
+                                        LIMIT 1";
                 var lastMatch = await connection.QueryFirstOrDefaultAsync<(int MatchNumber, int TotalMatches, DateTime MatchStartTime)?>(lastMatchQuery, new { TournamentId = tournamentId, PreviousRound = round * 2 });
 
                 if (lastMatch.HasValue)
@@ -107,13 +106,12 @@ namespace DataAccess.DAOs.Implementations
             // Si no es la primera ronda, obtenemos los ganadores de la ronda anterior
             if (round != tournament.MaxPlayers / 2) // Si no es la primera ronda
             {
-                var winnersQuery = @"
-            SELECT WinnerID 
-            FROM Matches 
-            WHERE TournamentID = @TournamentId 
-              AND Round = @PreviousRound 
-              AND Status = 'Finished' 
-            ORDER BY MatchNumber";
+                var winnersQuery = @" SELECT WinnerID 
+                                      FROM Matches 
+                                      WHERE TournamentID = @TournamentId 
+                                      AND Round = @PreviousRound 
+                                      AND Status = 'Finished' 
+                                      ORDER BY MatchNumber";
                 var winners = await connection.QueryAsync<int>(winnersQuery, new { TournamentId = tournamentId, PreviousRound = round * 2 });
                 playerIds = winners.ToList();
             }
@@ -124,9 +122,8 @@ namespace DataAccess.DAOs.Implementations
                 playerIds = playerIds.OrderBy(x => Guid.NewGuid()).ToList();
             }
 
-            var insertQuery = @"
-        INSERT INTO Matches (TournamentID, MatchNumber, TotalMatches, Player1ID, Player2ID, MatchStartTime, Status, Round)
-        VALUES (@TournamentID, @MatchNumber, @TotalMatches, @Player1ID, @Player2ID, @MatchStartTime, @Status, @Round)";
+            var insertQuery = @" INSERT INTO Matches (TournamentID, MatchNumber, TotalMatches, Player1ID, Player2ID, MatchStartTime, Status, Round)
+                                 VALUES (@TournamentID, @MatchNumber, @TotalMatches, @Player1ID, @Player2ID, @MatchStartTime, @Status, @Round)";
 
             // Recorrer la lista de jugadores emparejándolos
             for (int i = 0; i < playerIds.Count; i += 2)

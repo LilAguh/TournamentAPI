@@ -42,8 +42,8 @@ namespace DataAccess.DAOs.Implementations
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
             var query = @"SELECT c.Id AS CardId, c.Name AS CardName
-                          FROM CardDecks cd
-                          INNER JOIN Cards c ON cd.CardID = c.Id
+                          FROM CardDecks AS cd
+                          INNER JOIN Cards AS c ON cd.CardID = c.Id
                           WHERE cd.DeckID = @DeckId";
             return await connection.QueryAsync<CardDeckResponseDto>(query, new { DeckId = deckId });
         }
