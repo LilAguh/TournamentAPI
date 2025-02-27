@@ -121,5 +121,12 @@ namespace DataAccess.DAOs.Implementations
             if (rowsAffected == 0)
                 throw new ValidationException("No se pudo finalizar el torneo");
         }
+
+        public async Task<List<int>> GetEnabledSeriesAsync(int tournamentId)
+        {
+            using var connection = await _databaseConnection.GetConnectionAsync();
+            var query = @"SELECT SeriesID FROM TournamentSeries WHERE TournamentID = @TournamentId";
+            return (await connection.QueryAsync<int>(query, new { TournamentId = tournamentId })).ToList();
+        }
     }
 }

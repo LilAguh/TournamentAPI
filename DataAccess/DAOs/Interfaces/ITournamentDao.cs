@@ -13,5 +13,6 @@ namespace DataAccess.DAOs.Interfaces
         Task UpdateTournamentPhaseAsync(int tournamentId, string newPhase);
         Task IncrementCountPlayersAsync(int tournamentId);
         Task FinalizeTournamentAsync(int tournamentId, int winnerId);
+        Task<List<int>> GetEnabledSeriesAsync(int tournamentId);
     }
 }
