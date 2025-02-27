@@ -18,10 +18,10 @@ namespace TournamentApiV2.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddCardToDeck(int deckId, [FromBody] AddCardDeckRequestDto dto)
+        public async Task<IActionResult> AddCardToDeck(int deckId, [FromBody] AddCardDeckRequestDto requestDto)
         {
-            await _cardDeckService.AddCardToDeckAsync(deckId, dto.CardId);
-            return Ok("Carta agregada al mazo");
+            await _cardDeckService.AddCardToDeckAsync(deckId, requestDto);
+            return Ok(new { message = "Carta agregada al mazo" });
         }
 
         [HttpGet]
