@@ -128,5 +128,26 @@ namespace DataAccess.DAOs.Implementations
             var query = @"SELECT SeriesID FROM TournamentSeries WHERE TournamentID = @TournamentId";
             return (await connection.QueryAsync<int>(query, new { TournamentId = tournamentId })).ToList();
         }
+
+        public async Task AddAllowedSeriesAsync(int tournamentId, int seriesId)
+        {
+            using var connection = await _databaseConnection.GetConnectionAsync();
+            var query = "INSERT INTO TournamentSeries (TournamentID, SeriesID) VALUES (@TournamentId, @SeriesId)";
+            await connection.ExecuteAsync(query, new { TournamentId = tournamentId, SeriesId = seriesId });
+        }
+
+        public async Task RemoveAllowedSeriesAsync(int tournamentId, int seriesId)
+        {
+            using var connection = await _databaseConnection.GetConnectionAsync();
+            var query = "DELETE FROM TournamentSeries WHERE TournamentID = @TournamentId AND SeriesID = @SeriesId";
+            await connection.ExecuteAsync(query, new { TournamentId = tournamentId, SeriesId = seriesId });
+        }
+
+        public async Task<List<int>> GetAllowedSeriesAsync(int tournamentId)
+        {
+            using var connection = await _databaseConnection.GetConnectionAsync();
+            var query = "SELECT SeriesID FROM TournamentSeries WHERE TournamentID = @TournamentId";
+            return (await connection.QueryAsync<int>(query, new { TournamentId = tournamentId })).ToList();
+        }
     }
 }
