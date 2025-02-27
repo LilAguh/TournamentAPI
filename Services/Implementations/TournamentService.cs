@@ -1,5 +1,6 @@
 ﻿
 using Config;
+using DataAccess.DAOs.Implementations;
 using DataAccess.DAOs.Interfaces;
 using Models.DTOs.Tournament;
 using Models.Enums;
@@ -15,12 +16,15 @@ namespace Services.Implementations
         private readonly ICountryDao _countryDao;
         private readonly ITournamentPlayerDao _tournamentPlayerDao;
         private readonly IDeckDao _deckDao;
-        public TournamentService(ITournamentDao tournamentDao, ICountryDao countryDao, ITournamentPlayerDao tournamentPlayerDao, IDeckDao deckDao)
+        private readonly ICardDeckDao _cardDeckDao;
+
+        public TournamentService(ITournamentDao tournamentDao, ICountryDao countryDao, ITournamentPlayerDao tournamentPlayerDao, IDeckDao deckDao, ICardDeckDao cardDeckDao)
         {
             _tournamentDao = tournamentDao;
             _countryDao = countryDao;
             _tournamentPlayerDao = tournamentPlayerDao;
             _deckDao = deckDao;
+            _cardDeckDao = cardDeckDao;
         }
 
         public async Task<TournamentResponseDto> CreateTournamentAsync(TournamentRequestDto dto, int organizerId)
@@ -76,6 +80,15 @@ namespace Services.Implementations
 
             if (!await _deckDao.IsDeckOwnedByUser(deckId, userId))
                 throw new ValidationException("El mazo no esta permitido");
+
+            var deckCards = await _cardDeckDao.GetCardsInDeckAsync(deckId);
+            if (deckCards.Count() != 15)
+                throw new ValidationException("El mazo debe tener exactamente 15 cartas.");
+
+            //var tournamentSeries = await _tournamentDao.GetEnabledSeriesAsync(tournamentId);
+            //var invalidCards = deckCards.Where(c => !c.Series.Intersect(tournamentSeries).Any());
+            //if (invalidCards.Any())
+            //    throw new ValidationException($"Cartas no permitidas: {string.Join(", ", invalidCards.Select(c => c.CardName))}");
 
             if (tournament.CountPlayers >= tournament.MaxPlayers)
             {
