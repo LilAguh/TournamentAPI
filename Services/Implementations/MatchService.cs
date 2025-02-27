@@ -53,17 +53,20 @@ namespace Services.Implementations
             // Obtener el partido para validar que el ganador participe
             var match = await _matchDao.GetMatchByIdAsync(matchId);
             if (match == null)
-            {
                 throw new NotFoundException("Partido no encontrado");
-            }
 
             // Validar que el winnerId sea uno de los jugadores en el partido
             if (match.Player1ID != winnerId && match.Player2ID != winnerId)
-            {
                 throw new ValidationException("El jugador ganador no participó en este partido");
-            }
 
-            return await _matchDao.UpdateMatchWinnerAsync(matchId, winnerId);
+            // Actualizamos el partido
+            bool updated = await _matchDao.UpdateMatchWinnerAsync(matchId, winnerId);
+
+            // Si el partido es de la ronda final (Round == 1), finalizamos el torneo
+            if (match.Round == 1)
+                await _tournamentDao.FinalizeTournamentAsync(match.TournamentID, winnerId);
+
+            return updated;
         }
     }
 }
