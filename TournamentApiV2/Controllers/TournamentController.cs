@@ -65,5 +65,28 @@ namespace TournamentApiV2.Controllers
             return Ok(matches);
         }
 
+        //[Authorize(Roles = "Organizer,Admin")]
+        [HttpPost("{tournamentId}/series/{seriesId}")]
+        public async Task<IActionResult> AddAllowedSeries(int tournamentId, int seriesId)
+        {
+            await _tournamentService.AddAllowedSeriesAsync(tournamentId, seriesId);
+            return Ok();
+        }
+
+        //[Authorize(Roles = "Organizer,Admin")]
+        [HttpDelete("{tournamentId}/series/{seriesId}")]
+        public async Task<IActionResult> RemoveAllowedSeries(int tournamentId, int seriesId)
+        {
+            await _tournamentService.RemoveAllowedSeriesAsync(tournamentId, seriesId);
+            return Ok();
+        }
+
+        [HttpGet("{tournamentId}/series")]
+        public async Task<IActionResult> GetAllowedSeries(int tournamentId)
+        {
+            var seriesIds = await _tournamentService.GetAllowedSeriesAsync(tournamentId);
+            return Ok(seriesIds);
+        }
+
     }
 }
