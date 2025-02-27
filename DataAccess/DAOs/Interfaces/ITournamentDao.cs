@@ -12,5 +12,6 @@ namespace DataAccess.DAOs.Interfaces
         Task<int> CalculateMaxPlayersAsync(TournamentRequestDto dto);
         Task UpdateTournamentPhaseAsync(int tournamentId, string newPhase);
         Task IncrementCountPlayersAsync(int tournamentId);
+        Task FinalizeTournamentAsync(int tournamentId, int winnerId);
     }
 }

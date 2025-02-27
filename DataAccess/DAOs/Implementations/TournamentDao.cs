@@ -112,5 +112,14 @@ namespace DataAccess.DAOs.Implementations
             var query = "UPDATE Tournament SET CountPlayers = CountPlayers + 1 WHERE ID = @TournamentId";
             await connection.ExecuteAsync(query, new { TournamentId = tournamentId });
         }
+
+        public async Task FinalizeTournamentAsync(int tournamentId, int winnerId)
+        {
+            using var connection = await _databaseConnection.GetConnectionAsync();
+            var query = "UPDATE Tournament SET Phase = 'finalized', WinnerID = @WinnerId WHERE ID = @TournamentId";
+            int rowsAffected = await connection.ExecuteAsync(query, new { TournamentId = tournamentId, WinnerId = winnerId });
+            if (rowsAffected == 0)
+                throw new ValidationException("No se pudo finalizar el torneo");
+        }
     }
 }
