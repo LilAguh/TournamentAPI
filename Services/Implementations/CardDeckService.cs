@@ -1,6 +1,7 @@
 ﻿
 using DataAccess.DAOs.Interfaces;
 using Models.DTOs.CardDecks;
+using Models.Entities;
 using Services.Interfaces;
 using static Models.Exceptions.CustomException;
 
@@ -17,20 +18,23 @@ namespace Services.Implementations
             _cardDao = cardDao;
         }
 
-        public async Task AddCardToDeckAsync(int deckId, int cardId)
+        public async Task AddCardToDeckAsync(int deckId, AddCardDeckRequestDto dto)
         {
             var currentCards = await _cardDeckDao.GetCardsInDeckAsync(deckId);
-            if (currentCards.Count() >= 15)
-                throw new ValidationException("El mazo ya tiene 15 cartas.");
+            if (currentCards.Any(c => c.CardId == dto.CardId))
+                throw new InvalidOperationException("La carta ya está asignada al mazo.");
 
-            if (currentCards.Any(c => c.CardId == cardId))
+            if (currentCards.Count() >= 15)
+                throw new InvalidOperationException("El mazo ya contiene 15 cartas y no se pueden agregar más.");
+
+            if (currentCards.Any(c => c.CardId == dto.CardId))
                 throw new ValidationException("La carta ya está en el mazo.");
 
-            var card = await _cardDao.GetCardByIdAsync(cardId);
+            var card = await _cardDao.GetCardByIdAsync(dto.CardId);
             if (card == null)
                 throw new NotFoundException("Carta no existe");
 
-            await _cardDeckDao.AddCardToDeckAsync(deckId, cardId);
+            await _cardDeckDao.AddCardToDeckAsync(deckId, dto.CardId);
         }
 
         public async Task RemoveCardFromDeckAsync(int deckId, int cardId)
