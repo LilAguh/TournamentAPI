@@ -19,5 +19,6 @@ namespace Models.DTOs.Tournament
         public int WinnerID { get; set; }
         public PhaseEnum Phase { get; set; }
         public List<int> AllowedSeriesIds { get; set; } = new List<int>();
+        public List<int> Juedges { get; set; } = new List<int>();
     }
 }
