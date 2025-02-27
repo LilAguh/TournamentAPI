@@ -24,10 +24,15 @@ namespace Services.Implementations
             return await connection.ExecuteScalarAsync<int>(query, new { UserId = userId, dto.Name });
         }
 
-        public async Task<DeckResponseDto> GetDeckByIdAsync(int deckId)
+        public async Task<DeckResponseDto?> GetDeckByIdAsync(int deckId)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
-            var query = "SELECT * FROM Decks WHERE Id = @DeckId";
+            var query = @"SELECT d.*, 
+                         COUNT(cd.CardID) as CardCount 
+                  FROM Decks d
+                  LEFT JOIN CardDecks cd ON d.Id = cd.DeckID
+                  WHERE d.Id = @DeckId
+                  GROUP BY d.Id";
             return await connection.QueryFirstOrDefaultAsync<DeckResponseDto>(query, new { DeckId = deckId });
         }
 

@@ -5,6 +5,6 @@ namespace Models.DTOs.CardDecks
     {
         public int DeckId { get; set; }
         public int CardId { get; set; }
-        public string CardName { get; set; } = string.Empty;
+        public string CardName { get; set; }
     }
 }
