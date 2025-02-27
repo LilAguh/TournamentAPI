@@ -1,5 +1,6 @@
 ﻿
 using Dapper;
+using DataAccess.DAOs.Interfaces;
 using DataAccess.Database;
 using Models.DTOs.Disqualifications;
 using Models.Entities;
