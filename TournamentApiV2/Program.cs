@@ -68,6 +68,8 @@ builder.Services.AddScoped<ITournamentService, TournamentService>();
 builder.Services.AddScoped<ITournamentPlayerDao, TournamentPlayerDao>();
 builder.Services.AddScoped<IMatchDao, MatchDao>();
 builder.Services.AddScoped<IMatchService, MatchService>();
+builder.Services.AddScoped<IDisqualificationDao, DisqualificationDao>();
+builder.Services.AddScoped<IDisqualificationService, DisqualificationService>();
 
 
 builder.Services.AddControllers();
