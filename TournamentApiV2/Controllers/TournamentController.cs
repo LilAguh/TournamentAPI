@@ -27,8 +27,6 @@ namespace TournamentApiV2.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateTournament([FromBody] TournamentRequestDto dto)
         {
-            // Extraer el OrganizerID del token
-            
 
             int organizerId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 

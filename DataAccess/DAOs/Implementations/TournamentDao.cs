@@ -28,8 +28,8 @@ namespace DataAccess.DAOs.Implementations
             int maxPlayers = await CalculateMaxPlayersAsync(dto);
             int maxGames = maxPlayers - 1;
 
-            var query = @"INSERT INTO Tournament (Name, OrganizerID, StartDate, EndDate, StartTime, EndTime, CountryCode, MaxPlayers, MaxGames, CountPlayers, Phase)
-                          VALUES (@Name, @OrganizerID, @StartDate, @EndDate, @StartTime, @EndTime, @CountryCode, @MaxPlayers, @MaxGames, 0, @Phase)";
+            var query = @"INSERT INTO Tournament (Name, OrganizerID, StartDate, EndDate, CountryCode, MaxPlayers, MaxGames, CountPlayers, Phase)
+                          VALUES (@Name, @OrganizerID, @StartDate, @EndDate, @CountryCode, @MaxPlayers, @MaxGames, 0, @Phase)";
 
             await connection.ExecuteAsync(query, new
             {
@@ -37,8 +37,6 @@ namespace DataAccess.DAOs.Implementations
                 OrganizerID = organizerId,
                 dto.StartDate,
                 dto.EndDate,
-                dto.StartTime,
-                dto.EndTime,
                 dto.CountryCode,
                 MaxPlayers = maxPlayers,
                 MaxGames = maxGames,
@@ -70,10 +68,10 @@ namespace DataAccess.DAOs.Implementations
         }
 
         public async Task<int> CalculateMaxPlayersAsync(TournamentRequestDto dto)
-        { 
+        {
             int dayAvailable = 1 + (dto.EndDate - dto.StartDate).Days;
 
-            int minutesDay = (int)(dto.EndTime - dto.StartTime).TotalMinutes;
+            int minutesDay = (dto.EndDate.Hour * 60 + dto.EndDate.Minute) - (dto.StartDate.Hour * 60 + dto.StartDate.Minute);
 
             int totalMatches = (dayAvailable * minutesDay) / 30;
 
