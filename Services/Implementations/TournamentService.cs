@@ -36,11 +36,7 @@ namespace Services.Implementations
             {
                 throw new ValidationException("La fecha de inicio debe ser anterior a la fecha de fin");
             }
-            // Validar que DailyEndTime es mayor que DailyStartTime
-            if (dto.StartTime >= dto.EndTime)
-            {
-                throw new ValidationException("La hora de inicio diaria debe ser anterior a la hora de fin diaria");
-            }
+            
 
             if (!string.IsNullOrEmpty(dto.CountryCode))
             {
