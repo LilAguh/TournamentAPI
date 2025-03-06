@@ -164,12 +164,42 @@ namespace Testing
             // Ejecución de otros endpoints o validaciones adicionales según sea necesario
         }
 
+        [Fact]
+        public async Task GenerateRoundForTournament()
+        {
+            int tournamentId = 41;
+
+            var loginAdmin = new
+            {
+                alias = "AdminTesting",
+                password = "AdminTesting123"
+            };
+
+            var loginResponse = await _client.PostAsJsonAsync("Auth/login", loginAdmin);
+            loginResponse.EnsureSuccessStatusCode();
+
+            var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponseDto>();
+            Assert.NotNull(loginResult);
+            Assert.NotNull(loginResult.Token);
+
+            var adminToken = loginResult.Token;
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+
+            // Llamada al endpoint para generar la ronda
+            var generateRoundResponse = await _client.PostAsync($"Match/GenerateRound/{tournamentId}", null);
+            generateRoundResponse.EnsureSuccessStatusCode();
+
+            var responseContent = await generateRoundResponse.Content.ReadAsStringAsync();
+            _output.WriteLine($"{responseContent}");
+
+            Assert.NotNull(responseContent);
+        }
 
         [Fact]
         public async Task GenerateWinnersForLastConfirmedRound()
         {
             // ID del torneo a utilizar
-            int tournamentId = 40;
+            int tournamentId = 41;
 
             // Login como admin para tener permisos
             var loginAdmin = new
@@ -209,15 +239,14 @@ namespace Testing
             {
                 int winnerId = random.Next(2) == 0 ? match.Player1ID : match.Player2ID;
 
-                // Payload para asignar el resultado del partido
-                var resultPayload = new
+                var resultMatch = new
                 {
                     matchId = match.Id,
                     winnerId = winnerId
                 };
 
                 // Llamada al endpoint para asignar el resultado del partido
-                var resultResponse = await _client.PostAsJsonAsync("/Match/Result", resultPayload);
+                var resultResponse = await _client.PostAsJsonAsync("/Match/Result", resultMatch);
                 resultResponse.EnsureSuccessStatusCode();
 
                 var resultContent = await resultResponse.Content.ReadAsStringAsync();
