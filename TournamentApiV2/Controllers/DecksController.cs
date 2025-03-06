@@ -7,8 +7,8 @@ using System.Security.Claims;
 namespace TournamentApiV2.Controllers
 {
     [Authorize]
-    [Route("api/decks")]
     [ApiController]
+    [Route("[controller]")]
     public class DecksController : ControllerBase
     {
         private readonly IDeckService _deckService;
