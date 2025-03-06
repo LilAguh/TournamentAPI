@@ -27,7 +27,7 @@ namespace TournamentApiV2.Controllers
 
         //[Authorize(Roles = "Judge")]
         [HttpPost("result")]
-        public async Task<IActionResult> SubmitMatchResult([FromBody] MatchResultDto dto)
+        public async Task<IActionResult> SubmitMatchResult([FromBody] MatchResultRequestDto dto)
         {
             bool success = await _matchService.UpdateMatchWinnerAsync(dto.MatchId, dto.WinnerId);
             if (success)

@@ -12,7 +12,7 @@ namespace Models.DTOs.Disqualifications
         public int PlayerID { get; set; }
 
         [Required(ErrorMessage = "La razón de la descalificación es obligatoria.")]
-        [StringLength(255, ErrorMessage = "La razón no puede exceder 255 caracteres.")]
+        [StringLength(255, MinimumLength = 10, ErrorMessage = "La razón no puede tener menos de 10 caracteres, ni exceder los 255 caracteres.")]
         public string Reason { get; set; }
     }
 }

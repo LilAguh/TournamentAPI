@@ -29,6 +29,9 @@ namespace Services.Implementations
 
             var tournament = await _tournamentDao.GetTournamentByIdAsync(tournamentId);
 
+            if(tournament == null)
+                throw new ForbiddenException("El toneo no existe.");
+
             // Calcular la siguiente ronda
             int nextRound = lastRound == 0 ? tournament.MaxPlayers / 2 : lastRound / 2;
 
