@@ -27,8 +27,6 @@ namespace Services.Implementations
             // Obtener la última ronda generada para el torneo
             int lastRound = await _matchDao.GetLastRoundAsync(tournamentId);
 
-            Console.WriteLine(lastRound);
-
             var tournament = await _tournamentDao.GetTournamentByIdAsync(tournamentId);
 
             // Calcular la siguiente ronda
