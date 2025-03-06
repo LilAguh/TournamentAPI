@@ -19,7 +19,7 @@ namespace TournamentApiV2.Controllers
             _userService = userService;
         }
 
-        [HttpPost("register")]
+        [HttpPost("Register")]
         public async Task<IActionResult> Register(PlayerRegisterRequestDto dto)
         {
             var user = await _userService.Register(dto);
@@ -43,7 +43,7 @@ namespace TournamentApiV2.Controllers
         }
 
         [Authorize]
-        [HttpPost("change-password")]
+        [HttpPost("ChangePassword")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDto dto)
         {
             var userIdFromToken = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
