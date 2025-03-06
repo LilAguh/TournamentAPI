@@ -20,21 +20,31 @@ namespace Services.Implementations
 
         public async Task AddCardToDeckAsync(int deckId, AddCardDeckRequestDto dto)
         {
+            // Obtener las cartas actuales en el mazo
             var currentCards = await _cardDeckDao.GetCardsInDeckAsync(deckId);
-            if (currentCards.Any(c => c.CardId == dto.CardId))
-                throw new InvalidOperationException("La carta ya está asignada al mazo.");
 
-            if (currentCards.Count() >= 15)
-                throw new InvalidOperationException("El mazo ya contiene 15 cartas y no se pueden agregar más.");
+            // Validar que el total (actual + nuevas) no exceda el límite de 15 cartas
+            if (currentCards.Count() + dto.CardId.Count > 15)
+                throw new InvalidOperationException("El mazo ya contiene 15 cartas o se supera el límite al agregar las nuevas cartas.");
 
-            if (currentCards.Any(c => c.CardId == dto.CardId))
-                throw new ValidationException("La carta ya está en el mazo.");
+            // Validar para cada carta en la solicitud
+            foreach (var cardId in dto.CardId)
+            {
+                // Verificar que la carta no se encuentre ya en el mazo
+                if (currentCards.Any(c => c.CardId == cardId))
+                    throw new ValidationException($"La carta con ID {cardId} ya está asignada al mazo.");
 
-            var card = await _cardDao.GetCardByIdAsync(dto.CardId);
-            if (card == null)
-                throw new NotFoundException("Carta no existe");
+                // Verificar que la carta exista
+                var card = await _cardDao.GetCardByIdAsync(cardId);
+                if (card == null)
+                    throw new NotFoundException($"La carta con ID {cardId} no existe.");
+            }
 
-            await _cardDeckDao.AddCardToDeckAsync(deckId, dto.CardId);
+            // Agregar cada carta al mazo
+            foreach (var cardId in dto.CardId)
+            {
+                await _cardDeckDao.AddCardToDeckAsync(deckId, cardId);
+            }
         }
 
         public async Task RemoveCardFromDeckAsync(int deckId, int cardId)

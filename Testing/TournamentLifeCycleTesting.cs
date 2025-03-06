@@ -135,19 +135,17 @@ namespace Testing
                 var idDeckUser = createdDeckResult.Id;
 
                 // Agregar cartas al Deck
-                for (int c = 68; c <= 82; c++)
+                var addCardsDeckRequest = new
                 {
-                    var addCardDeck = new
-                    {
-                        cardId = c
-                    };
+                    CardId = new List<int> { 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82 }
+                };
 
-                    var addCardDeckResponse = await _client.PostAsJsonAsync($"/api/decks/{idDeckUser}/cards", addCardDeck);
-                    addCardDeckResponse.EnsureSuccessStatusCode();
-                    var addCardDeckResult = await addCardDeckResponse.Content.ReadAsStringAsync();
+                var addCardDeckResponse = await _client.PostAsJsonAsync($"/api/decks/{idDeckUser}/cards", addCardsDeckRequest);
+                //Esta es la alinea 144
+                addCardDeckResponse.EnsureSuccessStatusCode();
+                var addCardDeckResult = await addCardDeckResponse.Content.ReadAsStringAsync();
 
-                    Assert.NotNull(addCardDeckResult);
-                }
+                Assert.NotNull(addCardDeckResult);
 
                 // Agregar jugador al torneo
                 var addUserTournament = new
