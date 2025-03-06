@@ -9,8 +9,8 @@ using static Models.Exceptions.CustomException;
 
 namespace TournamentApiV2.Controllers
 {
-    [Route("api/tournaments")]
     [ApiController]
+    [Route("[controller]")]
     public class TournamentController : ControllerBase
     {
         private readonly ITournamentService _tournamentService;
@@ -43,7 +43,7 @@ namespace TournamentApiV2.Controllers
             return Ok(tournament);
         }
 
-        [HttpPost("{tournamentId}/register")]
+        [HttpPost("{tournamentId}/Register")]
         public async Task<IActionResult> RegisterPlayer(int tournamentId, [FromBody] TournamentPlayerRegistrationDto dto)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
@@ -56,7 +56,7 @@ namespace TournamentApiV2.Controllers
             return Ok("Inscripción exitosa");
         }
 
-        [HttpGet("{tournamentId}/matches")]
+        [HttpGet("{tournamentId}/Matches")]
         public async Task<IActionResult> GetTournamentMatches(int tournamentId)
         {
             IEnumerable<MatchResponseDto> matches = await _matchService.GetMatchesByTournamentAsync(tournamentId);
@@ -64,7 +64,7 @@ namespace TournamentApiV2.Controllers
         }
 
         //[Authorize(Roles = "Organizer,Admin")]
-        [HttpPost("{tournamentId}/series/{seriesId}")]
+        [HttpPost("{tournamentId}/Series/{seriesId}")]
         public async Task<IActionResult> AddAllowedSeries(int tournamentId, int seriesId)
         {
             await _tournamentService.AddAllowedSeriesAsync(tournamentId, seriesId);
@@ -72,14 +72,14 @@ namespace TournamentApiV2.Controllers
         }
 
         //[Authorize(Roles = "Organizer,Admin")]
-        [HttpDelete("{tournamentId}/series/{seriesId}")]
+        [HttpDelete("{tournamentId}/Series/{seriesId}")]
         public async Task<IActionResult> RemoveAllowedSeries(int tournamentId, int seriesId)
         {
             await _tournamentService.RemoveAllowedSeriesAsync(tournamentId, seriesId);
             return Ok();
         }
 
-        [HttpGet("{tournamentId}/series")]
+        [HttpGet("{tournamentId}/Series")]
         public async Task<IActionResult> GetAllowedSeries(int tournamentId)
         {
             var seriesIds = await _tournamentService.GetAllowedSeriesAsync(tournamentId);
