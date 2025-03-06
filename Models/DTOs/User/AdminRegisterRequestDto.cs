@@ -12,6 +12,7 @@ namespace Models.DTOs.User
     public class AdminRegisterRequestDto
     {
         [Required(ErrorMessage = ErrorMessages.RequiredName)]
+        [StringLength(50, MinimumLength = 5, ErrorMessage = "El nombre no puede tener menos de 5 caracteres, ni más de 50 caracteres.")]
         [StringLength(50, ErrorMessage = ErrorMessages.NameExceedCharacters)]
         public string FirstName { get; set; }
 
