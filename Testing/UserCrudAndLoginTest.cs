@@ -50,7 +50,7 @@ namespace Testing
                 password = "@TestPassword123",
             };
 
-            var loginResponse = await _client.PostAsJsonAsync("Auth/login", loginUser);
+            var loginResponse = await _client.PostAsJsonAsync("Auth/Login", loginUser);
             loginResponse.EnsureSuccessStatusCode();
 
             var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponseDto>();
@@ -100,7 +100,7 @@ namespace Testing
                 password = "@TestPassword123",
             };
 
-            var invalidLoginResponse = await _client.PostAsJsonAsync("Auth/login", invalidLoginUser);
+            var invalidLoginResponse = await _client.PostAsJsonAsync("Auth/Login", invalidLoginUser);
             Assert.Equal(HttpStatusCode.Unauthorized, invalidLoginResponse.StatusCode);
 
             //Crear nuevo usuario con mismo mail
@@ -132,7 +132,7 @@ namespace Testing
                 password = "@TestPassword123",
             };
 
-            var loginNewResponse = await _client.PostAsJsonAsync("Auth/login", loginNewUser);
+            var loginNewResponse = await _client.PostAsJsonAsync("Auth/Login", loginNewUser);
             loginNewResponse.EnsureSuccessStatusCode();
 
             var loginNewResult = await loginNewResponse.Content.ReadFromJsonAsync<LoginResponseDto>();

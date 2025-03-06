@@ -6,8 +6,8 @@ using Services.Interfaces;
 namespace TournamentApiV2.Controllers
 {
     [Authorize(Roles = "Organizer, Admin")]
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("[controller]")]
     public class TournamentJudgeController : ControllerBase
     {
         private readonly ITournamentJudgeService _tournamentJudgeService;
@@ -17,7 +17,7 @@ namespace TournamentApiV2.Controllers
             _tournamentJudgeService = tournamentJudgeService;
         }
 
-        [HttpPost("assign")]
+        [HttpPost("Assign")]
         public async Task<IActionResult> AssignJudge([FromBody] TournamentJudgeRequestDto requestDto)
         {
             if (!ModelState.IsValid)
@@ -29,7 +29,7 @@ namespace TournamentApiV2.Controllers
             return Ok(new { message = "Juez asignado al torneo" });
         }
 
-        [HttpDelete("remove")]
+        [HttpDelete("Remove")]
         public async Task<IActionResult> RemoveJudge([FromQuery] int tournamentId, [FromQuery] int judgeId)
         {
             await _tournamentJudgeService.RemoveJudgeAsync(tournamentId, judgeId);

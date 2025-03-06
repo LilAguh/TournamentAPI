@@ -36,7 +36,7 @@ namespace Testing
                 password = "AdminTesting123"
             };
 
-            var loginResponse = await _client.PostAsJsonAsync("Auth/login", loginAdmin);
+            var loginResponse = await _client.PostAsJsonAsync("Auth/Login", loginAdmin);
             loginResponse.EnsureSuccessStatusCode();
 
             var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponseDto>();
@@ -52,12 +52,12 @@ namespace Testing
             var newTournament = new
             {
                 name = "Torneo Testing",
-                startDate = DateTime.UtcNow.AddDays(1).Date.Add(new TimeSpan(10, 0, 0)), // Fecha de inicio: día siguiente a las 10:00 AM
-                endDate = DateTime.UtcNow.AddDays(2).Date.Add(new TimeSpan(18, 0, 0)),   // Fecha de finalización: dos días después a las 6:00 PM
+                startDate = DateTime.UtcNow.AddDays(1).Date.Add(new TimeSpan(10, 0, 0)),
+                endDate = DateTime.UtcNow.AddDays(2).Date.Add(new TimeSpan(18, 0, 0)),
                 countryCode = "AR"
             };
 
-            var createTournamentResponse = await _client.PostAsJsonAsync("/api/tournaments", newTournament);
+            var createTournamentResponse = await _client.PostAsJsonAsync("/Tournament", newTournament);
             createTournamentResponse.EnsureSuccessStatusCode();
             var createdTournament = await createTournamentResponse.Content.ReadFromJsonAsync<TournamentResponseDto>();
 
@@ -67,7 +67,7 @@ namespace Testing
 
             // Agregar una serie al torneo (serie con id 6)
             int seriesId = 6;
-            var addSeriesResponse = await _client.PostAsync($"/api/tournaments/{tournamentId}/series/{seriesId}", null);
+            var addSeriesResponse = await _client.PostAsync($"/Tournament/{tournamentId}/Series/{seriesId}", null);
             addSeriesResponse.EnsureSuccessStatusCode();
 
             // Creación de jugadores, agregar mazos e inscribirse al torneo
@@ -104,7 +104,7 @@ namespace Testing
                     password = newUser.password,
                 };
 
-                var loginNewUserResponse = await _client.PostAsJsonAsync("Auth/login", loginNewUser);
+                var loginNewUserResponse = await _client.PostAsJsonAsync("Auth/Login", loginNewUser);
                 loginNewUserResponse.EnsureSuccessStatusCode();
 
                 var loginNewUserResult = await loginNewUserResponse.Content.ReadFromJsonAsync<LoginResponseDto>();
@@ -124,7 +124,7 @@ namespace Testing
                     name = $"Deck Test {i}"
                 };
 
-                var createDeckResponse = await _client.PostAsJsonAsync("/api/decks", newDeck);
+                var createDeckResponse = await _client.PostAsJsonAsync("/Decks", newDeck);
                 createDeckResponse.EnsureSuccessStatusCode();
                 var createdDeckResult = await createDeckResponse.Content.ReadFromJsonAsync<DeckResponseDto>();
 
@@ -140,7 +140,7 @@ namespace Testing
                     CardId = new List<int> { 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82 }
                 };
 
-                var addCardDeckResponse = await _client.PostAsJsonAsync($"/api/decks/{idDeckUser}/cards", addCardsDeckRequest);
+                var addCardDeckResponse = await _client.PostAsJsonAsync($"/CardDecks/{idDeckUser}/Cards", addCardsDeckRequest);
                 //Esta es la alinea 144
                 addCardDeckResponse.EnsureSuccessStatusCode();
                 var addCardDeckResult = await addCardDeckResponse.Content.ReadAsStringAsync();
@@ -154,7 +154,7 @@ namespace Testing
                     deckId = idDeckUser
                 };
 
-                var addUserTournamentResponse = await _client.PostAsJsonAsync($"/api/tournaments/{tournamentId}/register", addUserTournament);
+                var addUserTournamentResponse = await _client.PostAsJsonAsync($"/Tournament/{tournamentId}/Register", addUserTournament);
                 addUserTournamentResponse.EnsureSuccessStatusCode();
                 var addUserTournamentResult = await addUserTournamentResponse.Content.ReadAsStringAsync();
             }
@@ -169,7 +169,7 @@ namespace Testing
         public async Task GenerateWinnersForLastConfirmedRound()
         {
             // ID del torneo a utilizar
-            int tournamentId = 34;
+            int tournamentId = 40;
 
             // Login como admin para tener permisos
             var loginAdmin = new
@@ -178,7 +178,7 @@ namespace Testing
                 password = "AdminTesting123"
             };
 
-            var loginResponse = await _client.PostAsJsonAsync("Auth/login", loginAdmin);
+            var loginResponse = await _client.PostAsJsonAsync("Auth/Login", loginAdmin);
             loginResponse.EnsureSuccessStatusCode();
             var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponseDto>();
             Assert.NotNull(loginResult);
@@ -186,7 +186,7 @@ namespace Testing
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
 
             // Obtener todos los partidos del torneo
-            var matchesResponse = await _client.GetAsync($"/api/tournaments/{tournamentId}/matches");
+            var matchesResponse = await _client.GetAsync($"Tournament/{tournamentId}/Matches");
             matchesResponse.EnsureSuccessStatusCode();
             var matches = await matchesResponse.Content.ReadFromJsonAsync<List<MatchResponseDto>>();
             Assert.NotNull(matches);
@@ -217,7 +217,7 @@ namespace Testing
                 };
 
                 // Llamada al endpoint para asignar el resultado del partido
-                var resultResponse = await _client.PostAsJsonAsync("/api/matches/result", resultPayload);
+                var resultResponse = await _client.PostAsJsonAsync("/Match/Result", resultPayload);
                 resultResponse.EnsureSuccessStatusCode();
 
                 var resultContent = await resultResponse.Content.ReadAsStringAsync();

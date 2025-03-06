@@ -17,7 +17,7 @@ namespace TournamentApi.Controllers
             _authService = authService;
         }
 
-        [HttpPost("login")]
+        [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto dto)
         {
             var user = await _authService.AuthenticateAsync(dto.Alias, dto.Password);

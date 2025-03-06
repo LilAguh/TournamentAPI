@@ -5,8 +5,8 @@ using Services.Interfaces;
 
 namespace TournamentApiV2.Controllers
 {
-    [Route("api/cardseries")]
     [ApiController]
+    [Route("[controller]")]
     public class CardSeriesController : ControllerBase
     {
         private readonly ICardSeriesService _cardSeriesService;
@@ -32,14 +32,14 @@ namespace TournamentApiV2.Controllers
             return Ok("Carta removida de la serie");
         }
 
-        [HttpGet("byseries/{seriesId}")]
+        [HttpGet("BySeries/{seriesId}")]
         public async Task<IActionResult> GetCardsBySeries(int seriesId)
         {
             var result = await _cardSeriesService.GetCardsBySeriesAsync(seriesId);
             return Ok(result);
         }
 
-        [HttpGet("bycard/{cardId}")]
+        [HttpGet("ByCard/{cardId}")]
         public async Task<IActionResult> GetSeriesByCard(int cardId)
         {
             var result = await _cardSeriesService.GetSeriesByCardAsync(cardId);

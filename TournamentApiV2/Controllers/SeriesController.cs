@@ -5,8 +5,8 @@ using Services.Interfaces;
 
 namespace TournamentApiV2.Controllers
 {
-    [Route("api/series")]
     [ApiController]
+    [Route("[controller]")]
     public class SeriesController : ControllerBase
     {
         private readonly ISerieService _seriesService;

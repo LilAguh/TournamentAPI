@@ -6,8 +6,8 @@ using Services.Interfaces;
 namespace TournamentApiV2.Controllers
 {
     [Authorize]
-    [Route("api/decks/{deckId}/cards")]
     [ApiController]
+    [Route("[controller]/{deckId}/Cards")]
     public class CardDecksController : ControllerBase
     {
         private readonly ICardDeckService _cardDeckService;

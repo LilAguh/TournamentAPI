@@ -5,8 +5,8 @@ using Services.Interfaces;
 
 namespace TournamentApiV2.Controllers
 {
-    [Route("api/matches")]
     [ApiController]
+    [Route("[controller]")]
     public class MatchController : ControllerBase
     {
         private readonly IMatchService _matchService;
@@ -17,7 +17,7 @@ namespace TournamentApiV2.Controllers
         }
 
         //[Authorize(Roles = "Admin,Organizer")]
-        [HttpPost("generate-round/{tournamentId}")]
+        [HttpPost("GenerateRound/{tournamentId}")]
         public async Task<IActionResult> GenerateRoundMatches(int tournamentId)
         {
 
@@ -26,7 +26,7 @@ namespace TournamentApiV2.Controllers
         }
 
         //[Authorize(Roles = "Judge")]
-        [HttpPost("result")]
+        [HttpPost("Result")]
         public async Task<IActionResult> SubmitMatchResult([FromBody] MatchResultRequestDto dto)
         {
             bool success = await _matchService.UpdateMatchWinnerAsync(dto.MatchId, dto.WinnerId);
