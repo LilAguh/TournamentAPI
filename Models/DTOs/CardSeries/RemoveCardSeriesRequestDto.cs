@@ -13,4 +13,3 @@ namespace Models.DTOs.CardSeries
         public int SeriesId { get; set; }
     }
 }
-}
