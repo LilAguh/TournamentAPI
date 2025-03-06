@@ -7,8 +7,8 @@ using static Models.Exceptions.CustomException;
 
 namespace TournamentApiV2.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("[controller]")]
     public class DisqualificationController : ControllerBase
     {
         private readonly IDisqualificationService _disqualificationService;
