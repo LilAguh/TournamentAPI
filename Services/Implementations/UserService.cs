@@ -5,6 +5,7 @@ using Models.Enums;
 using Config;
 using Services.Interfaces;
 using static Models.Exceptions.CustomException;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 
 namespace Services.Implementations
@@ -22,32 +23,17 @@ namespace Services.Implementations
             _countryService = countryService;
         }
 
-        public async Task<UserRequestDto> Register(PlayerRegisterRequestDto dto)
+        public async Task<UserRequestDto> Register(UserRegisterRequestDto dto)
         {
-
             await ValidateUserDetailsAsync(dto.Alias, dto.Email, dto.CountryCode);
-            var hashedPassword = _passwordHasher.HashPassword(dto.Password);
-
-            var user = new UserRequestDto
-            {
-                FirstName = dto.FirstName,
-                LastName = dto.LastName,
-                Alias = dto.Alias,
-                Email = dto.Email,
-                PasswordHash = hashedPassword,
-                CountryCode = dto.CountryCode,
-                AvatarUrl = dto.AvatarUrl,
-                Role = RoleEnum.Player,
-                CreatedAt = DateTime.UtcNow,
-                IsActive = true
-            };
+            var user = CreateUserDto(dto, 0);
 
             await _userDao.AddUserAsync(user);
             return user;
         }
 
 
-        public async Task<UserRequestDto> CreateUserByAdmin(AdminRegisterRequestDto dto, int adminId)
+        public async Task<UserRequestDto> CreateUserByAdmin(UserRegisterRequestDto dto, int adminId)
         {
             // Validar que el admin que realiza la acción exista y tenga rol de Admin
             var admin = await _userDao.GetUserByIdAsync(adminId);
@@ -61,23 +47,8 @@ namespace Services.Implementations
                 throw new ForbiddenException(ErrorMessages.AccesDenied);
 
             await ValidateUserDetailsAsync(dto.Alias, dto.Email, dto.CountryCode);
-            var hashedPassword = _passwordHasher.HashPassword(dto.Password);
-
-            var user = new UserRequestDto
-            {
-                FirstName = dto.FirstName,
-                LastName = dto.LastName,
-                Alias = dto.Alias,
-                Email = dto.Email,
-                PasswordHash = hashedPassword,
-                CountryCode = dto.CountryCode,
-                AvatarUrl = dto.AvatarUrl,
-                Role = dto.Role,
-                CreatedBy = adminId,
-                CreatedAt = DateTime.UtcNow,
-                IsActive = true
-            };
-
+            
+            var user = CreateUserDto(dto, adminId);
             await _userDao.AddUserAsync(user);
             return user;
         }
@@ -162,5 +133,24 @@ namespace Services.Implementations
             var user = await _userDao.GetUserByIdAsync(id);
             return user ?? throw new NotFoundException(ErrorMessages.UserNotFound);
         }
+
+        private UserRequestDto CreateUserDto(UserRegisterRequestDto dto, int createdDy)
+        {
+            return new UserRequestDto
+            {
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                Alias = dto.Alias,
+                Email = dto.Email,
+                PasswordHash = _passwordHasher.HashPassword(dto.Password),
+                CountryCode = dto.CountryCode,
+                AvatarUrl = dto.AvatarUrl,
+                Role = dto.Role,
+                CreatedBy = createdDy,
+                CreatedAt = DateTime.UtcNow,
+                IsActive = true
+            };
+        }
+
     }
 }
