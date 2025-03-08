@@ -28,10 +28,7 @@ namespace Services.Implementations
 
         public async Task<UserRequestDto> Register(PlayerRegisterRequestDto dto)
         {
-            // Validar que el alias sea único (sin importar el estado)
-            var existingAlias = await _userDao.GetUserByAliasAsync(dto.Alias);
-            if (existingAlias != null)
-                throw new ValidationException("El alias ya está en uso.");
+            await ValidateAliasAsync(dto.Alias);
 
             // Validar email: se busca un usuario activo con ese email.
             var existingEmailUser = await _userDao.GetActiveUserByEmailAsync(dto.Email);
@@ -58,6 +55,7 @@ namespace Services.Implementations
             return user;
         }
 
+
         public async Task<UserRequestDto> CreateUserByAdmin(AdminRegisterRequestDto dto, int adminId)
         {
             // Validar que el admin que realiza la acción exista y tenga rol de Admin
@@ -71,10 +69,7 @@ namespace Services.Implementations
             if (admin.Role == RoleEnum.Organizer && dto.Role != RoleEnum.Judge)
                 throw new ForbiddenException(ErrorMessages.AccesDenied);
 
-            // Validar que el alias sea único
-            var existingAlias = await _userDao.GetUserByAliasAsync(dto.Alias);
-            if (existingAlias != null)
-                throw new ValidationException("El alias ya está en uso.");
+            await ValidateAliasAsync(dto.Alias);
 
             // Validar email: se busca un usuario activo con ese email.
             var existingEmailUser = await _userDao.GetActiveUserByEmailAsync(dto.Email);
@@ -105,6 +100,13 @@ namespace Services.Implementations
 
             await _userDao.AddUserAsync(user);
             return user;
+        }
+
+        private async Task ValidateAliasAsync(string alias)
+        {
+            var existingAlias = await _userDao.GetUserByAliasAsync(alias) != null ?
+                throw new ValidationException(ErrorMessages.AliasAlreadyUse)
+                : true;
         }
 
         public async Task<UserResponseDto> UpdateUser(int id, UserUpdateRequestDto dto)
