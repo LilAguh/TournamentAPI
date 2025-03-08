@@ -43,7 +43,7 @@ namespace Config
         public const string InternalServerError = "Internal server error.";
 
         //Country:
-        public const string InvalidCountryCode = "Código de país inválido.";
+        public const string InvalidCountryCode = "Invalid country code.";
 
         //UserCard
         //public const string
