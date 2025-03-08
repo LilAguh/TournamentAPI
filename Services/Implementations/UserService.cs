@@ -24,9 +24,8 @@ namespace Services.Implementations
 
         public async Task<UserRequestDto> Register(PlayerRegisterRequestDto dto)
         {
-            await ValidateAliasAsync(dto.Alias);
-            await ValidateEmailAsync(dto.Email);
-            await _countryService.ValidateCountryAsync(dto.CountryCode);
+
+            await ValidateUserDetailsAsync(dto.Alias, dto.Email, dto.CountryCode);
             var hashedPassword = _passwordHasher.HashPassword(dto.Password);
 
             var user = new UserRequestDto
@@ -61,10 +60,7 @@ namespace Services.Implementations
             if (admin.Role == RoleEnum.Organizer && dto.Role != RoleEnum.Judge)
                 throw new ForbiddenException(ErrorMessages.AccesDenied);
 
-            await ValidateAliasAsync(dto.Alias);
-            await ValidateEmailAsync(dto.Email);
-
-            await _countryService.ValidateCountryAsync(dto.CountryCode);
+            await ValidateUserDetailsAsync(dto.Alias, dto.Email, dto.CountryCode);
             var hashedPassword = _passwordHasher.HashPassword(dto.Password);
 
             var user = new UserRequestDto
@@ -152,6 +148,13 @@ namespace Services.Implementations
             var existingEmailUser = await _userDao.GetActiveUserByEmailAsync(email) != null ?
                 throw new ValidationException(ErrorMessages.EmailAlreadyUse)
                 : true;
+        }
+
+        private async Task ValidateUserDetailsAsync(string alias, string email, string countryCode)
+        {
+            await ValidateAliasAsync(alias);
+            await ValidateEmailAsync(email);
+            await _countryService.ValidateCountryAsync(countryCode);
         }
 
         private async Task<UserResponseDto> ValidateUserExistsAsync(int id)
