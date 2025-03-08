@@ -1,4 +1,6 @@
 ﻿
+using System.Runtime.Intrinsics.X86;
+
 namespace Config
 {
     public class ErrorMessages
@@ -49,5 +51,6 @@ namespace Config
 
         //UserService:
         public const string AliasAlreadyUse = "Alias is already in use.";
+        public const string EmailAlreadyUse = "The email is already in use by an active user.";
     }
 }
