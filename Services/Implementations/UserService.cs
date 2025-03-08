@@ -16,14 +16,14 @@ namespace Services.Implementations
     {
         private readonly IUserDao _userDao;
         private readonly PasswordHasher _passwordHasher;
-        private readonly ICountryDao _countryDao;
+        private readonly ICountryService _countryService;
         private readonly IConfiguration _config;
 
-        public UserService(IUserDao userDao, PasswordHasher passwordHasher, ICountryDao countryDao, IConfiguration config)
+        public UserService(IUserDao userDao, PasswordHasher passwordHasher, ICountryService countryService, IConfiguration config)
         {
             _userDao = userDao;
             _passwordHasher = passwordHasher;
-            _countryDao = countryDao;
+            _countryService = countryService;
             _config = config;
         }
 
@@ -31,7 +31,7 @@ namespace Services.Implementations
         {
             await ValidateAliasAsync(dto.Alias);
             await ValidateEmailAsync(dto.Email);
-
+            await _countryService.ValidateCountryAsync(dto.CountryCode);
             var hashedPassword = _passwordHasher.HashPassword(dto.Password);
 
             var user = new UserRequestDto
@@ -68,13 +68,8 @@ namespace Services.Implementations
 
             await ValidateAliasAsync(dto.Alias);
             await ValidateEmailAsync(dto.Email);
-            await ValidateCountryAsync(dto.CountryCode);
 
-            // Validar existencia del país
-            bool countryExists = await _countryDao.CountryExists(dto.CountryCode);
-            if (!countryExists)
-                throw new ValidationException(ErrorMessages.InvalidCountryCode);
-
+            await _countryService.ValidateCountryAsync(dto.CountryCode);
             var hashedPassword = _passwordHasher.HashPassword(dto.Password);
 
             var user = new UserRequestDto
@@ -109,13 +104,6 @@ namespace Services.Implementations
                 throw new ValidationException(ErrorMessages.EmailAlreadyUse)
                 : true;
         }
-
-        private async Task ValidateCountryAsync(string country)
-        {
-            bool countryExists = await _countryDao.CountryExists(country);
-            if (!countryExists)
-                throw new ValidationException(ErrorMessages.InvalidCountryCode);
-        }
         
         public async Task<UserResponseDto> UpdateUser(int id, UserUpdateRequestDto dto)
         {
@@ -125,9 +113,7 @@ namespace Services.Implementations
 
             if (!string.IsNullOrEmpty(dto.CountryCode))
             {
-                bool countryExists = await _countryDao.CountryExists(dto.CountryCode);
-                if (!countryExists)
-                    throw new ValidationException(ErrorMessages.InvalidCountryCode);
+                await _countryService.ValidateCountryAsync(dto.CountryCode);
             }
 
             user.FirstName = !string.IsNullOrEmpty(dto.FirstName) ? dto.FirstName : user.FirstName;
