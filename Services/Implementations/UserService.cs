@@ -1,13 +1,10 @@
 ﻿using DataAccess.DAOs.Interfaces;
 using Models.DTOs.User;
-using Models.Entities;
 using Services.Helpers;
-using Microsoft.Extensions.Configuration;
 using Models.Enums;
 using Config;
-using static Models.Exceptions.CustomException;
 using Services.Interfaces;
-using System.Diagnostics.Metrics;
+using static Models.Exceptions.CustomException;
 
 
 namespace Services.Implementations
@@ -17,14 +14,12 @@ namespace Services.Implementations
         private readonly IUserDao _userDao;
         private readonly PasswordHasher _passwordHasher;
         private readonly ICountryService _countryService;
-        private readonly IConfiguration _config;
 
-        public UserService(IUserDao userDao, PasswordHasher passwordHasher, ICountryService countryService, IConfiguration config)
+        public UserService(IUserDao userDao, PasswordHasher passwordHasher, ICountryService countryService)
         {
             _userDao = userDao;
             _passwordHasher = passwordHasher;
             _countryService = countryService;
-            _config = config;
         }
 
         public async Task<UserRequestDto> Register(PlayerRegisterRequestDto dto)
@@ -91,25 +86,9 @@ namespace Services.Implementations
             return user;
         }
 
-        private async Task ValidateAliasAsync(string alias)
-        {
-            var existingAlias = await _userDao.GetUserByAliasAsync(alias) != null ?
-                throw new ValidationException(ErrorMessages.AliasAlreadyUse)
-                : true;
-        }
-
-        private async Task ValidateEmailAsync(string email)
-        {
-            var existingEmailUser = await _userDao.GetActiveUserByEmailAsync(email) != null ?
-                throw new ValidationException(ErrorMessages.EmailAlreadyUse)
-                : true;
-        }
-        
         public async Task<UserResponseDto> UpdateUser(int id, UserUpdateRequestDto dto)
         {
-            var user = await _userDao.GetUserByIdAsync(id);
-            if (user == null)
-                throw new NotFoundException(ErrorMessages.UserNotFound);
+            var user = await ValidateUserExistsAsync(id);
 
             if (!string.IsNullOrEmpty(dto.CountryCode))
             {
@@ -129,9 +108,7 @@ namespace Services.Implementations
 
         public async Task ChangePasswordAsync(int userId, ChangePasswordRequestDto dto)
         {
-            var user = await _userDao.GetUserByIdAsync(userId);
-            if (user == null)
-                throw new NotFoundException(ErrorMessages.UserNotFound);
+            var user = await ValidateUserExistsAsync(userId);
 
             if (!_passwordHasher.VerifyPassword(dto.CurrentPassword, user.PasswordHash))
                 throw new ValidationException(ErrorMessages.InvalidCredentials);
@@ -142,9 +119,7 @@ namespace Services.Implementations
 
         public async Task DeleteUser(int id)
         {
-            var user = await _userDao.GetUserByIdAsync(id);
-            if (user == null)
-                throw new NotFoundException(ErrorMessages.UserNotFound);
+            var user = await ValidateUserExistsAsync(id);
 
             user.IsActive = false;
             await _userDao.UpdateUserStatusAsync(user);
@@ -152,17 +127,37 @@ namespace Services.Implementations
 
         public async Task<UserResponseDto> GetUserById(int id)
         {
-            var user = await _userDao.GetUserByIdAsync(id);
-            if (user == null || !user.IsActive)
-                throw new NotFoundException(ErrorMessages.UserNotFound);
+            var user = await ValidateUserExistsAsync(id);
 
             return user;
         }
 
+        // Private section //
+
         public async Task DeletePermanentUser(int id)
         {
-            var user = await _userDao.GetUserByIdAsync(id);
+            var user = await ValidateUserExistsAsync(id);
             await _userDao.PermanentDeleteUserAsync(id);
+        }
+
+        private async Task ValidateAliasAsync(string alias)
+        {
+            var existingAlias = await _userDao.GetUserByAliasAsync(alias) != null ?
+                throw new ValidationException(ErrorMessages.AliasAlreadyUse)
+                : true;
+        }
+
+        private async Task ValidateEmailAsync(string email)
+        {
+            var existingEmailUser = await _userDao.GetActiveUserByEmailAsync(email) != null ?
+                throw new ValidationException(ErrorMessages.EmailAlreadyUse)
+                : true;
+        }
+
+        private async Task<UserResponseDto> ValidateUserExistsAsync(int id)
+        {
+            var user = await _userDao.GetUserByIdAsync(id);
+            return user ?? throw new NotFoundException(ErrorMessages.UserNotFound);
         }
     }
 }
