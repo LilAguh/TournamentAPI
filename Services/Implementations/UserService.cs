@@ -7,6 +7,7 @@ using Models.Enums;
 using Config;
 using static Models.Exceptions.CustomException;
 using Services.Interfaces;
+using System.Diagnostics.Metrics;
 
 
 namespace Services.Implementations
@@ -29,11 +30,7 @@ namespace Services.Implementations
         public async Task<UserRequestDto> Register(PlayerRegisterRequestDto dto)
         {
             await ValidateAliasAsync(dto.Alias);
-
-            // Validar email: se busca un usuario activo con ese email.
-            var existingEmailUser = await _userDao.GetActiveUserByEmailAsync(dto.Email);
-            if (existingEmailUser != null)
-                throw new ValidationException("El email ya está en uso por un usuario activo.");
+            await ValidateEmailAsync(dto.Email);
 
             var hashedPassword = _passwordHasher.HashPassword(dto.Password);
 
@@ -70,11 +67,8 @@ namespace Services.Implementations
                 throw new ForbiddenException(ErrorMessages.AccesDenied);
 
             await ValidateAliasAsync(dto.Alias);
-
-            // Validar email: se busca un usuario activo con ese email.
-            var existingEmailUser = await _userDao.GetActiveUserByEmailAsync(dto.Email);
-            if (existingEmailUser != null)
-                throw new ValidationException("El email ya está en uso por un usuario activo.");
+            await ValidateEmailAsync(dto.Email);
+            await ValidateCountryAsync(dto.CountryCode);
 
             // Validar existencia del país
             bool countryExists = await _countryDao.CountryExists(dto.CountryCode);
@@ -109,6 +103,20 @@ namespace Services.Implementations
                 : true;
         }
 
+        private async Task ValidateEmailAsync(string email)
+        {
+            var existingEmailUser = await _userDao.GetActiveUserByEmailAsync(email) != null ?
+                throw new ValidationException(ErrorMessages.EmailAlreadyUse)
+                : true;
+        }
+
+        private async Task ValidateCountryAsync(string country)
+        {
+            bool countryExists = await _countryDao.CountryExists(country);
+            if (!countryExists)
+                throw new ValidationException(ErrorMessages.InvalidCountryCode);
+        }
+        
         public async Task<UserResponseDto> UpdateUser(int id, UserUpdateRequestDto dto)
         {
             var user = await _userDao.GetUserByIdAsync(id);
