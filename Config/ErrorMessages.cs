@@ -46,5 +46,8 @@ namespace Config
         //UserCard
         //public const string
         public const string CardNotFound = "Carta no encontrada.";
+
+        //UserService:
+        public const string AliasAlreadyUse = "Alias is already in use.";
     }
 }
