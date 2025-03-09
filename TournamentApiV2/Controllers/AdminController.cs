@@ -20,7 +20,7 @@ namespace TournamentApiV2.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateUser([FromBody] AdminRegisterRequestDto dto)
+        public async Task<IActionResult> CreateUser([FromBody] UserRegisterRequestDto dto)
         {
             var adminId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             var user = await _userService.CreateUserByAdmin(dto, adminId);
