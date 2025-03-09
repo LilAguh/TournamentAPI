@@ -5,7 +5,6 @@ using Models.Enums;
 using Config;
 using Services.Interfaces;
 using static Models.Exceptions.CustomException;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 
 namespace Services.Implementations
@@ -25,8 +24,23 @@ namespace Services.Implementations
 
         public async Task<UserRequestDto> Register(UserRegisterRequestDto dto)
         {
+
             await ValidateUserDetailsAsync(dto.Alias, dto.Email, dto.CountryCode);
-            var user = CreateUserDto(dto, 0);
+            var hashedPassword = _passwordHasher.HashPassword(dto.Password);
+
+            var user = new UserRequestDto
+            {
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                Alias = dto.Alias,
+                Email = dto.Email,
+                PasswordHash = hashedPassword,
+                CountryCode = dto.CountryCode,
+                AvatarUrl = dto.AvatarUrl,
+                Role = RoleEnum.Player,
+                CreatedAt = DateTime.UtcNow,
+                IsActive = true
+            };
 
             await _userDao.AddUserAsync(user);
             return user;
@@ -47,8 +61,23 @@ namespace Services.Implementations
                 throw new ForbiddenException(ErrorMessages.AccesDenied);
 
             await ValidateUserDetailsAsync(dto.Alias, dto.Email, dto.CountryCode);
-            
-            var user = CreateUserDto(dto, adminId);
+            var hashedPassword = _passwordHasher.HashPassword(dto.Password);
+
+            var user = new UserRequestDto
+            {
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                Alias = dto.Alias,
+                Email = dto.Email,
+                PasswordHash = hashedPassword,
+                CountryCode = dto.CountryCode,
+                AvatarUrl = dto.AvatarUrl,
+                Role = dto.Role,
+                CreatedBy = adminId,
+                CreatedAt = DateTime.UtcNow,
+                IsActive = true
+            };
+
             await _userDao.AddUserAsync(user);
             return user;
         }
@@ -58,17 +87,9 @@ namespace Services.Implementations
             var user = await ValidateUserExistsAsync(id);
 
             if (!string.IsNullOrEmpty(dto.CountryCode))
-            {
                 await _countryService.ValidateCountryAsync(dto.CountryCode);
-            }
 
-            user.FirstName = !string.IsNullOrEmpty(dto.FirstName) ? dto.FirstName : user.FirstName;
-            user.LastName = !string.IsNullOrEmpty(dto.LastName) ? dto.LastName : user.LastName;
-            user.Alias = !string.IsNullOrEmpty(dto.Alias) ? dto.Alias : user.Alias;
-            user.Email = !string.IsNullOrEmpty(dto.Email) ? dto.Email : user.Email;
-            user.CountryCode = !string.IsNullOrEmpty(dto.CountryCode) ? dto.CountryCode : user.CountryCode;
-            user.AvatarUrl = !string.IsNullOrEmpty(dto.AvatarUrl) ? dto.AvatarUrl : user.AvatarUrl;
-
+            UpdateUserProperties(user, dto);
             await _userDao.UpdateUserAsync(user);
             return user;
         }
@@ -77,9 +98,8 @@ namespace Services.Implementations
         {
             var user = await ValidateUserExistsAsync(userId);
 
-            if (!_passwordHasher.VerifyPassword(dto.CurrentPassword, user.PasswordHash))
-                throw new ValidationException(ErrorMessages.InvalidCredentials);
-
+            _passwordHasher.VerifyPassword(dto.CurrentPassword, user.PasswordHash);
+               
             user.PasswordHash = _passwordHasher.HashPassword(dto.NewPassword);
             await _userDao.UpdateUserAsync(user);
         }
@@ -134,23 +154,14 @@ namespace Services.Implementations
             return user ?? throw new NotFoundException(ErrorMessages.UserNotFound);
         }
 
-        private UserRequestDto CreateUserDto(UserRegisterRequestDto dto, int createdDy)
+        private void UpdateUserProperties(UserResponseDto user, UserUpdateRequestDto dto)
         {
-            return new UserRequestDto
-            {
-                FirstName = dto.FirstName,
-                LastName = dto.LastName,
-                Alias = dto.Alias,
-                Email = dto.Email,
-                PasswordHash = _passwordHasher.HashPassword(dto.Password),
-                CountryCode = dto.CountryCode,
-                AvatarUrl = dto.AvatarUrl,
-                Role = dto.Role,
-                CreatedBy = createdDy,
-                CreatedAt = DateTime.UtcNow,
-                IsActive = true
-            };
+            user.FirstName = !string.IsNullOrEmpty(dto.FirstName) ? dto.FirstName : user.FirstName;
+            user.LastName = !string.IsNullOrEmpty(dto.LastName) ? dto.LastName : user.LastName;
+            user.Alias = !string.IsNullOrEmpty(dto.Alias) ? dto.Alias : user.Alias;
+            user.Email = !string.IsNullOrEmpty(dto.Email) ? dto.Email : user.Email;
+            user.CountryCode = !string.IsNullOrEmpty(dto.CountryCode) ? dto.CountryCode : user.CountryCode;
+            user.AvatarUrl = !string.IsNullOrEmpty(dto.AvatarUrl) ? dto.AvatarUrl : user.AvatarUrl;
         }
-
     }
 }
