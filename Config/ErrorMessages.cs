@@ -31,6 +31,7 @@ namespace Config
 
         //authservice:
         public const string InvalidCredentials = "Credentials are invalid.";
+        public const string InvalidCredentialsPassword = "Password are invalid.";
 
         //userservice:
         public const string DataUserAlreadyUse = "The email or alias is already in use.";
