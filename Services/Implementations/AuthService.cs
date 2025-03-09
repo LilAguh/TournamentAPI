@@ -37,8 +37,7 @@ namespace Services.Implementations
             {
                 if (!user.IsActive)
                     throw new UnauthorizedException("Usuario no activo");
-                if (!_passwordHasher.VerifyPassword(password, user.PasswordHash))
-                    throw new UnauthorizedException("Contraseña invalida");
+                _passwordHasher.VerifyPassword(password, user.PasswordHash);
                 return user;
             }
             else
