@@ -1,5 +1,4 @@
 ﻿
-using System.Runtime.Intrinsics.X86;
 
 namespace Config
 {
