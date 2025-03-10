@@ -1,4 +1,5 @@
 ﻿
+
 namespace Config
 {
     public class ErrorMessages
@@ -29,6 +30,7 @@ namespace Config
 
         //authservice:
         public const string InvalidCredentials = "Credentials are invalid.";
+        public const string InvalidCredentialsPassword = "Password are invalid.";
 
         //userservice:
         public const string DataUserAlreadyUse = "The email or alias is already in use.";
@@ -41,10 +43,14 @@ namespace Config
         public const string InternalServerError = "Internal server error.";
 
         //Country:
-        public const string InvalidCountryCode = "Código de país inválido.";
+        public const string InvalidCountryCode = "Invalid country code.";
 
         //UserCard
         //public const string
         public const string CardNotFound = "Carta no encontrada.";
+
+        //UserService:
+        public const string AliasAlreadyUse = "Alias is already in use.";
+        public const string EmailAlreadyUse = "The email is already in use by an active user.";
     }
 }

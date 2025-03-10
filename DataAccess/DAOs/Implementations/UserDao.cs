@@ -1,10 +1,7 @@
 ﻿using Dapper;
 using Models.DTOs.User;
 using DataAccess.DAOs.Interfaces;
-using Models.Entities;
 using DataAccess.Database;
-using Newtonsoft.Json;
-using Models.Enums;
 
 namespace DataAccess.DAOs.Implementations
 {

@@ -1,15 +1,10 @@
 ﻿using Config;
 using Models.Enums;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Models.DTOs.User
 {
-    public class AdminRegisterRequestDto
+    public class UserRegisterRequestDto
     {
         [Required(ErrorMessage = ErrorMessages.RequiredName)]
         //[StringLength(50, MinimumLength = 5, ErrorMessage = "El nombre no puede tener menos de 5 caracteres, ni más de 50 caracteres.")]

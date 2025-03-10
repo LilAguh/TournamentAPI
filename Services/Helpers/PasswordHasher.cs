@@ -1,4 +1,8 @@
 ﻿
+using Config;
+using Models.Entities;
+using static Models.Exceptions.CustomException;
+
 namespace Services.Helpers
 {
     public class PasswordHasher
@@ -10,7 +14,11 @@ namespace Services.Helpers
 
         public bool VerifyPassword(string password, string hashedPassword)
         {
-            return BCrypt.Net.BCrypt.Verify(password, hashedPassword);
+            var passwordCheck = BCrypt.Net.BCrypt.Verify(password, hashedPassword);
+            if (!passwordCheck)
+                throw new UnauthorizedException(ErrorMessages.InvalidCredentialsPassword);
+
+            return passwordCheck;
         }
     }
 }

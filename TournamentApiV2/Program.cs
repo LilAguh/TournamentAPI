@@ -49,6 +49,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserDao, UserDao>();
 builder.Services.AddScoped<ICountryDao, CountryDao>();
+builder.Services.AddScoped<ICountryService, CountryService>();
 builder.Services.AddScoped<PasswordHasher>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICardDao, CardDao>();

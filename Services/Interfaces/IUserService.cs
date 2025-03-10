@@ -6,8 +6,8 @@ namespace Services.Interfaces
 {
     public interface IUserService
     {
-        Task<UserRequestDto> Register(PlayerRegisterRequestDto dto);
-        Task<UserRequestDto> CreateUserByAdmin(AdminRegisterRequestDto dto, int adminId);
+        Task<UserRequestDto> Register(UserRegisterRequestDto dto);
+        Task<UserRequestDto> CreateUserByAdmin(UserRegisterRequestDto dto, int adminId);
         Task<UserResponseDto> UpdateUser(int id, UserUpdateRequestDto dto);
         Task ChangePasswordAsync(int userId, ChangePasswordRequestDto dto);
         Task DeleteUser(int id);
