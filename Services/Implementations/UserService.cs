@@ -15,7 +15,10 @@ namespace Services.Implementations
         private readonly PasswordHasher _passwordHasher;
         private readonly ICountryService _countryService;
 
-        public UserService(IUserDao userDao, PasswordHasher passwordHasher, ICountryService countryService)
+        public UserService(
+            IUserDao userDao, 
+            PasswordHasher passwordHasher, 
+            ICountryService countryService)
         {
             _userDao = userDao;
             _passwordHasher = passwordHasher;
@@ -24,6 +27,9 @@ namespace Services.Implementations
 
         public async Task<UserRequestDto> Register(UserRegisterRequestDto dto)
         {
+
+            // lo primero y principal que se hace aca es verificar si el token es un admin
+            // pero como verifico aca el token?
 
             await ValidateUserDetailsAsync(dto.Alias, dto.Email, dto.CountryCode);
             var hashedPassword = _passwordHasher.HashPassword(dto.Password);
