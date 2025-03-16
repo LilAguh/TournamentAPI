@@ -63,12 +63,12 @@ namespace DataAccess.DAOs.Implementations
                 var lastMatch = await connection.QueryFirstOrDefaultAsync<(int MatchNumber, int TotalMatches, DateTime MatchStartTime)?>(lastMatchQuery,
                                                 new { TournamentId = tournamentId, PreviousRound = round * 2 });
 
-                if (lastMatch.HasValue)
+                if (lastMatch != null)
                 {
                     // Calcular el horario de inicio del siguiente partido (suponiendo que cada partido dura 30 minutos)
                     DateTime lastMatchEndTime = lastMatch.Value.MatchStartTime.AddMinutes(30);
 
-                    // Si el último partido termina después del horario de finalización, comenzamos al día siguiente
+                    // Si el último partido termina después del horario de finalizacion, comenzamos al día siguiente
                     if (lastMatchEndTime.TimeOfDay >= tournamentEndTime)
                     {
                         currentMatchTime = lastMatchEndTime.Date.AddDays(1) + tournamentStartTime;
@@ -188,7 +188,7 @@ namespace DataAccess.DAOs.Implementations
             // Consulta para contar cuántos partidos hay en el torneo
             var query = "SELECT COUNT(*) FROM Matches WHERE TournamentID = @TournamentId";
 
-            // Ejecutamos la consulta y obtenemos el número de partidos
+            // Ejecutamos la consulta y obtenemos el numero de partidos
             int matchCount = await connection.ExecuteScalarAsync<int>(query, new { TournamentId = tournamentId });
 
             // Si no hay partidos, es la primera ronda
