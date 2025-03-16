@@ -25,15 +25,54 @@ namespace Services.Implementations
             _countryService = countryService;
         }
 
-        public async Task<UserRequestDto> Register(UserRegisterRequestDto dto)
+        //public async Task<UserRequestDto> Register(UserRegisterRequestDto dto)
+        //{
+
+        //    // lo primero y principal que se hace aca es verificar si el token es un admin
+        //    // pero como verifico aca el token?
+
+        //    await ValidateUserDetailsAsync(dto.Alias, dto.Email, dto.CountryCode);
+        //    var hashedPassword = _passwordHasher.HashPassword(dto.Password);
+
+        //    var user = new UserRequestDto
+        //    {
+        //        FirstName = dto.FirstName,
+        //        LastName = dto.LastName,
+        //        Alias = dto.Alias,
+        //        Email = dto.Email,
+        //        PasswordHash = hashedPassword,
+        //        CountryCode = dto.CountryCode,
+        //        AvatarUrl = dto.AvatarUrl,
+        //        Role = RoleEnum.Player,
+        //        CreatedAt = DateTime.UtcNow,
+        //        IsActive = true
+        //    };
+
+        //    await _userDao.AddUserAsync(user);
+        //    return user;
+        //}
+
+
+        //{
+        //    "firstName": "Aguh",
+        //    "lastName": "Ochoa",
+        //    "alias": "AguhCab123123s",
+        //    "email": "aguhOchoa123123s@gmail.com",
+        //    "password": "Argentina14123123",
+        //    "countryCode": "AR",
+        //    "avatarUrl": "https://tn.com.ar/resizer/v2/guillermo-farre-sentencio-el-descenso-de-river-ap-C3BQEM6HE76CAM7ARY7ETWPG7Q.jpg?auth=84a0351a3871bb7f63c7762fe232d157d2349d146d2ad637b39d15b2a11cee6c&width=1023",
+        //    "createdBy": 0
+        //}
+        public async Task<UserResponseDto> Register(UserRegisterRequestDto dto, int? creatorId)
         {
+            // Determinar el rol y el creador
+            var (role, createdBy) = await DetermineRoleAndCreator(dto, creatorId);
 
-            // lo primero y principal que se hace aca es verificar si el token es un admin
-            // pero como verifico aca el token?
-
+            // Validar detalles del usuario
             await ValidateUserDetailsAsync(dto.Alias, dto.Email, dto.CountryCode);
             var hashedPassword = _passwordHasher.HashPassword(dto.Password);
 
+            // Crear el objeto UserRequestDto
             var user = new UserRequestDto
             {
                 FirstName = dto.FirstName,
@@ -43,50 +82,99 @@ namespace Services.Implementations
                 PasswordHash = hashedPassword,
                 CountryCode = dto.CountryCode,
                 AvatarUrl = dto.AvatarUrl,
-                Role = RoleEnum.Player,
+                Role = role,
+                CreatedBy = createdBy, // createdBy ya es int (no nullable)
                 CreatedAt = DateTime.UtcNow,
                 IsActive = true
             };
 
-            await _userDao.AddUserAsync(user);
-            return user;
-        }
+            // Guardar el usuario en la base de datos
+            var userId = await _userDao.AddUserAsync(user);
 
-
-        public async Task<UserRequestDto> CreateUserByAdmin(UserRegisterRequestDto dto, int adminId)
-        {
-            // Validar que el admin que realiza la acción exista y tenga rol de Admin
-            var admin = await _userDao.GetUserByIdAsync(adminId);
-            if (admin == null || admin.Role != RoleEnum.Admin)
-                throw new ForbiddenException(ErrorMessages.AccesDenied);
-
-            if (dto.Role is RoleEnum.Admin or RoleEnum.Organizer or RoleEnum.Judge && admin.Role != RoleEnum.Admin)
-                throw new ForbiddenException(ErrorMessages.AccesDenied);
-
-            if (admin.Role == RoleEnum.Organizer && dto.Role != RoleEnum.Judge)
-                throw new ForbiddenException(ErrorMessages.AccesDenied);
-
-            await ValidateUserDetailsAsync(dto.Alias, dto.Email, dto.CountryCode);
-            var hashedPassword = _passwordHasher.HashPassword(dto.Password);
-
-            var user = new UserRequestDto
+            // Mapear UserRequestDto a UserResponseDto
+            return new UserResponseDto
             {
-                FirstName = dto.FirstName,
-                LastName = dto.LastName,
-                Alias = dto.Alias,
-                Email = dto.Email,
-                PasswordHash = hashedPassword,
-                CountryCode = dto.CountryCode,
-                AvatarUrl = dto.AvatarUrl,
-                Role = dto.Role,
-                CreatedBy = adminId,
-                CreatedAt = DateTime.UtcNow,
-                IsActive = true
+                Id = userId,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Alias = user.Alias,
+                Email = user.Email,
+                CountryCode = user.CountryCode,
+                AvatarUrl = user.AvatarUrl,
+                Role = user.Role,
+                CreatedAt = user.CreatedAt,
+                IsActive = user.IsActive
             };
-
-            await _userDao.AddUserAsync(user);
-            return user;
         }
+
+        private async Task<(RoleEnum role, int createdBy)> DetermineRoleAndCreator(
+    UserRegisterRequestDto dto,
+    int? creatorId
+)
+        {
+            // Registro público -> Solo permite Player
+            if (!creatorId.HasValue)
+            {
+                if (dto.Role != null && dto.Role != RoleEnum.Player)
+                {
+                    throw new ForbiddenException("No puedes crear usuarios con roles específicos sin autenticación.");
+                }
+                return (RoleEnum.Player, 0); // 0 indica autoregistro
+            }
+
+            // Registro por usuario autenticado
+            var creator = await _userDao.GetUserByIdAsync(creatorId.Value);
+
+            // Validar que el creador tenga permisos
+            if (creator.Role != RoleEnum.Admin && creator.Role != RoleEnum.Organizer)
+            {
+                throw new ForbiddenException("No tienes permisos para registrar usuarios");
+            }
+
+            // Asignar el rol según el creador
+            return creator.Role switch
+            {
+                RoleEnum.Admin => (dto.Role ?? throw new ValidationException("El rol es obligatorio para Admins"), creator.Id),
+                RoleEnum.Organizer => (RoleEnum.Judge, creator.Id),
+                _ => throw new ForbiddenException("Rol no soportado")
+            };
+        }
+
+
+        //public async Task<UserRequestDto> CreateUserByAdmin(UserRegisterRequestDto dto, int adminId)
+        //{
+        //    // Validar que el admin que realiza la acción exista y tenga rol de Admin
+        //    var admin = await _userDao.GetUserByIdAsync(adminId);
+        //    if (admin == null || admin.Role != RoleEnum.Admin)
+        //        throw new ForbiddenException(ErrorMessages.AccesDenied);
+
+        //    if (dto.Role is RoleEnum.Admin or RoleEnum.Organizer or RoleEnum.Judge && admin.Role != RoleEnum.Admin)
+        //        throw new ForbiddenException(ErrorMessages.AccesDenied);
+
+        //    if (admin.Role == RoleEnum.Organizer && dto.Role != RoleEnum.Judge)
+        //        throw new ForbiddenException(ErrorMessages.AccesDenied);
+
+        //    await ValidateUserDetailsAsync(dto.Alias, dto.Email, dto.CountryCode);
+        //    var hashedPassword = _passwordHasher.HashPassword(dto.Password);
+
+        //    var user = new UserRequestDto
+        //    {
+        //        FirstName = dto.FirstName,
+        //        LastName = dto.LastName,
+        //        Alias = dto.Alias,
+        //        Email = dto.Email,
+        //        PasswordHash = hashedPassword,
+        //        CountryCode = dto.CountryCode,
+        //        AvatarUrl = dto.AvatarUrl,
+        //        Role = dto.Role,
+        //        CreatedBy = adminId,
+        //        CreatedAt = DateTime.UtcNow,
+        //        IsActive = true
+        //    };
+
+        //    await _userDao.AddUserAsync(user);
+        //    return user;
+        //}
 
         public async Task<UserResponseDto> UpdateUser(int id, UserUpdateRequestDto dto)
         {
