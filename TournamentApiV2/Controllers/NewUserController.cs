@@ -20,23 +20,41 @@ namespace TournamentApiV2.Controllers
         }
 
         [HttpPost("Register")]
-        public async Task<IActionResult> Register(UserRegisterRequestDto dto)
+        [AllowAnonymous]
+        public async Task<IActionResult> Register([FromBody] UserRegisterRequestDto dto)
         {
-            //por el momento voy a implementar asi pero el token se va a revisar en el service
-            //vamos a ver como funciona esto
-            var user = await _userService.Register(dto);
-            return Ok(new { user.Alias, user.Email, user.Role });
+            int? creatorId = null;
+
+            // Solo intenta obtener el ID si el token es válido y el usuario está autenticado
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                creatorId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            }
+
+            try
+            {
+                var user = await _userService.Register(dto, creatorId);
+                return Ok(new { user.Alias, user.Role });
+            }
+            catch (ForbiddenException ex)
+            {
+                return StatusCode(403, ex.Message); // 403 si no tiene permisos
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(ex.Message); // 400 si falta el rol para Admin
+            }
         }
 
-        [Authorize(Roles = "Admin, Organizer")]
-        [HttpPost("Register/Roles")]
-        public async Task<IActionResult> RegisterUserByUser([FromBody] UserRegisterRequestDto dto)
-        {
-            //Es lo que se me ocurre por el momento, como para llegar a esta fase, investigar el tema del token
-            var adminId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-            var user = await _userService.CreateUserByAdmin(dto, adminId);
-            return Ok(new { user.Alias, user.Email, user.Role });
-        }
+        //[Authorize(Roles = "Admin, Organizer")]
+        //[HttpPost("Register/Roles")]
+        //public async Task<IActionResult> RegisterUserByUser([FromBody] UserRegisterRequestDto dto)
+        //{
+        //    //Es lo que se me ocurre por el momento, como para llegar a esta fase, investigar el tema del token
+        //    var adminId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+        //    var user = await _userService.CreateUserByAdmin(dto, adminId);
+        //    return Ok(new { user.Alias, user.Email, user.Role });
+        //}
 
         [Authorize]
         [HttpPut("{id}")]
