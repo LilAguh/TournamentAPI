@@ -43,13 +43,15 @@ namespace DataAccess.DAOs.Implementations
             return await connection.QueryFirstOrDefaultAsync<UserResponseDto>(query, new { Id = id });
         }
 
-        public async Task AddUserAsync(UserRequestDto userDto)
+        public async Task<int> AddUserAsync(UserRequestDto user)
         {
-            using var connection = await _databaseConnection.GetConnectionAsync();
-            var query = @" INSERT INTO users (Role, FirstName, LastName, Alias, Email, PasswordHash, CountryCode, CreatedBy, CreatedAt, IsActive)
-                           VALUES (@Role, @FirstName, @LastName, @Alias, @Email, @PasswordHash, @CountryCode, @CreatedBy, @CreatedAt, @IsActive)";
+            var query = @"
+        INSERT INTO Users (FirstName, LastName, Alias, Email, PasswordHash, CountryCode, AvatarUrl, Role, CreatedBy, CreatedAt, IsActive)
+        VALUES (@FirstName, @LastName, @Alias, @Email, @PasswordHash, @CountryCode, @AvatarUrl, @Role, @CreatedBy, @CreatedAt, @IsActive);
+        SELECT LAST_INSERT_ID();";
 
-            await connection.ExecuteAsync(query, userDto);
+            using var connection = await _databaseConnection.GetConnectionAsync();
+            return await connection.ExecuteScalarAsync<int>(query, user);
         }
 
         public async Task UpdateLastLoginAsync(int userId)
