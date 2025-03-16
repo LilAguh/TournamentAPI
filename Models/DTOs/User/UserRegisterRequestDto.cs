@@ -34,8 +34,10 @@ namespace Models.DTOs.User
         [Url(ErrorMessage = ErrorMessages.InvalidAvatarUrl)]
         public string? AvatarUrl { get; set; }
 
-        [Required(ErrorMessage = ErrorMessages.IncorrectRole)]
+        //[Required(ErrorMessage = ErrorMessages.IncorrectRole)]
         [Range(1, 4, ErrorMessage = ErrorMessages.IncorrectRole)]
-        public RoleEnum Role { get; set; }
+        public RoleEnum? Role { get; set; }
+
+        public int CreatedBy { get; set; }
     }
 }
