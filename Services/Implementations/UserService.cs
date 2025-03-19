@@ -25,44 +25,16 @@ namespace Services.Implementations
             _countryService = countryService;
         }
 
-        //public async Task<UserRequestDto> Register(UserRegisterRequestDto dto)
-        //{
-
-        //    // lo primero y principal que se hace aca es verificar si el token es un admin
-        //    // pero como verifico aca el token?
-
-        //    await ValidateUserDetailsAsync(dto.Alias, dto.Email, dto.CountryCode);
-        //    var hashedPassword = _passwordHasher.HashPassword(dto.Password);
-
-        //    var user = new UserRequestDto
-        //    {
-        //        FirstName = dto.FirstName,
-        //        LastName = dto.LastName,
-        //        Alias = dto.Alias,
-        //        Email = dto.Email,
-        //        PasswordHash = hashedPassword,
-        //        CountryCode = dto.CountryCode,
-        //        AvatarUrl = dto.AvatarUrl,
-        //        Role = RoleEnum.Player,
-        //        CreatedAt = DateTime.UtcNow,
-        //        IsActive = true
-        //    };
-
-        //    await _userDao.AddUserAsync(user);
-        //    return user;
-        //}
-
-
-        //{
-        //    "firstName": "Aguh",
-        //    "lastName": "Ochoa",
-        //    "alias": "AguhCab123123s",
-        //    "email": "aguhOchoa123123s@gmail.com",
-        //    "password": "Argentina14123123",
-        //    "countryCode": "AR",
-        //    "avatarUrl": "https://tn.com.ar/resizer/v2/guillermo-farre-sentencio-el-descenso-de-river-ap-C3BQEM6HE76CAM7ARY7ETWPG7Q.jpg?auth=84a0351a3871bb7f63c7762fe232d157d2349d146d2ad637b39d15b2a11cee6c&width=1023",
-        //    "createdBy": 0
-        //}
+        /*
+            "firstName": "Aguh",
+            "lastName": "Ochoa",
+            "alias": "AguhCab123123s",
+            "email": "aguhOchoa123123s@gmail.com",
+            "password": "Argentina14123123",
+            "countryCode": "AR",
+            "avatarUrl": "https://tn.com.ar/resizer/v2/guillermo-farre-sentencio-el-descenso-de-river-ap-C3BQEM6HE76CAM7ARY7ETWPG7Q.jpg?auth=84a0351a3871bb7f63c7762fe232d157d2349d146d2ad637b39d15b2a11cee6c&width=1023",
+            "createdBy": 0
+        */
         public async Task<UserResponseDto> Register(UserRegisterRequestDto dto, int? creatorId)
         {
             // Determinar el rol y el creador
@@ -107,10 +79,7 @@ namespace Services.Implementations
             };
         }
 
-        private async Task<(RoleEnum role, int createdBy)> DetermineRoleAndCreator(
-    UserRegisterRequestDto dto,
-    int? creatorId
-)
+        private async Task<(RoleEnum role, int createdBy)> DetermineRoleAndCreator(UserRegisterRequestDto dto,int? creatorId)
         {
             // Registro público -> Solo permite Player
             if (!creatorId.HasValue)
@@ -139,42 +108,6 @@ namespace Services.Implementations
                 _ => throw new ForbiddenException("Rol no soportado")
             };
         }
-
-
-        //public async Task<UserRequestDto> CreateUserByAdmin(UserRegisterRequestDto dto, int adminId)
-        //{
-        //    // Validar que el admin que realiza la acción exista y tenga rol de Admin
-        //    var admin = await _userDao.GetUserByIdAsync(adminId);
-        //    if (admin == null || admin.Role != RoleEnum.Admin)
-        //        throw new ForbiddenException(ErrorMessages.AccesDenied);
-
-        //    if (dto.Role is RoleEnum.Admin or RoleEnum.Organizer or RoleEnum.Judge && admin.Role != RoleEnum.Admin)
-        //        throw new ForbiddenException(ErrorMessages.AccesDenied);
-
-        //    if (admin.Role == RoleEnum.Organizer && dto.Role != RoleEnum.Judge)
-        //        throw new ForbiddenException(ErrorMessages.AccesDenied);
-
-        //    await ValidateUserDetailsAsync(dto.Alias, dto.Email, dto.CountryCode);
-        //    var hashedPassword = _passwordHasher.HashPassword(dto.Password);
-
-        //    var user = new UserRequestDto
-        //    {
-        //        FirstName = dto.FirstName,
-        //        LastName = dto.LastName,
-        //        Alias = dto.Alias,
-        //        Email = dto.Email,
-        //        PasswordHash = hashedPassword,
-        //        CountryCode = dto.CountryCode,
-        //        AvatarUrl = dto.AvatarUrl,
-        //        Role = dto.Role,
-        //        CreatedBy = adminId,
-        //        CreatedAt = DateTime.UtcNow,
-        //        IsActive = true
-        //    };
-
-        //    await _userDao.AddUserAsync(user);
-        //    return user;
-        //}
 
         public async Task<UserResponseDto> UpdateUser(int id, UserUpdateRequestDto dto)
         {
