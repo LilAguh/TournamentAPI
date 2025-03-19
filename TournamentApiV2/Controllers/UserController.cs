@@ -24,25 +24,11 @@ namespace TournamentApiV2.Controllers
         {
             int? creatorId = null;
 
-            // Solo intenta obtener el ID si el token es válido y el usuario está autenticado
             if (User.Identity?.IsAuthenticated == true)
-            {
                 creatorId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-            }
 
-            try
-            {
-                var user = await _userService.Register(dto, creatorId);
-                return Ok(new { user.Alias, user.Role });
-            }
-            catch (ForbiddenException ex)
-            {
-                return StatusCode(403, ex.Message); // 403 si no tiene permisos
-            }
-            catch (ValidationException ex)
-            {
-                return BadRequest(ex.Message); // 400 si falta el rol para Admin
-            }
+            var user = await _userService.Register(dto, creatorId);
+            return Ok(new { user.Alias, user.Role });
         }
 
         [Authorize]
