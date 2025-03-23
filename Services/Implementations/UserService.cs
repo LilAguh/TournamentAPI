@@ -5,6 +5,7 @@ using Models.Enums;
 using Config;
 using Services.Interfaces;
 using static Models.Exceptions.CustomException;
+using Models.Entities;
 
 
 namespace Services.Implementations
@@ -37,76 +38,15 @@ namespace Services.Implementations
         */
         public async Task<UserResponseDto> Register(UserRegisterRequestDto dto, int? creatorId)
         {
-            // Determinar el rol y el creador
+            await ValidateUserDetailsAsync(dto.Alias, dto.Email, dto.CountryCode);
             var (role, createdBy) = await DetermineRoleAndCreator(dto, creatorId);
 
-            // Validar detalles del usuario
-            await ValidateUserDetailsAsync(dto.Alias, dto.Email, dto.CountryCode);
-            var hashedPassword = _passwordHasher.HashPassword(dto.Password);
+            var user = CreateUser(dto, role, createdBy);
 
-            // Crear el objeto UserRequestDto
-            var user = new UserRequestDto
-            {
-                FirstName = dto.FirstName,
-                LastName = dto.LastName,
-                Alias = dto.Alias,
-                Email = dto.Email,
-                PasswordHash = hashedPassword,
-                CountryCode = dto.CountryCode,
-                AvatarUrl = dto.AvatarUrl,
-                Role = role,
-                CreatedBy = createdBy, // createdBy ya es int (no nullable)
-                CreatedAt = DateTime.UtcNow,
-                IsActive = true
-            };
-
-            // Guardar el usuario en la base de datos
             var userId = await _userDao.AddUserAsync(user);
 
-            // Mapear UserRequestDto a UserResponseDto
-            return new UserResponseDto
-            {
-                Id = userId,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Alias = user.Alias,
-                Email = user.Email,
-                CountryCode = user.CountryCode,
-                AvatarUrl = user.AvatarUrl,
-                Role = user.Role,
-                CreatedAt = user.CreatedAt,
-                IsActive = user.IsActive
-            };
-        }
+            return MapUserResponseDto(user, userId);
 
-        private async Task<(RoleEnum role, int createdBy)> DetermineRoleAndCreator(UserRegisterRequestDto dto,int? creatorId)
-        {
-            // Registro público -> Solo permite Player
-            if (!creatorId.HasValue)
-            {
-                if (dto.Role != null && dto.Role != RoleEnum.Player)
-                {
-                    throw new ForbiddenException("No puedes crear usuarios con roles específicos sin autenticación.");
-                }
-                return (RoleEnum.Player, 0); // 0 indica autoregistro
-            }
-
-            // Registro por usuario autenticado
-            var creator = await _userDao.GetUserByIdAsync(creatorId.Value);
-
-            // Validar que el creador tenga permisos
-            if (creator.Role != RoleEnum.Admin && creator.Role != RoleEnum.Organizer)
-            {
-                throw new ForbiddenException("No tienes permisos para registrar usuarios");
-            }
-
-            // Asignar el rol según el creador
-            return creator.Role switch
-            {
-                RoleEnum.Admin => (dto.Role ?? throw new ValidationException("El rol es obligatorio para Admins"), creator.Id),
-                RoleEnum.Organizer => (RoleEnum.Judge, creator.Id),
-                _ => throw new ForbiddenException("Rol no soportado")
-            };
         }
 
         public async Task<UserResponseDto> UpdateUser(int id, UserUpdateRequestDto dto)
@@ -145,13 +85,77 @@ namespace Services.Implementations
 
             return user;
         }
-
-        // Private section //
-
         public async Task DeletePermanentUser(int id)
         {
             var user = await ValidateUserExistsAsync(id);
             await _userDao.PermanentDeleteUserAsync(id);
+        }
+
+        // Private section //
+
+        private async Task<(RoleEnum role, int createdBy)> DetermineRoleAndCreator(UserRegisterRequestDto dto, int? creatorId)
+        {
+            // Registro público -> Solo permite Player
+            if (!creatorId.HasValue)
+            {
+                if (dto.Role != null && dto.Role != RoleEnum.Player)
+                {
+                    throw new ForbiddenException("No puedes crear usuarios con roles específicos sin autenticación.");
+                }
+                return (RoleEnum.Player, 0); // 0 indica autoregistro
+            }
+
+            // Registro por usuario autenticado
+            var creator = await _userDao.GetUserByIdAsync(creatorId.Value);
+
+            // Validar que el creador tenga permisos
+            if (creator.Role != RoleEnum.Admin && creator.Role != RoleEnum.Organizer)
+            {
+                throw new ForbiddenException("No tienes permisos para registrar usuarios");
+            }
+
+            // Asignar el rol según el creador
+            return creator.Role switch
+            {
+                RoleEnum.Admin => (dto.Role ?? throw new ValidationException("El rol es obligatorio para Admins"), creator.Id),
+                RoleEnum.Organizer => (RoleEnum.Judge, creator.Id),
+                _ => throw new ForbiddenException("Rol no soportado")
+            };
+        }
+
+        private UserRequestDto CreateUser(UserRegisterRequestDto dto, RoleEnum role, int createdBy)
+        {
+            return new UserRequestDto
+            {
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                Alias = dto.Alias,
+                Email = dto.Email,
+                PasswordHash = _passwordHasher.HashPassword(dto.Password),
+                CountryCode = dto.CountryCode,
+                AvatarUrl = dto.AvatarUrl,
+                Role = role,
+                CreatedBy = createdBy,
+                CreatedAt = DateTime.UtcNow,
+                IsActive = true
+            };
+        }
+
+        private UserResponseDto MapUserResponseDto(UserRequestDto user, int userId)
+        {
+            return new UserResponseDto
+            {
+                Id = userId,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Alias = user.Alias,
+                Email = user.Email,
+                CountryCode = user.CountryCode,
+                AvatarUrl = user.AvatarUrl,
+                Role = user.Role,
+                CreatedAt = user.CreatedAt,
+                IsActive = user.IsActive
+            };
         }
 
         private async Task ValidateAliasAsync(string alias)
