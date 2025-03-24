@@ -90,7 +90,6 @@ namespace DataAccess.DAOs.Implementations
             await connection.ExecuteAsync(query, new { userDto.IsActive, userDto.Id });
         }
 
-        //Solo va a funcionar para el testing
         public async Task<bool> PermanentDeleteUserAsync(int userId)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
