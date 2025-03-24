@@ -8,20 +8,17 @@ using static Models.Exceptions.CustomException;
 
 namespace Services.Implementations
 {
-    /// <summary>
-    /// Servicio para gestionar las operaciones relacionadas con usuarios.
-    /// Incluye funcionalidades como registro, actualización, cambio de contraseña,
-    /// eliminación y consulta de usuarios.
-    /// </summary>
+    // Servicio para gestionar las operaciones relacionadas con usuarios.
     public class UserService : IUserService
     {
         private readonly IUserDao _userDao;
         private readonly PasswordHasher _passwordHasher;
         private readonly ICountryService _countryService;
 
+        // Constructor del servicio de usuario
         public UserService(
-            IUserDao userDao, 
-            PasswordHasher passwordHasher, 
+            IUserDao userDao,
+            PasswordHasher passwordHasher,
             ICountryService countryService)
         {
             _userDao = userDao;
@@ -29,48 +26,19 @@ namespace Services.Implementations
             _countryService = countryService;
         }
 
-        /*
-            "firstName": "Aguh",
-            "lastName": "Ochoa",
-            "alias": "AguhCab123123s",
-            "email": "aguhOchoa123123s@gmail.com",
-            "password": "Argentina14123123",
-            "countryCode": "AR",
-            "avatarUrl": "https://tn.com.ar/resizer/v2/guillermo-farre-sentencio-el-descenso-de-river-ap-C3BQEM6HE76CAM7ARY7ETWPG7Q.jpg?auth=84a0351a3871bb7f63c7762fe232d157d2349d146d2ad637b39d15b2a11cee6c&width=1023",
-            "createdBy": 0
-        */
-
-
-        /// <summary>
-        /// Registra un nuevo usuario en el sistema.
-        /// </summary>
-        /// <param name="dto">DTO con los datos del usuario a registrar.</param>
-        /// <param name="creatorId">ID del usuario que realiza el registro (opcional).</param>
-        /// <returns>DTO con los datos del usuario registrado.</returns>
-        /// <exception cref="ValidationException">Se lanza si el alias, email o código de país no son válidos.</exception>
-        /// <exception cref="ForbiddenException">Se lanza si el usuario no tiene permisos para registrar otros usuarios.</exception>
+        // Registra un nuevo usuario en el sistema.
         public async Task<UserResponseDto> Register(UserRegisterRequestDto dto, int? creatorId)
         {
             await ValidateUserDetailsAsync(dto.Alias, dto.Email, dto.CountryCode);
             var (role, createdBy) = await DetermineRoleAndCreator(dto, creatorId);
 
             var user = CreateUser(dto, role, createdBy);
-
             var userId = await _userDao.AddUserAsync(user);
 
             return MapUserResponseDto(user, userId);
-
         }
 
-
-        /// <summary>
-        /// Actualiza los datos de un usuario existente.
-        /// </summary>
-        /// <param name="id">ID del usuario a actualizar.</param>
-        /// <param name="dto">DTO con los nuevos datos del usuario.</param>
-        /// <returns>DTO con los datos actualizados del usuario.</returns>
-        /// <exception cref="NotFoundException">Se lanza si el usuario no existe.</exception>
-        /// <exception cref="ValidationException">Se lanza si el código de país no es válido.</exception>
+        // Actualiza los datos de un usuario existente.
         public async Task<UserResponseDto> UpdateUser(int id, UserUpdateRequestDto dto)
         {
             var user = await ValidateUserExistsAsync(id);
@@ -83,39 +51,41 @@ namespace Services.Implementations
             return user;
         }
 
+        // Cambia la contraseña de un usuario.
         public async Task ChangePasswordAsync(int userId, ChangePasswordRequestDto dto)
         {
             var user = await ValidateUserExistsAsync(userId);
-
             _passwordHasher.VerifyPassword(dto.CurrentPassword, user.PasswordHash);
-               
+
             user.PasswordHash = _passwordHasher.HashPassword(dto.NewPassword);
             await _userDao.UpdateUserAsync(user);
         }
 
+        // Desactiva un usuario (eliminación lógica).
         public async Task DeleteUser(int id)
         {
             var user = await ValidateUserExistsAsync(id);
-
             user.IsActive = false;
             await _userDao.UpdateUserStatusAsync(user);
         }
 
+        // Obtiene los datos de un usuario por su ID.
         public async Task<UserResponseDto> GetUserById(int id)
         {
             var user = await ValidateUserExistsAsync(id);
-
             return user;
         }
 
+        // Elimina permanentemente un usuario de la base de datos.
         public async Task DeletePermanentUser(int id)
         {
             var user = await ValidateUserExistsAsync(id);
             await _userDao.PermanentDeleteUserAsync(id);
         }
 
-        // Private section //
+        // Métodos privados //
 
+        // Determina el rol y el creador de un nuevo usuario.
         private async Task<(RoleEnum role, int createdBy)> DetermineRoleAndCreator(UserRegisterRequestDto dto, int? creatorId)
         {
             if (creatorId != null)
@@ -128,21 +98,24 @@ namespace Services.Implementations
             return DetermineRoleBasedOnCreator(dto, creator);
         }
 
+        // Maneja el registro público de usuarios (sin autenticación).
         private (RoleEnum role, int createdBy) PublicRegistration(UserRegisterRequestDto dto)
         {
             if (dto.Role != null && dto.Role != RoleEnum.Player)
             {
                 throw new ForbiddenException("No puedes crear usuarios con roles específicos sin autenticación.");
             }
-            return (RoleEnum.Player, 0); // 0 indica autoregistro
+            return (RoleEnum.Player, 0);
         }
 
+        // Obtiene el usuario creador desde la base de datos.
         private async Task<UserResponseDto> GetCreatorAsync(int creatorId)
         {
             var creator = await _userDao.GetUserByIdAsync(creatorId);
             return creator ?? throw new NotFoundException("Usuario creador no encontrado.");
         }
 
+        // Valida que el creador tenga permisos para registrar usuarios.
         private void CreatorHasPermissions(UserResponseDto creator)
         {
             bool isAdmin = creator.Role == RoleEnum.Admin;
@@ -154,16 +127,24 @@ namespace Services.Implementations
             }
         }
 
+        // Determina el rol del nuevo usuario basado en el rol del creador.
         private (RoleEnum role, int createdBy) DetermineRoleBasedOnCreator(UserRegisterRequestDto dto, UserResponseDto creator)
         {
-            return creator.Role switch
+            if (creator.Role == RoleEnum.Admin)
             {
-                RoleEnum.Admin => HandleAdminRegistration(dto, creator),
-                RoleEnum.Organizer => (RoleEnum.Judge, creator.Id),
-                _ => throw new ForbiddenException("Rol no soportado para creación de usuarios.")
-            };
+                return HandleAdminRegistration(dto, creator);
+            }
+            else if (creator.Role == RoleEnum.Organizer)
+            {
+                return (RoleEnum.Judge, creator.Id);
+            }
+            else
+            {
+                throw new ForbiddenException("Rol no soportado para creación de usuarios.");
+            }
         }
 
+        // Maneja el registro de usuarios por un Admin.
         private (RoleEnum role, int createdBy) HandleAdminRegistration(UserRegisterRequestDto dto, UserResponseDto creator)
         {
             if (dto.Role == null)
@@ -173,6 +154,7 @@ namespace Services.Implementations
             return (dto.Role.Value, creator.Id);
         }
 
+        // Crea un objeto UserRequestDto a partir de un UserRegisterRequestDto.
         private UserRequestDto CreateUser(UserRegisterRequestDto dto, RoleEnum role, int createdBy)
         {
             return new UserRequestDto
@@ -191,6 +173,7 @@ namespace Services.Implementations
             };
         }
 
+        // Mapea un UserRequestDto a un UserResponseDto.
         private UserResponseDto MapUserResponseDto(UserRequestDto user, int userId)
         {
             return new UserResponseDto
@@ -208,6 +191,7 @@ namespace Services.Implementations
             };
         }
 
+        // Valida que el alias no esté en uso.
         private async Task ValidateAliasAsync(string alias)
         {
             var existingAlias = await _userDao.GetUserByAliasAsync(alias) != null ?
@@ -215,6 +199,7 @@ namespace Services.Implementations
                 : true;
         }
 
+        // Valida que el email no esté en uso.
         private async Task ValidateEmailAsync(string email)
         {
             var existingEmailUser = await _userDao.GetActiveUserByEmailAsync(email) != null ?
@@ -222,6 +207,7 @@ namespace Services.Implementations
                 : true;
         }
 
+        // Valida los detalles del usuario (alias, email y código de país).
         private async Task ValidateUserDetailsAsync(string alias, string email, string countryCode)
         {
             await ValidateAliasAsync(alias);
@@ -229,12 +215,14 @@ namespace Services.Implementations
             await _countryService.ValidateCountryAsync(countryCode);
         }
 
+        // Valida que un usuario exista en la base de datos.
         private async Task<UserResponseDto> ValidateUserExistsAsync(int id)
         {
             var user = await _userDao.GetUserByIdAsync(id);
             return user ?? throw new NotFoundException(ErrorMessages.UserNotFound);
         }
 
+        // Actualiza las propiedades de un usuario con los datos proporcionados.
         private void UpdateUserProperties(UserResponseDto user, UserUpdateRequestDto dto)
         {
             user.FirstName = !string.IsNullOrEmpty(dto.FirstName) ? dto.FirstName : user.FirstName;
