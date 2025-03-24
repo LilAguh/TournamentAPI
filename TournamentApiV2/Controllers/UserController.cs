@@ -25,7 +25,7 @@ namespace TournamentApiV2.Controllers
             int? creatorId = null;
 
             if (User.Identity?.IsAuthenticated == true)
-                creatorId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                creatorId = GetUserIdFromToken();
 
             var user = await _userService.Register(dto, creatorId);
             return Ok(new { user.Alias, user.Role });
@@ -35,7 +35,7 @@ namespace TournamentApiV2.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, [FromBody] UserUpdateRequestDto dto)
         {
-            var userIdFromToken = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var userIdFromToken = GetUserIdFromToken();
             if (userIdFromToken != id)
                 throw new ForbiddenException(ErrorMessages.IdDiffer);
 
@@ -47,7 +47,7 @@ namespace TournamentApiV2.Controllers
         [HttpPost("ChangePassword")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDto dto)
         {
-            var userIdFromToken = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var userIdFromToken = GetUserIdFromToken();
 
             await _userService.ChangePasswordAsync(userIdFromToken, dto);
             return Ok(new { Message = ErrorMessages.PasswordUpdated });
@@ -57,7 +57,7 @@ namespace TournamentApiV2.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
-            var userIdFromToken = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var userIdFromToken = GetUserIdFromToken();
             if (userIdFromToken != id)
                 throw new ForbiddenException(ErrorMessages.IdDiffer);
 
@@ -78,6 +78,14 @@ namespace TournamentApiV2.Controllers
         {
             var user = await _userService.GetUserById(id);
             return Ok(user);
+        }
+
+        private int GetUserIdFromToken()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                ?? throw new UnauthorizedException(ErrorMessages.GetUserIdException);
+
+            return int.Parse(userId);
         }
     }
 }
