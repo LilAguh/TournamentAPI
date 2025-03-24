@@ -65,11 +65,16 @@ namespace TournamentApiV2.Controllers
             return Ok(new { Message = ErrorMessages.AccountDeactivated });
         }
 
+        [Authorize]
         [HttpDelete("DeletePermanent/{id}")]
         public async Task<IActionResult> DeleteUserPermanently(int id)
         {
+            var userIdFromToken = GetUserIdFromToken();
+            if (userIdFromToken != id)
+                throw new ForbiddenException(ErrorMessages.IdDiffer);
+
             await _userService.DeletePermanentUser(id);
-            return NoContent();
+            return Ok(new { Message = ErrorMessages.AccountDeleted });
         }
 
         [Authorize(Roles = "Admin")]
