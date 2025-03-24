@@ -59,5 +59,6 @@ namespace Config
 
         //UserController
         public const string PasswordUpdated = "Password updated successfully.";
+        public const string GetUserIdException = "Unauthenticated user.";
     }
 }
