@@ -46,11 +46,18 @@ namespace Config
         public const string InvalidCountryCode = "Invalid country code.";
 
         //UserCard
-        //public const string
         public const string CardNotFound = "Carta no encontrada.";
 
         //UserService:
         public const string AliasAlreadyUse = "Alias is already in use.";
         public const string EmailAlreadyUse = "The email is already in use by an active user.";
+        public const string CannotCreateUsers = "You cannot create users with specific roles without authentication.";
+        public const string CreatorUserNotFound = "Creator user not found.";
+        public const string NotHavePermissionRegister = "You do not have permission to register users.";
+        public const string RoleNoSupportedUser = "Role not supported for user creation.";
+        public const string AdminRoleRequired = "The role is required for Admins.";
+
+        //UserController
+        public const string PasswordUpdated = "Password updated successfully.";
     }
 }
