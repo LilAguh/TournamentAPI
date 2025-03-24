@@ -5,11 +5,14 @@ using Models.Enums;
 using Config;
 using Services.Interfaces;
 using static Models.Exceptions.CustomException;
-using Models.Entities;
-
 
 namespace Services.Implementations
 {
+    /// <summary>
+    /// Servicio para gestionar las operaciones relacionadas con usuarios.
+    /// Incluye funcionalidades como registro, actualización, cambio de contraseña,
+    /// eliminación y consulta de usuarios.
+    /// </summary>
     public class UserService : IUserService
     {
         private readonly IUserDao _userDao;
@@ -36,6 +39,16 @@ namespace Services.Implementations
             "avatarUrl": "https://tn.com.ar/resizer/v2/guillermo-farre-sentencio-el-descenso-de-river-ap-C3BQEM6HE76CAM7ARY7ETWPG7Q.jpg?auth=84a0351a3871bb7f63c7762fe232d157d2349d146d2ad637b39d15b2a11cee6c&width=1023",
             "createdBy": 0
         */
+
+
+        /// <summary>
+        /// Registra un nuevo usuario en el sistema.
+        /// </summary>
+        /// <param name="dto">DTO con los datos del usuario a registrar.</param>
+        /// <param name="creatorId">ID del usuario que realiza el registro (opcional).</param>
+        /// <returns>DTO con los datos del usuario registrado.</returns>
+        /// <exception cref="ValidationException">Se lanza si el alias, email o código de país no son válidos.</exception>
+        /// <exception cref="ForbiddenException">Se lanza si el usuario no tiene permisos para registrar otros usuarios.</exception>
         public async Task<UserResponseDto> Register(UserRegisterRequestDto dto, int? creatorId)
         {
             await ValidateUserDetailsAsync(dto.Alias, dto.Email, dto.CountryCode);
@@ -49,6 +62,15 @@ namespace Services.Implementations
 
         }
 
+
+        /// <summary>
+        /// Actualiza los datos de un usuario existente.
+        /// </summary>
+        /// <param name="id">ID del usuario a actualizar.</param>
+        /// <param name="dto">DTO con los nuevos datos del usuario.</param>
+        /// <returns>DTO con los datos actualizados del usuario.</returns>
+        /// <exception cref="NotFoundException">Se lanza si el usuario no existe.</exception>
+        /// <exception cref="ValidationException">Se lanza si el código de país no es válido.</exception>
         public async Task<UserResponseDto> UpdateUser(int id, UserUpdateRequestDto dto)
         {
             var user = await ValidateUserExistsAsync(id);
@@ -85,6 +107,7 @@ namespace Services.Implementations
 
             return user;
         }
+
         public async Task DeletePermanentUser(int id)
         {
             var user = await ValidateUserExistsAsync(id);
@@ -95,32 +118,59 @@ namespace Services.Implementations
 
         private async Task<(RoleEnum role, int createdBy)> DetermineRoleAndCreator(UserRegisterRequestDto dto, int? creatorId)
         {
-            // Registro público -> Solo permite Player
-            if (!creatorId.HasValue)
+            if (creatorId != null)
             {
-                if (dto.Role != null && dto.Role != RoleEnum.Player)
-                {
-                    throw new ForbiddenException("No puedes crear usuarios con roles específicos sin autenticación.");
-                }
-                return (RoleEnum.Player, 0); // 0 indica autoregistro
+                return PublicRegistration(dto);
             }
 
-            // Registro por usuario autenticado
-            var creator = await _userDao.GetUserByIdAsync(creatorId.Value);
+            var creator = await GetCreatorAsync(creatorId.Value);
+            CreatorHasPermissions(creator);
+            return DetermineRoleBasedOnCreator(dto, creator);
+        }
 
-            // Validar que el creador tenga permisos
-            if (creator.Role != RoleEnum.Admin && creator.Role != RoleEnum.Organizer)
+        private (RoleEnum role, int createdBy) PublicRegistration(UserRegisterRequestDto dto)
+        {
+            if (dto.Role != null && dto.Role != RoleEnum.Player)
             {
-                throw new ForbiddenException("No tienes permisos para registrar usuarios");
+                throw new ForbiddenException("No puedes crear usuarios con roles específicos sin autenticación.");
             }
+            return (RoleEnum.Player, 0); // 0 indica autoregistro
+        }
 
-            // Asignar el rol según el creador
+        private async Task<UserResponseDto> GetCreatorAsync(int creatorId)
+        {
+            var creator = await _userDao.GetUserByIdAsync(creatorId);
+            return creator ?? throw new NotFoundException("Usuario creador no encontrado.");
+        }
+
+        private void CreatorHasPermissions(UserResponseDto creator)
+        {
+            bool isAdmin = creator.Role == RoleEnum.Admin;
+            bool isOrganizer = creator.Role == RoleEnum.Organizer;
+
+            if (!isAdmin && !isOrganizer)
+            {
+                throw new ForbiddenException("No tienes permisos para registrar usuarios.");
+            }
+        }
+
+        private (RoleEnum role, int createdBy) DetermineRoleBasedOnCreator(UserRegisterRequestDto dto, UserResponseDto creator)
+        {
             return creator.Role switch
             {
-                RoleEnum.Admin => (dto.Role ?? throw new ValidationException("El rol es obligatorio para Admins"), creator.Id),
+                RoleEnum.Admin => HandleAdminRegistration(dto, creator),
                 RoleEnum.Organizer => (RoleEnum.Judge, creator.Id),
-                _ => throw new ForbiddenException("Rol no soportado")
+                _ => throw new ForbiddenException("Rol no soportado para creación de usuarios.")
             };
+        }
+
+        private (RoleEnum role, int createdBy) HandleAdminRegistration(UserRegisterRequestDto dto, UserResponseDto creator)
+        {
+            if (dto.Role == null)
+            {
+                throw new ValidationException("El rol es obligatorio para Admins.");
+            }
+            return (dto.Role.Value, creator.Id);
         }
 
         private UserRequestDto CreateUser(UserRegisterRequestDto dto, RoleEnum role, int createdBy)
