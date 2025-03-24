@@ -103,7 +103,7 @@ namespace Services.Implementations
         {
             if (dto.Role != null && dto.Role != RoleEnum.Player)
             {
-                throw new ForbiddenException("No puedes crear usuarios con roles específicos sin autenticación.");
+                throw new ForbiddenException(ErrorMessages.CannotCreateUsers);
             }
             return (RoleEnum.Player, 0);
         }
@@ -112,7 +112,7 @@ namespace Services.Implementations
         private async Task<UserResponseDto> GetCreatorAsync(int creatorId)
         {
             var creator = await _userDao.GetUserByIdAsync(creatorId);
-            return creator ?? throw new NotFoundException("Usuario creador no encontrado.");
+            return creator ?? throw new NotFoundException(ErrorMessages.CreatorUserNotFound);
         }
 
         // Valida que el creador tenga permisos para registrar usuarios.
@@ -123,7 +123,7 @@ namespace Services.Implementations
 
             if (!isAdmin && !isOrganizer)
             {
-                throw new ForbiddenException("No tienes permisos para registrar usuarios.");
+                throw new ForbiddenException(ErrorMessages.NotHavePermissionRegister);
             }
         }
 
@@ -140,7 +140,7 @@ namespace Services.Implementations
             }
             else
             {
-                throw new ForbiddenException("Rol no soportado para creación de usuarios.");
+                throw new ForbiddenException(ErrorMessages.RoleNoSupportedUser);
             }
         }
 
@@ -149,7 +149,7 @@ namespace Services.Implementations
         {
             if (dto.Role == null)
             {
-                throw new ValidationException("El rol es obligatorio para Admins.");
+                throw new ValidationException(ErrorMessages.AdminRoleRequired);
             }
             return (dto.Role.Value, creator.Id);
         }
