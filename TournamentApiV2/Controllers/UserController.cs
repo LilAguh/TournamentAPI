@@ -50,7 +50,7 @@ namespace TournamentApiV2.Controllers
             var userIdFromToken = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
             await _userService.ChangePasswordAsync(userIdFromToken, dto);
-            return Ok(new { Message = "Contraseña actualizada correctamente." });
+            return Ok(new { Message = ErrorMessages.PasswordUpdated });
         }
 
         [Authorize]
