@@ -2,6 +2,7 @@
 
 using Config;
 using DataAccess.DAOs.Interfaces;
+using Models.DTOs.Country;
 using Services.Interfaces;
 using static Models.Exceptions.CustomException;
 
@@ -21,6 +22,11 @@ namespace Services.Implementations
             bool countryExists = await _countryDao.CountryExists(countryCode);
             if (!countryExists)
                 throw new ValidationException(ErrorMessages.InvalidCountryCode);
+        }
+
+        public async Task<IEnumerable<CountryResponseDto>> GetAllCountriesAsync()
+        {
+            return await _countryDao.GetAllCountriesAsync();
         }
     }
 }
