@@ -45,6 +45,7 @@ builder.Services.AddSingleton<IDatabaseConnection>(provider =>
 
 builder.Services.AddScoped<JwtHelper>();
 builder.Services.AddAuthorization();
+builder.Services.AddMemoryCache();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserDao, UserDao>();
