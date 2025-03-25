@@ -15,6 +15,8 @@ namespace DataAccess.DAOs.Implementations
             _databaseConnection = databaseConnection;
         }
 
+        // Verifica si existe un país con el código especificado.
+        // Retorna true si el país existe, de lo contrario false.
         public async Task<bool> CountryExists(string code)
         {
             using (var connection = await _databaseConnection.GetConnectionAsync())
@@ -25,6 +27,8 @@ namespace DataAccess.DAOs.Implementations
             }
         }
 
+        // Obtiene la lista de todos los países registrados.
+        // Retorna una colección de CountryResponseDto con el código y nombre de cada país.
         public async Task<IEnumerable<CountryResponseDto>> GetAllCountriesAsync()
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
