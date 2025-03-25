@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using DataAccess.DAOs.Interfaces;
 using DataAccess.Database;
+using Models.DTOs.Country;
 
 
 namespace DataAccess.DAOs.Implementations
@@ -22,6 +23,13 @@ namespace DataAccess.DAOs.Implementations
                 var count = await connection.ExecuteScalarAsync<int>(query, new { Code = code });
                 return count > 0;
             }
+        }
+
+        public async Task<IEnumerable<CountryResponseDto>> GetAllCountriesAsync()
+        {
+            using var connection = await _databaseConnection.GetConnectionAsync();
+            var query = "SELECT Code, Name FROM countries";
+            return await connection.QueryAsync<CountryResponseDto>(query);
         }
     }
 }
