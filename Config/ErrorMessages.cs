@@ -44,6 +44,7 @@ namespace Config
 
         //Country:
         public const string InvalidCountryCode = "Invalid country code.";
+        public const string NoCountriesRegistered = "There are no countries registered.";
 
         //UserCard
         public const string CardNotFound = "Carta no encontrada.";
