@@ -47,7 +47,8 @@ namespace Config
         public const string NoCountriesRegistered = "There are no countries registered.";
 
         //UserCard
-        public const string CardNotFound = "Carta no encontrada.";
+        public const string CardNotFound = "The card has not been found.";
+        public const string NoCardsRegistered = "There are no registered cards.";
 
         //UserService:
         public const string AliasAlreadyUse = "Alias is already in use.";
@@ -57,6 +58,7 @@ namespace Config
         public const string NotHavePermissionRegister = "You do not have permission to register users.";
         public const string RoleNoSupportedUser = "Role not supported for user creation.";
         public const string AdminRoleRequired = "The role is required for Admins.";
+        public const string AdminInvalid = "The admin is not valid.";
 
         //UserController
         public const string PasswordUpdated = "Password updated successfully.";
