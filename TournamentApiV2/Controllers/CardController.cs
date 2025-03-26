@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.DTOs.Cards;
-using Services.Implementations;
 using Services.Interfaces;
 using System.Security.Claims;
 using static Models.Exceptions.CustomException;
@@ -24,7 +23,7 @@ namespace TournamentApiV2.Controllers
         public async Task<IActionResult> CreateCard([FromBody] CardRequestDto card)
         {
             var adminId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-            var cardId = await _cardService.CreateCardAsync(card, 21);
+            var cardId = await _cardService.CreateCardAsync(card, adminId);
             return CreatedAtAction(nameof(GetCardById), new { id = cardId }, new { id = cardId });
         }
 
