@@ -52,6 +52,7 @@ namespace Config
         public const string CardNotFound = "The card has not been found.";
         public const string NoCardsRegistered = "There are no registered cards.";
         public const string CardDeleted = "Card successfully deleted.";
+        public const string CardAlreadyExist = "There is already a card with this name.";
 
         //UserService:
         public const string AliasAlreadyUse = "Alias is already in use.";
