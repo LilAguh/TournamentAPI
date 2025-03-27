@@ -41,6 +41,8 @@ namespace Config
         //admincontroller:
         public const string UserNotFound = "User not found.";
         public const string InternalServerError = "Internal server error.";
+        public const string AdminTokenNotFound = "Admin ID not found in token.";
+        public const string InvalidFormatTokenId = "Invalid format for administrator ID.";
 
         //Country:
         public const string InvalidCountryCode = "Invalid country code.";
@@ -49,6 +51,7 @@ namespace Config
         //UserCard
         public const string CardNotFound = "The card has not been found.";
         public const string NoCardsRegistered = "There are no registered cards.";
+        public const string CardDeleted = "Card successfully deleted.";
 
         //UserService:
         public const string AliasAlreadyUse = "Alias is already in use.";
