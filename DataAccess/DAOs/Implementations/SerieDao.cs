@@ -15,6 +15,7 @@ namespace DataAccess.DAOs.Implementations
             _databaseConnection = databaseConnection;
         }
 
+        // Agrega una nueva serie a la base de datos y retorna el objeto SeriesResponseDto de la serie creada.
         public async Task<SeriesResponseDto> AddSeriesAsync(SeriesRequestDto dto)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
@@ -25,6 +26,7 @@ namespace DataAccess.DAOs.Implementations
             return await GetSeriesByIdAsync(id);
         }
 
+        // Retorna todas las series registradas en la base de datos.
         public async Task<IEnumerable<SeriesResponseDto>> GetAllSeriesAsync()
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
@@ -32,6 +34,7 @@ namespace DataAccess.DAOs.Implementations
             return await connection.QueryAsync<SeriesResponseDto>(query);
         }
 
+        // Retorna una serie específica por su ID.
         public async Task<SeriesResponseDto> GetSeriesByIdAsync(int id)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
@@ -39,6 +42,7 @@ namespace DataAccess.DAOs.Implementations
             return await connection.QueryFirstOrDefaultAsync<SeriesResponseDto>(query, new { Id = id });
         }
 
+        // Actualiza los datos de una serie y retorna el objeto actualizado.
         public async Task<SeriesResponseDto> UpdateSeriesAsync(int id, SeriesRequestDto dto)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
@@ -49,6 +53,7 @@ namespace DataAccess.DAOs.Implementations
             return await GetSeriesByIdAsync(id);
         }
 
+        // Elimina una serie de la base de datos y retorna true si la eliminación fue exitosa.
         public async Task<bool> DeleteSeriesAsync(int id)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
