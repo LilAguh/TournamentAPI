@@ -53,6 +53,11 @@ namespace Config
         public const string NoCardsRegistered = "There are no registered cards.";
         public const string CardDeleted = "Card successfully deleted.";
         public const string CardAlreadyExist = "There is already a card with this name.";
+        public const string CardIdRequired = "Card ID is required.";
+        public const string AmountRequired = "The amount is required.";
+        public const string ErrorQuantity = "The quantity must be between 1 and 100.";
+        public const string CardAddCollection = "Card added to your collection.";
+        public const string CardRemovedCollection = "Card removed from your collection.";
 
         //UserService:
         public const string AliasAlreadyUse = "Alias is already in use.";
