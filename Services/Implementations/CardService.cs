@@ -42,11 +42,12 @@ namespace Services.Implementations
         }
 
         // Actualiza una carta existente, validando primero que el admin es válido y la carta existe.
-        public async Task<bool> UpdateCardAsync(int id, CardRequestDto card, int adminId)
+        public async Task<CardResponseDto> UpdateCardAsync(int id, CardRequestDto card, int adminId)
         {
             await ValidateAdminAsync(adminId);
             await ExistingCardAsync(id);
-            return await _cardDao.UpdateCardAsync(id, card);
+            await _cardDao.UpdateCardAsync(id, card);
+            return await GetCardByIdAsync(id);
         }
 
         // Elimina una carta (eliminación lógica o física, según la implementación), validando que el admin es válido y la carta existe.
