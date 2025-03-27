@@ -20,10 +20,16 @@ namespace Services.Implementations
         }
 
         // Crea una carta en el sistema, solo si el usuario (admin) es válido.
-        public async Task<int> CreateCardAsync(CardRequestDto card, int adminId)
+        // Comprueba que la carta no exista en el sistema.
+        public async Task<CardResponseDto> CreateCardAsync(CardRequestDto card, int adminId)
         {
             await ValidateAdminAsync(adminId);
-            return await _cardDao.AddCardAsync(card, adminId);
+            if (await _cardDao.CardExistsAsync(card.Name))
+            {
+                throw new ValidationException(ErrorMessages.CardAlreadyExist);
+            }
+            var cardId = await _cardDao.AddCardAsync(card, adminId);
+            return await _cardDao.GetCardByIdAsync(cardId);
         }
 
         // Retorna todas las cartas registradas.
