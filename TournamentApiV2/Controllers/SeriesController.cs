@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿
+using Config;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.DTOs.Series;
 using Services.Interfaces;
@@ -16,6 +18,8 @@ namespace TournamentApiV2.Controllers
             _seriesService = seriesService;
         }
 
+        // POST /Series
+        // Crea una nueva serie. Solo los administradores pueden realizar esta acción.
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateSeries([FromBody] SeriesRequestDto dto)
@@ -24,6 +28,8 @@ namespace TournamentApiV2.Controllers
             return CreatedAtAction(nameof(GetSeriesById), new { id = series.Id }, series);
         }
 
+        // GET /Series
+        // Obtiene la lista de todas las series registradas.
         [HttpGet]
         public async Task<IActionResult> GetAllSeries()
         {
@@ -31,6 +37,8 @@ namespace TournamentApiV2.Controllers
             return Ok(seriesList);
         }
 
+        // GET /Series/{id}
+        // Obtiene una serie específica según su ID.
         [HttpGet("{id}")]
         public async Task<IActionResult> GetSeriesById(int id)
         {
@@ -38,6 +46,8 @@ namespace TournamentApiV2.Controllers
             return Ok(series);
         }
 
+        // PUT /Series/{id}
+        // Actualiza los datos de una serie existente. Solo los administradores pueden modificar una serie.
         [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateSeries(int id, [FromBody] SeriesRequestDto dto)
@@ -46,12 +56,14 @@ namespace TournamentApiV2.Controllers
             return Ok(updatedSeries);
         }
 
+        // DELETE /Series/{id}
+        // Elimina una serie según su ID. Solo los administradores pueden realizar esta acción.
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSeries(int id)
         {
             await _seriesService.DeleteSeriesAsync(id);
-            return Ok("Serie eliminada");
+            return Ok(ErrorMessages.SeriesDeleted);
         }
     }
 }
