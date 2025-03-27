@@ -66,6 +66,15 @@ namespace Config
         public const string ErrorDeleteDeck = "You cannot delete this deck.";
         public const string DeleteDeck = "Deck has been removed.";
 
+        //CardDecks
+        public const string LeastOneCard = "At least one card must be sent.";
+        public const string LimitCardSentDeck = "Only 1 to 15 cards can be sent to each deck.";
+        public const string LimitCardExceeded = "The deck already contains 15 cards or the limit is exceeded when adding new cards.";
+        public const string CardNotInDeck = "The card is not in the deck.";
+        public const string DeckEmpty = "The deck is empty.";
+        public const string CardRemovedDeck = "Card removed from your deck.";
+        public const string CardsAddDeck = "Cards added to the deck.";
+
         //UserService:
         public const string AliasAlreadyUse = "Alias is already in use.";
         public const string EmailAlreadyUse = "The email is already in use by an active user.";
