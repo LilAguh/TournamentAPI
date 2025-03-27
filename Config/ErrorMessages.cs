@@ -104,5 +104,9 @@ namespace Config
         public const string PasswordUpdated = "Password updated successfully.";
         public const string GetUserIdException = "Unauthenticated user.";
         public const string AccountDeleted = "User has been deleted.";
+
+        //Tournament
+        public const string TournamentNotFoundForUpdate = "No se encontró el torneo para actualizar su fase.";
+        public const string TournamentFinalizeError = "No se pudo finalizar el torneo.";
     }
 }

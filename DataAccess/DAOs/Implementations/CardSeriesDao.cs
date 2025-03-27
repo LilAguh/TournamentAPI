@@ -17,7 +17,7 @@ namespace DataAccess.DAOs.Implementations
 
         // Agrega una carta a una serie específica.
         // Devuelve true si la operación fue exitosa, false en caso contrario.
-        public async Task<bool> AddCardToSeriesAsync(AddCardSeriesRequestDto dto)
+        public async Task<bool> AddCardToSeriesAsync(CardSeriesRequestDto dto)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
             var query = @"INSERT INTO CardSeries (CardID, SeriesID) VALUES (@CardId, @SeriesId)";
