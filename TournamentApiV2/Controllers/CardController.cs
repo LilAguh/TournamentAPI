@@ -29,8 +29,8 @@ namespace TournamentApiV2.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateCard([FromBody] CardRequestDto card)
         {
-            var cardId = await _cardService.CreateCardAsync(card, GetAdminId());
-            return CreatedAtAction(nameof(GetCardById), new { id = cardId }, new { id = cardId });
+            var createdCard = await _cardService.CreateCardAsync(card, GetAdminId());
+            return CreatedAtAction(nameof(GetCardById), new { id = createdCard.Id }, createdCard);
         }
 
         // GET /Card/{id}
