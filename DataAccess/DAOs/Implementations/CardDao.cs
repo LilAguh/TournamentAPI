@@ -1,5 +1,4 @@
-﻿
-using Dapper;
+﻿using Dapper;
 using DataAccess.DAOs.Interfaces;
 using DataAccess.Database;
 using Models.DTOs.Cards;
@@ -8,20 +7,23 @@ namespace DataAccess.DAOs.Implementations
 {
     public class CardDao : ICardDao
     {
+        // Conexión a la base de datos inyectada
         private readonly IDatabaseConnection _databaseConnection;
 
+        // Constructor que inyecta la conexión a la base de datos
         public CardDao(IDatabaseConnection databaseConnection)
         {
             _databaseConnection = databaseConnection;
         }
 
+        // Agrega una nueva carta a la base de datos y retorna el ID generado.
+        // Se requiere el DTO con los datos de la carta y el ID del admin que la crea.
         public async Task<int> AddCardAsync(CardRequestDto card, int adminId)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
-            var query = @"
-            INSERT INTO Cards (Name, Attack, Defense, IllustrationUrl, CreatedBy) 
-            VALUES (@Name, @Attack, @Defense, @IllustrationUrl, @CreatedBy);
-            SELECT LAST_INSERT_ID();";
+            var query = @" INSERT INTO Cards (Name, Attack, Defense, IllustrationUrl, CreatedBy) 
+                           VALUES (@Name, @Attack, @Defense, @IllustrationUrl, @CreatedBy);
+                           SELECT LAST_INSERT_ID();";
 
             return await connection.ExecuteScalarAsync<int>(query, new
             {
@@ -33,6 +35,7 @@ namespace DataAccess.DAOs.Implementations
             });
         }
 
+        // Retorna todas las cartas registradas en la base de datos.
         public async Task<IEnumerable<CardResponseDto>> GetAllCardsAsync()
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
@@ -40,6 +43,7 @@ namespace DataAccess.DAOs.Implementations
             return await connection.QueryAsync<CardResponseDto>(query);
         }
 
+        // Retorna la carta cuyo ID coincide con el proporcionado.
         public async Task<CardResponseDto> GetCardByIdAsync(int id)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
@@ -47,15 +51,19 @@ namespace DataAccess.DAOs.Implementations
             return await connection.QueryFirstOrDefaultAsync<CardResponseDto>(query, new { Id = id });
         }
 
-        public async Task<bool> UpdateCardAsync(int id, CardRequestDto card)
+        // Actualiza los datos de una carta en la base de datos.
+        // Retorna la actualización si se realizó correctamente.
+        public async Task<CardResponseDto> UpdateCardAsync(int id, CardRequestDto card)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
-            var query = @"
-            UPDATE Cards 
-            SET Name = @Name, Attack = @Attack, Defense = @Defense, IllustrationUrl = @IllustrationUrl
-            WHERE ID = @Id";
+            var query = @" UPDATE Cards 
+                           SET Name = @Name, 
+                            Attack = @Attack, 
+                            Defense = @Defense, 
+                            IllustrationUrl = @IllustrationUrl 
+                           WHERE ID = @Id";
 
-            var rowsAffected = await connection.ExecuteAsync(query, new
+            await connection.ExecuteAsync(query, new
             {
                 Id = id,
                 card.Name,
@@ -63,15 +71,24 @@ namespace DataAccess.DAOs.Implementations
                 card.Defense,
                 card.IllustrationUrl
             });
-            return rowsAffected > 0;
+            return await GetCardByIdAsync(id);
         }
 
+        // Elimina una carta de la base de datos según el ID.
+        // Retorna true si la eliminación se realizó correctamente.
         public async Task<bool> DeleteCardAsync(int id)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
             var query = "DELETE FROM Cards WHERE ID = @Id";
             var rowsAffected = await connection.ExecuteAsync(query, new { Id = id });
             return rowsAffected > 0;
+        }
+
+        public async Task<bool> CardExistsAsync(string cardName)
+        {
+            using var connection = await _databaseConnection.GetConnectionAsync();
+            const string query = "SELECT COUNT(*) FROM Cards WHERE Name = @CardName";
+            return await connection.ExecuteScalarAsync<int>(query, new { CardName = cardName }) > 0;
         }
     }
 }

@@ -14,6 +14,7 @@ namespace DataAccess.DAOs.Implementations
             _databaseConnection = databaseConnection;
         }
 
+        // Registra un jugador en un torneo con su ID de usuario y mazo.
         public async Task<bool> RegisterPlayerAsync(int tournamentId, int userId, int deckId)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
@@ -22,6 +23,7 @@ namespace DataAccess.DAOs.Implementations
             return rowsAffected > 0;
         }
 
+        // Verifica si un usuario ya está registrado en un torneo específico.
         public async Task<bool> IsPlayerRegisteredAsync(int tournamentId, int userId)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
@@ -30,6 +32,7 @@ namespace DataAccess.DAOs.Implementations
             return count > 0;
         }
 
+        // Obtiene la lista de IDs de los jugadores registrados en un torneo.
         public async Task<List<int>> GetPlayerIdsAsync(int tournamentId)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();

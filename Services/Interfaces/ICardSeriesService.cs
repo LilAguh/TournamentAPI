@@ -6,7 +6,7 @@ namespace Services.Interfaces
 {
     public interface ICardSeriesService
     {
-        Task AddCardToSeriesAsync(AddCardSeriesRequestDto dto);
+        Task AddCardToSeriesAsync(CardSeriesRequestDto dto);
         Task RemoveCardFromSeriesAsync(int cardId, int seriesId);
         Task<IEnumerable<CardSeriesResponseDto>> GetCardsBySeriesAsync(int seriesId);
         Task<IEnumerable<CardSeriesResponseDto>> GetSeriesByCardAsync(int cardId);

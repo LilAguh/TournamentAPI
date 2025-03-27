@@ -9,10 +9,10 @@ namespace Services.Interfaces
 {
     public interface ICardService
     {
-        Task<int> CreateCardAsync(CardRequestDto card, int adminId);
+        Task<CardResponseDto> CreateCardAsync(CardRequestDto card, int adminId);
         Task<IEnumerable<CardResponseDto>> GetAllCardsAsync();
         Task<CardResponseDto?> GetCardByIdAsync(int id);
-        Task<bool> UpdateCardAsync(int id, CardRequestDto card, int adminId);
+        Task<CardResponseDto> UpdateCardAsync(int id, CardRequestDto card, int adminId);
         Task<bool> DeleteCardAsync(int id, int adminId);
     }
 }

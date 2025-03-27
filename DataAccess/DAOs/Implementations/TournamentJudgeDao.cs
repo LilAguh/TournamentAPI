@@ -13,6 +13,8 @@ namespace DataAccess.DAOs.Implementations
         {
             _databaseConnection = databaseConnection;
         }
+
+        // Agrega un juez al torneo especificado.
         public async Task<bool> AddJudgeToTournamentAsync(int tournamentId, int judgeId)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
@@ -21,6 +23,7 @@ namespace DataAccess.DAOs.Implementations
             return rowsAffected > 0;
         }
 
+        // Elimina un juez de un torneo especificado.
         public async Task<bool> RemoveJudgeFromTournamentAsync(int tournamentId, int judgeId)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
@@ -29,6 +32,7 @@ namespace DataAccess.DAOs.Implementations
             return rowsAffected > 0;
         }
 
+        // Obtiene los jueces asociados a un torneo especificado.
         public async Task<IEnumerable<int>> GetJudgesByTournamentAsync(int tournamentId)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();

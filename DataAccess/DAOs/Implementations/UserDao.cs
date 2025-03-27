@@ -14,28 +14,32 @@ namespace DataAccess.DAOs.Implementations
             _databaseConnection = databaseConnection;
         }
 
+        // Obtiene un usuario activo por su alias.
         public async Task<UserResponseDto> GetUserByAliasAsync(string alias)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
             var query = "SELECT * FROM users WHERE Alias = @Alias AND IsActive = 1";
             return await connection.QueryFirstOrDefaultAsync<UserResponseDto>(query, new { Alias = alias });
         }
+
+        // Obtiene un usuario activo por su email.
         public async Task<UserResponseDto> GetActiveUserByEmailAsync(string email)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
             var query = "SELECT * FROM users WHERE Email = @Email AND IsActive = 1";
             return await connection.QueryFirstOrDefaultAsync<UserResponseDto>(query, new { Email = email });
         }
+
+        // Intenta obtener un usuario activo primero por alias; si no lo encuentra, lo busca por email.
         public async Task<UserResponseDto> GetUserByIdentifierAsync(string identifier)
         {
-            // Primero se intenta obtener por alias
             var user = await GetUserByAliasAsync(identifier);
             if (user != null)
                 return user;
-            // Si no se encuentra por alias, se busca por email
             return await GetActiveUserByEmailAsync(identifier);
         }
 
+        // Obtiene un usuario por su ID.
         public async Task<UserResponseDto> GetUserByIdAsync(int id)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
@@ -43,15 +47,19 @@ namespace DataAccess.DAOs.Implementations
             return await connection.QueryFirstOrDefaultAsync<UserResponseDto>(query, new { Id = id });
         }
 
-        public async Task AddUserAsync(UserRequestDto userDto)
+        // Agrega un nuevo usuario y retorna el ID generado.
+        public async Task<int> AddUserAsync(UserRequestDto user)
         {
-            using var connection = await _databaseConnection.GetConnectionAsync();
-            var query = @" INSERT INTO users (Role, FirstName, LastName, Alias, Email, PasswordHash, CountryCode, CreatedBy, CreatedAt, IsActive)
-                           VALUES (@Role, @FirstName, @LastName, @Alias, @Email, @PasswordHash, @CountryCode, @CreatedBy, @CreatedAt, @IsActive)";
+            var query = @"
+                INSERT INTO Users (FirstName, LastName, Alias, Email, PasswordHash, CountryCode, AvatarUrl, Role, CreatedBy, CreatedAt, IsActive)
+                VALUES (@FirstName, @LastName, @Alias, @Email, @PasswordHash, @CountryCode, @AvatarUrl, @Role, @CreatedBy, @CreatedAt, @IsActive);
+                SELECT LAST_INSERT_ID();";
 
-            await connection.ExecuteAsync(query, userDto);
+            using var connection = await _databaseConnection.GetConnectionAsync();
+            return await connection.ExecuteScalarAsync<int>(query, user);
         }
 
+        // Actualiza la fecha de último inicio de sesión para un usuario.
         public async Task UpdateLastLoginAsync(int userId)
         {
             using (var connection = await _databaseConnection.GetConnectionAsync())
@@ -65,22 +73,23 @@ namespace DataAccess.DAOs.Implementations
             }
         }
 
+        // Actualiza los datos de un usuario existente.
         public async Task UpdateUserAsync(UserResponseDto userDto)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
-            var query = @" UPDATE users 
-                           SET FirstName = @FirstName, 
-                           LastName = @LastName,
-                           Alias = @Alias,
-                           Email = @Email,
-                           PasswordHash = @PasswordHash,
-                           CountryCode = @CountryCode, 
-                           AvatarUrl = @AvatarUrl
-                           WHERE Id = @Id";
-
+            var query = @"UPDATE users 
+                          SET FirstName = @FirstName, 
+                              LastName = @LastName,
+                              Alias = @Alias,
+                              Email = @Email,
+                              PasswordHash = @PasswordHash,
+                              CountryCode = @CountryCode, 
+                              AvatarUrl = @AvatarUrl
+                          WHERE Id = @Id";
             await connection.ExecuteAsync(query, userDto);
         }
 
+        // Actualiza el estado (activo/inactivo) de un usuario.
         public async Task UpdateUserStatusAsync(UserResponseDto userDto)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
@@ -88,7 +97,7 @@ namespace DataAccess.DAOs.Implementations
             await connection.ExecuteAsync(query, new { userDto.IsActive, userDto.Id });
         }
 
-        //Solo va a funcionar para el testing
+        // Elimina permanentemente un usuario de la base de datos.
         public async Task<bool> PermanentDeleteUserAsync(int userId)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();

@@ -1,51 +1,85 @@
 ﻿
+using Config;
 using DataAccess.DAOs.Interfaces;
 using Models.DTOs.Cards;
+using Models.Enums;
 using Services.Interfaces;
+using static Models.Exceptions.CustomException;
 
 namespace Services.Implementations
 {
     public class CardService : ICardService
     {
         private readonly ICardDao _cardDao;
+        private readonly IUserDao _userDao;
 
-        public CardService(ICardDao cardDao)
+        public CardService(ICardDao cardDao, IUserDao userDao)
         {
             _cardDao = cardDao;
+            _userDao = userDao;
         }
 
-        public async Task<int> CreateCardAsync (CardRequestDto card, int adminId)
+        // Crea una carta en el sistema, solo si el usuario (admin) es válido.
+        // Comprueba que la carta no exista en el sistema.
+        public async Task<CardResponseDto> CreateCardAsync(CardRequestDto card, int adminId)
         {
-            return await _cardDao.AddCardAsync(card, adminId);
+            await ValidateAdminAsync(adminId);
+            if (await _cardDao.CardExistsAsync(card.Name))
+            {
+                throw new ValidationException(ErrorMessages.CardAlreadyExist);
+            }
+            var cardId = await _cardDao.AddCardAsync(card, adminId);
+            return await _cardDao.GetCardByIdAsync(cardId);
         }
 
+        // Retorna todas las cartas registradas.
         public async Task<IEnumerable<CardResponseDto>> GetAllCardsAsync()
         {
-            return await _cardDao.GetAllCardsAsync();
+            var cards = await _cardDao.GetAllCardsAsync();
+            return cards.Any() ? cards : throw new NotFoundException(ErrorMessages.NoCardsRegistered);
         }
 
+        // Retorna una carta específica según su ID.
         public async Task<CardResponseDto?> GetCardByIdAsync(int id)
         {
-            return await _cardDao.GetCardByIdAsync(id);
+            var card = await _cardDao.GetCardByIdAsync(id);
+            return card ?? throw new NotFoundException(ErrorMessages.CardNotFound);
+            
         }
 
-        public async Task<bool> UpdateCardAsync(int id, CardRequestDto card, int adminId)
+        // Actualiza una carta existente, validando primero que el admin es válido y la carta existe.
+        public async Task<CardResponseDto> UpdateCardAsync(int id, CardRequestDto card, int adminId)
         {
-            var existingCard = await _cardDao.GetCardByIdAsync(id);
-            if (existingCard == null)
-                throw new KeyNotFoundException("Carta no encontrada");
-
-            return await _cardDao.UpdateCardAsync(id, card);
+            await ValidateAdminAsync(adminId);
+            await ExistingCardAsync(id);
+            await _cardDao.UpdateCardAsync(id, card);
+            return await GetCardByIdAsync(id);
         }
 
+        // Elimina una carta (eliminación lógica o física, según la implementación), validando que el admin es válido y la carta existe.
         public async Task<bool> DeleteCardAsync(int id, int adminId)
         {
-            var existingCard = await _cardDao.GetCardByIdAsync(id);
-            if (existingCard == null)
-                throw new KeyNotFoundException("Carta no encontrada");
-
+            await ValidateAdminAsync(adminId);
+            await ExistingCardAsync(id);
             return await _cardDao.DeleteCardAsync(id);
         }
 
+        // Métodos privados //
+
+        // Método privado para verificar que la carta existe.
+        private async Task ExistingCardAsync(int id)
+        {
+            var existingCard = await _cardDao.GetCardByIdAsync(id);
+            if (existingCard == null)
+                throw new NotFoundException(ErrorMessages.CardNotFound);
+        }
+
+        // Método privado para validar que el usuario con adminId sea un administrador válido.
+        private async Task ValidateAdminAsync(int adminId)
+        {
+            var user = await _userDao.GetUserByIdAsync(adminId);
+            if (user == null || user.Role != RoleEnum.Admin)
+                throw new ValidationException(ErrorMessages.AdminInvalid);
+        }
     }
 }

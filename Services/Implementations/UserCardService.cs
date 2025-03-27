@@ -1,5 +1,5 @@
 ﻿
-using DataAccess.DAOs.Implementations;
+using Config;
 using DataAccess.DAOs.Interfaces;
 using Models.DTOs.UserCards;
 using Services.Interfaces;
@@ -19,43 +19,46 @@ namespace Services.Implementations
             _cardDao = cardDao;
             _userDao = userDao;
         }
+
+        // Agrega una carta al usuario después de validar que el usuario y la carta existen.
         public async Task AddUserCardAsync(int userId, AddUserCardRequestDto dto)
         {
-            // Validar que el usuario exista
-            // No es necesario por el echo de que el usuario debe existir para llegar a esta instancia
-            // Por si a caso lo dejamos
-            var user = await _userDao.GetUserByIdAsync(userId);
-            if (user == null || !user.IsActive)
-                throw new NotFoundException("Usuario no encontrado.");
-
-            // Validar que la carta exista
-            var card = await _cardDao.GetCardByIdAsync(dto.CardId);
-            if (card == null)
-                throw new NotFoundException("Carta no encontrada.");
-
-            // Validar cantidad
-            if (dto.Quantity <= 0)
-                throw new ValidationException("La cantidad debe ser mayor a cero.");
-
-            // Intentar agregar la carta al usuario
-            var success = await _userCardDao.AddUserCardAsync(userId, dto);
-            if (!success)
-                throw new ValidationException("No se pudo agregar la carta al usuario.");
+            await ValidateUserExistence(userId);
+            await ValidateCardExistence(dto.CardId);
+            await _userCardDao.AddUserCardAsync(userId, dto);
         }
+
+        // Retorna todas las cartas asociadas al usuario.
         public async Task<IEnumerable<UserCardResponseDto>> GetUserCardsAsync(int userId)
         {
-            var userCards = await _userCardDao.GetUserCardsAsync(userId);
-            if (!userCards.Any())
-                throw new NotFoundException("No se encontraron cartas en tu colección.");
-
-            return userCards;
+            await ValidateUserExistence(userId);
+            return await _userCardDao.GetUserCardsAsync(userId);
         }
 
+        // Elimina una carta del usuario después de validar que el usuario y la carta existen.
         public async Task RemoveUserCardAsync(int userId, int cardId)
         {
-            var success = await _userCardDao.RemoveUserCardAsync(userId, cardId);
-            if (!success)
-                throw new NotFoundException("La carta no existe en tu colección.");
+            await ValidateUserExistence(userId);
+            await ValidateCardExistence(cardId);
+            await _userCardDao.RemoveUserCardAsync(userId, cardId);
+        }
+
+        // Métodos Privados
+
+        // Valida que el usuario exista y esté activo.
+        private async Task ValidateUserExistence(int userId)
+        {
+            var user = await _userDao.GetUserByIdAsync(userId);
+            if (user == null || !user.IsActive)
+                throw new NotFoundException(ErrorMessages.UserNotFound);
+        }
+
+        // Valida que la carta exista.
+        private async Task ValidateCardExistence(int cardId)
+        {
+            var card = await _cardDao.GetCardByIdAsync(cardId);
+            if (card == null)
+                throw new NotFoundException(ErrorMessages.CardNotFound);
         }
     }
 }

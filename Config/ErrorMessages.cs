@@ -41,16 +41,72 @@ namespace Config
         //admincontroller:
         public const string UserNotFound = "User not found.";
         public const string InternalServerError = "Internal server error.";
+        public const string AdminTokenNotFound = "Admin ID not found in token.";
+        public const string InvalidFormatTokenId = "Invalid format for administrator ID.";
 
         //Country:
         public const string InvalidCountryCode = "Invalid country code.";
+        public const string NoCountriesRegistered = "There are no countries registered.";
 
         //UserCard
-        //public const string
-        public const string CardNotFound = "Carta no encontrada.";
+        public const string CardNotFound = "The card has not been found.";
+        public const string NoCardsRegistered = "There are no registered cards.";
+        public const string CardDeleted = "Card successfully deleted.";
+        public const string CardAlreadyExist = "There is already a card with this name.";
+        public const string CardIdRequired = "Card ID is required.";
+        public const string AmountRequired = "The amount is required.";
+        public const string ErrorQuantity = "The quantity must be between 1 and 100.";
+        public const string CardAddCollection = "Card added to your collection.";
+        public const string CardRemovedCollection = "Card removed from your collection.";
+
+        //Decks
+        public const string ErrorCreateDeck = "Error creating deck.";
+        public const string NoRegisteredDecks = "You have no registered decks.";
+        public const string NotFoundDeck = "Deck not found.";
+        public const string ErrorDeleteDeck = "You cannot delete this deck.";
+        public const string DeleteDeck = "Deck has been removed.";
+
+        //CardDecks
+        public const string LeastOneCard = "At least one card must be sent.";
+        public const string LimitCardSentDeck = "Only 1 to 15 cards can be sent to each deck.";
+        public const string LimitCardExceeded = "The deck already contains 15 cards or the limit is exceeded when adding new cards.";
+        public const string CardNotInDeck = "The card is not in the deck.";
+        public const string DeckEmpty = "The deck is empty.";
+        public const string CardRemovedDeck = "Card removed from your deck.";
+        public const string CardsAddDeck = "Cards added to the deck.";
+
+        //Series
+        public const string SeriesNameIsRequired = "The series name is required.";
+        public const string SeriesNameCharacters = "The series name cannot be less than 5 characters, nor more than 50 characters.";
+        public const string SeriesDateIsRequired = "The series creation date is required.";
+        public const string NoSeriesRegistered = "There are no series registered.";
+        public const string NotFoundSerie = "Series not found.";
+        public const string SeriesDeleted = "Series has been eliminated";
+        public const string SerieIdRequired = "Series ID is required.";
+        public const string CardBelongsSeries = "The card already belongs to this series.";
+        public const string CardSeriesRelationshipError = "Card-series relationship not found.";
+        public const string NoCardSeriesError = "There are no cards in this series.";
+        public const string CardNotBelongSeries = "This card does not belong to any series.";
+        public const string CardRemoveSeries = "Card removed from the series.";
+        public const string CardAddSeries = "Card assigned to the series.";
 
         //UserService:
         public const string AliasAlreadyUse = "Alias is already in use.";
         public const string EmailAlreadyUse = "The email is already in use by an active user.";
+        public const string CannotCreateUsers = "You cannot create users with specific roles without authentication.";
+        public const string CreatorUserNotFound = "Creator user not found.";
+        public const string NotHavePermissionRegister = "You do not have permission to register users.";
+        public const string RoleNoSupportedUser = "Role not supported for user creation.";
+        public const string AdminRoleRequired = "The role is required for Admins.";
+        public const string AdminInvalid = "The admin is not valid.";
+
+        //UserController
+        public const string PasswordUpdated = "Password updated successfully.";
+        public const string GetUserIdException = "Unauthenticated user.";
+        public const string AccountDeleted = "User has been deleted.";
+
+        //Tournament
+        public const string TournamentNotFoundForUpdate = "No se encontró el torneo para actualizar su fase.";
+        public const string TournamentFinalizeError = "No se pudo finalizar el torneo.";
     }
 }

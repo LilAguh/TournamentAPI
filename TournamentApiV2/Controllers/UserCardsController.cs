@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿
+using Config;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.DTOs.UserCards;
-using Services.Implementations;
 using Services.Interfaces;
 using System.Security.Claims;
+using static Models.Exceptions.CustomException;
 
 namespace TournamentApiV2.Controllers
 {
@@ -19,28 +21,46 @@ namespace TournamentApiV2.Controllers
             _userCardService = userCardService;
         }
 
+        // POST /UserCards
+        // Agrega una carta a la colección del usuario autenticado.
         [HttpPost]
         public async Task<IActionResult> AddUserCard([FromBody] AddUserCardRequestDto dto)
         {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-            await _userCardService.AddUserCardAsync(userId, dto);
-            return Ok("Carta agregada a tu colección");
+            await _userCardService.AddUserCardAsync(GetUserId(), dto);
+            return Ok(ErrorMessages.CardAddCollection);
         }
 
+        // GET /UserCards
+        // Retorna la lista de cartas que el usuario autenticado posee.
         [HttpGet]
         public async Task<IActionResult> GetUserCards()
         {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-            var userCards = await _userCardService.GetUserCardsAsync(userId);
+            var userCards = await _userCardService.GetUserCardsAsync(GetUserId());
             return Ok(userCards);
         }
 
+        // DELETE /UserCards/{cardId}
+        // Elimina una carta de la colección del usuario autenticado.
         [HttpDelete("{cardId}")]
         public async Task<IActionResult> RemoveUserCard(int cardId)
         {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-            await _userCardService.RemoveUserCardAsync(userId, cardId);
-            return Ok("Carta removida de tu colección");
+            await _userCardService.RemoveUserCardAsync(GetUserId(), cardId);
+            return Ok(ErrorMessages.CardRemovedCollection);
+        }
+
+        // Método auxiliar para extraer el ID del usuario desde el token JWT.
+        // Lanza una excepción si el ID no se encuentra o no tiene el formato correcto.
+        private int GetUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim))
+                throw new UnauthorizedException(ErrorMessages.AdminTokenNotFound);
+
+            if (!int.TryParse(userIdClaim, out int userId))
+                throw new UnauthorizedException(ErrorMessages.InvalidFormatTokenId);
+
+            return userId;
         }
     }
 }

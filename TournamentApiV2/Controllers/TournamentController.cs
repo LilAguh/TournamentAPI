@@ -23,7 +23,7 @@ namespace TournamentApiV2.Controllers
         }
 
 
-        [Authorize(Roles = "Admin, Organizer")]
+        [Authorize(Roles = "Organizer")]
         [HttpPost]
         public async Task<IActionResult> CreateTournament([FromBody] TournamentRequestDto dto)
         {
@@ -63,7 +63,7 @@ namespace TournamentApiV2.Controllers
             return Ok(matches);
         }
 
-        //[Authorize(Roles = "Organizer,Admin")]
+        [Authorize(Roles = "Organizer")]
         [HttpPost("{tournamentId}/Series/{seriesId}")]
         public async Task<IActionResult> AddAllowedSeries(int tournamentId, int seriesId)
         {
@@ -71,7 +71,7 @@ namespace TournamentApiV2.Controllers
             return Ok();
         }
 
-        //[Authorize(Roles = "Organizer,Admin")]
+        [Authorize(Roles = "Organizer")]
         [HttpDelete("{tournamentId}/Series/{seriesId}")]
         public async Task<IActionResult> RemoveAllowedSeries(int tournamentId, int seriesId)
         {

@@ -16,25 +16,38 @@ namespace TournamentApiV2.Controllers
             _matchService = matchService;
         }
 
-        //[Authorize(Roles = "Admin,Organizer")]
+        [Authorize(Roles = "Organizer")]
         [HttpPost("GenerateRound/{tournamentId}")]
         public async Task<IActionResult> GenerateRoundMatches(int tournamentId)
         {
-
             await _matchService.CreateRoundMatchAsync(tournamentId);
-            return Ok("Partidos de la ronda generados correctamente");
+            return Ok(new
+            {
+                Message = "Ronda generada exitosamente",
+                TournamentId = tournamentId
+            });
         }
 
-        //[Authorize(Roles = "Judge")]
+        [Authorize(Roles = "Judge")]
         [HttpPost("Result")]
         public async Task<IActionResult> SubmitMatchResult([FromBody] MatchResultRequestDto dto)
         {
-            bool success = await _matchService.UpdateMatchWinnerAsync(dto.MatchId, dto.WinnerId);
-            if (success)
+            var result = await _matchService.UpdateMatchWinnerAsync(dto);
+
+            return result ?
+                Ok(new { Message = "Resultado registrado exitosamente" }) :
+                BadRequest(new { Message = "No se pudo actualizar el resultado" });
+        }
+
+        [HttpGet("Tournament/{tournamentId}")]
+        public async Task<IActionResult> GetTournamentMatches(int tournamentId)
+        {
+            var matches = await _matchService.GetMatchesByTournamentAsync(tournamentId);
+            return Ok(new
             {
-                return Ok("Resultado registrado exitosamente");
-            }
-            return NotFound("Partido no encontrado o error al actualizar");
+                TournamentId = tournamentId,
+                Matches = matches
+            });
         }
     }
 }

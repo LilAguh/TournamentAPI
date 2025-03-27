@@ -4,12 +4,12 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Models.DTOs.CardSeries
 {
-    public class RemoveCardSeriesRequestDto
+    public class CardSeriesRequestDto
     {
-        [Required(ErrorMessage = "El ID de la carta es obligatorio.")]
+        [Required(ErrorMessage = ErrorMessages.CardIdRequired)]
         public int CardId { get; set; }
 
-        [Required(ErrorMessage = "El ID de la serie es obligatorio.")]
+        [Required(ErrorMessage = ErrorMessages.SerieIdRequired)]
         public int SeriesId { get; set; }
     }
 }

@@ -14,6 +14,5 @@ namespace Models.DTOs.Cards
         public int Defense { get; set; }
         public string IllustrationUrl { get; set; }
         public DateTime CreatedAt { get; set; }
-        public int CreatedBy { get; set; }
     }
 }
