@@ -59,6 +59,13 @@ namespace Config
         public const string CardAddCollection = "Card added to your collection.";
         public const string CardRemovedCollection = "Card removed from your collection.";
 
+        //Decks
+        public const string ErrorCreateDeck = "Error creating deck.";
+        public const string NoRegisteredDecks = "You have no registered decks.";
+        public const string NotFoundDeck = "Deck not found.";
+        public const string ErrorDeleteDeck = "You cannot delete this deck.";
+        public const string DeleteDeck = "Deck has been removed.";
+
         //UserService:
         public const string AliasAlreadyUse = "Alias is already in use.";
         public const string EmailAlreadyUse = "The email is already in use by an active user.";
