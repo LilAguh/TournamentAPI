@@ -82,6 +82,13 @@ namespace Config
         public const string NoSeriesRegistered = "There are no series registered.";
         public const string NotFoundSerie = "Series not found.";
         public const string SeriesDeleted = "Series has been eliminated";
+        public const string SerieIdRequired = "Series ID is required.";
+        public const string CardBelongsSeries = "The card already belongs to this series.";
+        public const string CardSeriesRelationshipError = "Card-series relationship not found.";
+        public const string NoCardSeriesError = "There are no cards in this series.";
+        public const string CardNotBelongSeries = "This card does not belong to any series.";
+        public const string CardRemoveSeries = "Card removed from the series.";
+        public const string CardAddSeries = "Card assigned to the series.";
 
         //UserService:
         public const string AliasAlreadyUse = "Alias is already in use.";
