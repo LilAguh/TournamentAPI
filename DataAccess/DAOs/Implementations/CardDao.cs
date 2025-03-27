@@ -84,7 +84,7 @@ namespace DataAccess.DAOs.Implementations
             return rowsAffected > 0;
         }
 
-        public async Task<bool> CardExists(string cardName)
+        public async Task<bool> CardExistsAsync(string cardName)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
             const string query = "SELECT COUNT(*) FROM Cards WHERE Name = @CardName";

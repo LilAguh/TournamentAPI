@@ -9,6 +9,6 @@ namespace DataAccess.DAOs.Interfaces
         Task<CardResponseDto?> GetCardByIdAsync(int id);
         Task<CardResponseDto> UpdateCardAsync(int id, CardRequestDto card);
         Task<bool> DeleteCardAsync(int id);
-        Task<bool> CardExists(string cardName);
+        Task<bool> CardExistsAsync(string cardName);
     }
 }
