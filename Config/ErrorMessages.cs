@@ -75,6 +75,14 @@ namespace Config
         public const string CardRemovedDeck = "Card removed from your deck.";
         public const string CardsAddDeck = "Cards added to the deck.";
 
+        //Series
+        public const string SeriesNameIsRequired = "The series name is required.";
+        public const string SeriesNameCharacters = "The series name cannot be less than 5 characters, nor more than 50 characters.";
+        public const string SeriesDateIsRequired = "The series creation date is required.";
+        public const string NoSeriesRegistered = "There are no series registered.";
+        public const string NotFoundSerie = "Series not found.";
+        public const string SeriesDeleted = "Series has been eliminated";
+
         //UserService:
         public const string AliasAlreadyUse = "Alias is already in use.";
         public const string EmailAlreadyUse = "The email is already in use by an active user.";
