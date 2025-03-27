@@ -52,15 +52,18 @@ namespace DataAccess.DAOs.Implementations
         }
 
         // Actualiza los datos de una carta en la base de datos.
-        // Retorna true si la actualización se realizó correctamente.
-        public async Task<bool> UpdateCardAsync(int id, CardRequestDto card)
+        // Retorna la actualización si se realizó correctamente.
+        public async Task<CardResponseDto> UpdateCardAsync(int id, CardRequestDto card)
         {
             using var connection = await _databaseConnection.GetConnectionAsync();
             var query = @" UPDATE Cards 
-                           SET Name = @Name, Attack = @Attack, Defense = @Defense, IllustrationUrl = @IllustrationUrl
+                           SET Name = @Name, 
+                            Attack = @Attack, 
+                            Defense = @Defense, 
+                            IllustrationUrl = @IllustrationUrl 
                            WHERE ID = @Id";
 
-            var rowsAffected = await connection.ExecuteAsync(query, new
+            await connection.ExecuteAsync(query, new
             {
                 Id = id,
                 card.Name,
@@ -68,7 +71,7 @@ namespace DataAccess.DAOs.Implementations
                 card.Defense,
                 card.IllustrationUrl
             });
-            return rowsAffected > 0;
+            return await GetCardByIdAsync(id);
         }
 
         // Elimina una carta de la base de datos según el ID.
