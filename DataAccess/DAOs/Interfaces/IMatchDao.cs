@@ -1,16 +1,16 @@
 ﻿
 using Models.DTOs.Matches;
+using Models.Enums;
 
 namespace DataAccess.DAOs.Interfaces
 {
     public interface IMatchDao
     {
-        Task CreateRoundMatchAsync(int tournamentId, List<int> playerIds, int round);
+        Task CreateMatchesAsync(List<MatchCreateRequestDto> matches);
         Task<IEnumerable<MatchResponseDto>> GetMatchesByTournamentAsync(int tournamentId);
-        Task<MatchResponseDto?> GetMatchByIdAsync(int matchId);
-        Task<bool> UpdateMatchWinnerAsync(int matchId, int winnerId);
+        Task<MatchResponseDto> GetMatchByIdAsync(int matchId);
+        Task<bool> UpdateMatchResultAsync(MatchResultRequestDto dto);
         Task<List<int>> GetWinnersByRoundAsync(int tournamentId, int round);
-        Task<bool> IsFirstRoundAsync(int tournamentId);
-        Task<int> GetLastRoundAsync(int tournamentId);
+        Task<int> GetCurrentMaxRoundAsync(int tournamentId);
     }
 }
