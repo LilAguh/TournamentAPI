@@ -83,5 +83,12 @@ namespace DataAccess.DAOs.Implementations
             var rowsAffected = await connection.ExecuteAsync(query, new { Id = id });
             return rowsAffected > 0;
         }
+
+        public async Task<bool> CardExists(string cardName)
+        {
+            using var connection = await _databaseConnection.GetConnectionAsync();
+            const string query = "SELECT COUNT(*) FROM Cards WHERE Name = @CardName";
+            return await connection.ExecuteScalarAsync<int>(query, new { CardName = cardName }) > 0;
+        }
     }
 }
